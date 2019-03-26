@@ -1,4 +1,4 @@
-import 'package:beacon_bus/home.dart';
+import 'package:beacon_bus/thome.dart';
 import 'package:flutter/material.dart';
 
 class BeaconBusApp extends StatelessWidget {
@@ -10,9 +10,8 @@ class BeaconBusApp extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      home: THomePage(),
       routes: {
-
 
       },
     );
