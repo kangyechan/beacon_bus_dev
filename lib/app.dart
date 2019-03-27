@@ -1,20 +1,23 @@
-import 'package:beacon_bus/thome.dart';
-import 'package:beacon_bus/uhome.dart';
+import 'package:beacon_bus/blocs/teacher_provider.dart';
+import 'package:beacon_bus/screens/teacher_home.dart';
+import 'package:beacon_bus/screens/user_home.dart';
 import 'package:flutter/material.dart';
 
 class BeaconBusApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      title: 'School Bus',
-      theme: new ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: THomePage(),
-      routes: {
+    return TeacherProvider(
+      child: MaterialApp(
+        title: 'School Bus',
+        theme: new ThemeData(
+          primarySwatch: Colors.yellow,
+        ),
+        home: THomePage(),
+        routes: {
 
-      },
+        },
+      ),
     );
   }
 }

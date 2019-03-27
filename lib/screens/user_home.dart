@@ -22,22 +22,22 @@ class _UHomePageState extends State<UHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("School Bus"),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("School Bus"),
         backgroundColor: Colors.yellow,
       ),
-      body: new Container(
-        padding: new EdgeInsets.all(32.0),
-        child: new Center(
-          child: new Column(
+      body: Container(
+        padding: EdgeInsets.all(32.0),
+        child: Center(
+          child: Column(
             children: <Widget>[
-              new Text(_value),
+              Text(_value),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: new BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(
         items: _items,
         fixedColor: Colors.yellow,
         currentIndex: _currentIndex,
