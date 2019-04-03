@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
   @override
-  _THomePageState createState() => _THomePageState();
+  _TeacherHomeScreenState createState() => _TeacherHomeScreenState();
 }
 
-class _THomePageState extends State<TeacherHomeScreen> {
+class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   int _currentIndex = 0;
   TeacherBusScreen teacherBusScreen;
   TeacherActivityScreen teacherActivityScreen;
