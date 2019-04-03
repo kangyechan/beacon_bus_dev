@@ -10,7 +10,7 @@ class BeaconBusApp extends StatelessWidget {
     return TeacherProvider(
       child: MaterialApp(
         title: 'School Bus',
-        theme: new ThemeData(
+        theme: ThemeData(
           primarySwatch: Colors.yellow,
         ),
         home: THomePage(),
