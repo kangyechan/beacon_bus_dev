@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class UserHomeScreen extends StatefulWidget {
+class UHomePage extends StatefulWidget {
   @override
   _UHomePageState createState() => _UHomePageState();
 }
 
-class _UHomePageState extends State<UserHomeScreen> {
+class _UHomePageState extends State<UHomePage> {
 
   List<BottomNavigationBarItem> _items;
   int _currentIndex = 0;
