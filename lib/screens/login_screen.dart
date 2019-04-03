@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:beacon_bus/blocs/parent/parent_provider.dart';
 
 
-class ParentLoginScreen extends StatelessWidget {
+class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bloc = ParentProvider.of(context);
