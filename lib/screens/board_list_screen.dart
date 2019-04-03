@@ -13,50 +13,49 @@ class BoardListScreen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Colors.yellow,
       ),
-      body: Column(
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              Text("현재 탑승목록"),
-              Row(
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: Column( // 현재탑승목록 부분
                 children: <Widget>[
-                  Expanded(child: Text("이름")),
-                  Expanded(child: Text("승하차 장소")),
+                  Text("현재 탑승목록"),
+                  Row(
+                    children: <Widget>[
+                      Expanded(child: Text("이름")),
+                      Expanded(child: Text("승하차 장소")),
+                    ],
+                  ),
+
                 ],
               ),
-            ],
-          ),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Column(
-                  children: <Widget>[
-                    Text("미탑승"),
-                    Row(
+            ),
+            Container(
+              height: 200.0,
+              child: Row( // 나머지 두 부분
+                children: <Widget>[
+                  Expanded(
+                    child: Column(
                       children: <Widget>[
-                        Expanded(child: Text("이름")),
-                        Expanded(child: Text("승하차 장소")),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  children: <Widget>[
-                    Text("미확인"),
-                    Row(
-                      children: <Widget>[
-                        Expanded(child: Text("이름")),
-                        Expanded(child: Text("승하차 장소")),
+                        Text("미탑승"),
+                        ListTile(),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: <Widget>[
+                        Text("미확인"),
+                        ListTile(),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
