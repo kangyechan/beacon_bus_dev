@@ -18,38 +18,22 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
     final bloc = TeacherProvider.of(context);
 
     return Scaffold(
-      body: Center(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Column(
-                children: <Widget>[
-                  Padding(
-                   padding: const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 30.0),
-                   child: DropdownButton(
-                     value: dropdownValue,
-                     onChanged: (String value) {
-                       setState(() {
-                         dropdownValue = value;
-                         carNum = _busNumber.indexWhere((num) => num.startsWith(value)) + 1;
-                       });
-                     },
-                     items: _busNumber.map((value) => DropdownMenuItem(
-                       value: value,
-                       child: Text(value),
-                     )).toList(),
-                     hint: Text("운행 차량"),
-                   ),
-                  ),
-                  _buildButton(context, carNum),
-                ],
-              ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              children: <Widget>[
+                SizedBox(height: 100.0),
+                _buildDropdownButton(),
+                SizedBox(height: 30.0),
+                _buildButton(context, carNum),
+              ],
             ),
-            Expanded(
-              child: _buildBackground(),
-            ),
-          ],
-        ),
+          ),
+          Expanded(
+            child: _buildBackground(),
+          ),
+        ],
       ),
     );
   }
@@ -69,9 +53,27 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
     );
   }
 
+  Widget _buildDropdownButton() {
+    return  DropdownButton(
+      value: dropdownValue,
+      onChanged: (String value) {
+        setState(() {
+          dropdownValue = value;
+          carNum = _busNumber.indexWhere((num) => num.startsWith(value)) + 1;
+        });
+      },
+      items: _busNumber.map((value) => DropdownMenuItem(
+        value: value,
+        child: Text(value),
+      )).toList(),
+      hint: Text("운행 차량"),
+    );
+  }
+
   Widget _buildBackground() {
     return Image.asset(
       'images/background.JPG',
     );
   }
+
 }

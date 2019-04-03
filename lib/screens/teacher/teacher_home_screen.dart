@@ -33,20 +33,29 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("소담 어린이집"),
-        centerTitle: true,
-        backgroundColor: Colors.yellow,
-      ),
+      appBar: _buildAppbar(),
       body: currentPage,
-      bottomNavigationBar: BottomNavigationBar(
-        items: buildBarItems(),
-        fixedColor: Colors.yellow,
-        currentIndex: _currentIndex,
-        onTap: onTabTapped,
-      ),
+      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
+
+  Widget _buildAppbar() {
+    return AppBar(
+      title: Text("소담 어린이집"),
+      centerTitle: true,
+      backgroundColor: Colors.yellow,
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return BottomNavigationBar(
+      items: buildBarItems(),
+      fixedColor: Colors.yellow,
+      currentIndex: _currentIndex,
+      onTap: onTabTapped,
+    );
+  }
+
   void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
