@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class UserHomeScreen extends StatefulWidget {
+class ParentHomeScreen extends StatefulWidget {
   @override
-  _UserHomeScreenState createState() => _UserHomeScreenState();
+  _ParentHomeScreenState createState() => _ParentHomeScreenState();
 }
 
-class _UserHomeScreenState extends State<UserHomeScreen> {
+class _ParentHomeScreenState extends State<ParentHomeScreen> {
 
   List<BottomNavigationBarItem> _items;
   int _currentIndex = 0;

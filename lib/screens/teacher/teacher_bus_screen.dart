@@ -55,19 +55,17 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   }
 
   Widget _buildButton(BuildContext context, int carNum) {
-    return Container(
-      child: FlatButton(
-        child: Text("운행시작"),
-        color: Colors.yellow,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => BoardListScreen(carNum: carNum,)
-            ),
-          );
-        },
-      ),
+    return FlatButton(
+      child: Text("운행시작"),
+      color: Colors.yellow,
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => BoardListScreen(carNum: carNum,)
+          ),
+        );
+      },
     );
   }
 
