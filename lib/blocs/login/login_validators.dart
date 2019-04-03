@@ -1,6 +1,6 @@
 import 'dart:async';
 
-class ParentLoginValidators {
+class LoginValidators {
   final validateEmail = StreamTransformer<String, String>.fromHandlers(
     handleData: (email, sink) {
       if (email.contains('@')) {
@@ -13,10 +13,10 @@ class ParentLoginValidators {
 
   final validatePassword = StreamTransformer<String, String>.fromHandlers(
     handleData: (password, sink) {
-      if (password.length >= 5) {
+      if (password.length >= 6) {
         sink.add(password);
       } else {
-        sink.addError('비밀번호는 5자리 이상이어야 합니다');
+        sink.addError('비밀번호는 6자리 이상이어야 합니다');
       }
     }
   );

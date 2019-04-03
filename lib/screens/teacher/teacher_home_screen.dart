@@ -3,12 +3,12 @@ import 'package:beacon_bus/screens/teacher/teacher_bus_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_log_screen.dart';
 import 'package:flutter/material.dart';
 
-class THomePage extends StatefulWidget {
+class TeacherHomeScreen extends StatefulWidget {
   @override
-  _THomePageState createState() => _THomePageState();
+  _TeacherHomeScreenState createState() => _TeacherHomeScreenState();
 }
 
-class _THomePageState extends State<THomePage> {
+class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   int _currentIndex = 0;
   TeacherBusScreen teacherBusScreen;
   TeacherActivityScreen teacherActivityScreen;
