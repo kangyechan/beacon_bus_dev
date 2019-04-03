@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:beacon_bus/blocs/teacher_bloc.dart';
-export 'package:beacon_bus/blocs/teacher_bloc.dart';
+import 'package:beacon_bus/blocs/teacher/teacher_bloc.dart';
+export 'package:beacon_bus/blocs/teacher/teacher_bloc.dart';
 
 
 class TeacherProvider extends InheritedWidget {

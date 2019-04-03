@@ -1,5 +1,5 @@
-import 'package:beacon_bus/blocs/teacher_provider.dart';
-import 'package:beacon_bus/screens/board_list_screen.dart';
+import 'package:beacon_bus/blocs/teacher/teacher_provider.dart';
+import 'package:beacon_bus/screens/teacher/board_list_screen.dart';
 import 'package:flutter/material.dart';
 
 class TeacherBusScreen extends StatefulWidget {
