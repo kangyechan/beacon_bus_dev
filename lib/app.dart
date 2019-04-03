@@ -1,3 +1,4 @@
+import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:beacon_bus/blocs/teacher/teacher_provider.dart';
 import 'package:beacon_bus/blocs/parent/parent_provider.dart';
 import 'package:beacon_bus/screens/login_screen.dart';
@@ -9,18 +10,20 @@ class BeaconBusApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ParentProvider(
-      child: TeacherProvider(
-        child: MaterialApp(
-          title: 'School Bus',
-          theme: ThemeData(
-            primarySwatch: Colors.yellow,
+    return LoginProvider(
+      child: ParentProvider(
+        child: TeacherProvider(
+          child: MaterialApp(
+            title: 'School Bus',
+            theme: ThemeData(
+              primarySwatch: Colors.yellow,
+            ),
+            home: LoginScreen(),
+            routes: {
+              '/parent': (context) => UserHomeScreen(),
+              '/teacher': (context) => TeacherHomeScreen(),
+            },
           ),
-          home: LoginScreen(),
-          routes: {
-            '/parent': (context) => UserHomeScreen(),
-            '/teacher': (context) => TeacherHomeScreen(),
-          },
         ),
       ),
     );
