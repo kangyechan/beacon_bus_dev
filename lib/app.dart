@@ -1,8 +1,8 @@
 import 'package:beacon_bus/blocs/teacher/teacher_provider.dart';
 import 'package:beacon_bus/blocs/parent/parent_provider.dart';
-import 'package:beacon_bus/screens/parent/parent_login_screen.dart';
-import 'package:beacon_bus/screens/teacher/teacher_home.dart';
-import 'package:beacon_bus/screens/parent/user_home.dart';
+import 'package:beacon_bus/screens/login_screen.dart';
+import 'package:beacon_bus/screens/teacher/teacher_home_screen.dart';
+import 'package:beacon_bus/screens/parent/user_home_screen.dart';
 import 'package:flutter/material.dart';
 
 class BeaconBusApp extends StatelessWidget {
@@ -16,7 +16,7 @@ class BeaconBusApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.yellow,
           ),
-          home: ParentLoginScreen(),
+          home: TeacherHomeScreen(),
           routes: {
 
           },
