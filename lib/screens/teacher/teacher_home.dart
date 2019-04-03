@@ -1,6 +1,6 @@
-import 'package:beacon_bus/screens/teacher_activity_screen.dart';
-import 'package:beacon_bus/screens/teacher_bus_screen.dart';
-import 'package:beacon_bus/screens/teacher_log_screen.dart';
+import 'package:beacon_bus/screens/teacher/teacher_activity_screen.dart';
+import 'package:beacon_bus/screens/teacher/teacher_bus_screen.dart';
+import 'package:beacon_bus/screens/teacher/teacher_log_screen.dart';
 import 'package:flutter/material.dart';
 
 class THomePage extends StatefulWidget {
