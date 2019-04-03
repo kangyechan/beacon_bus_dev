@@ -16,7 +16,7 @@ class BeaconBusApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.yellow,
           ),
-          home: ParentLoginScreen(),
+          home: LoginScreen(),
           routes: {
             '/parent': (context) => UserHomeScreen(),
             '/teacher': (context) => TeacherHomeScreen(),
