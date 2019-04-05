@@ -37,18 +37,13 @@ class LoginBloc extends Object with LoginValidators {
         .then((FirebaseUser user) {
       Firestore.instance.collection('Users').document(user.uid).get().then((snapshot) {
         String userType = snapshot.data['type'];
-
-        if (_context != null) {
           if (userType == "parent") {
-            Navigator.pushNamedAndRemoveUntil(_context, '/parent', (Route r) => false);
             prefs.setString(USER_TYPE, 'parent');
-          }
-          else if (userType == "teacher") {
-            Navigator.pushNamedAndRemoveUntil(_context, '/teacher', (Route r) => false);
+            Navigator.pushNamedAndRemoveUntil(_context, '/login', (Route r) => false);
+          } else if (userType == "teacher") {
             prefs.setString(USER_TYPE, 'teacher');
+            Navigator.pushNamedAndRemoveUntil(_context, '/login', (Route r) => false);
           }
-        }
-
       });
     });
   }
@@ -59,6 +54,14 @@ class LoginBloc extends Object with LoginValidators {
 
   loadSharedPrefs() async {
     prefs = await SharedPreferences.getInstance();
+  }
+
+  void signOut() {
+    FirebaseAuth _auth = FirebaseAuth.instance;
+    _auth.signOut().then((done) {
+      Navigator.pushNamedAndRemoveUntil(_context, '/login', (Route r) => false);
+      prefs.setString(USER_TYPE, "");
+    });
   }
 
   dispose() {

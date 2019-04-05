@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'board_status_screen.dart';
+import 'board_yes_or_no.screen.dart';
+import 'board_record_screen.dart';
+import '../../blocs/login/login_provider.dart';
 
 class ParentHomeScreen extends StatefulWidget {
   @override
@@ -6,39 +10,37 @@ class ParentHomeScreen extends StatefulWidget {
 }
 
 class _ParentHomeScreenState extends State<ParentHomeScreen> {
-
-  List<BottomNavigationBarItem> _items;
+  List<Widget> pages;
   int _currentIndex = 0;
-  String _value = "";
+  Widget currentPage;
+
+  BoardStatusScreen boardStatusScreen;
+  BoardYesOrNoScreen boardYesOrNoScreen;
+  BoardRecordScreen boardRecordScreen;
 
   @override
   void initState() {
-    _items = new List();
-    _items.add(new BottomNavigationBarItem(icon: new Icon(Icons.directions_bus), title: new Text("승하차 상태")));
-    _items.add(new BottomNavigationBarItem(icon: new Icon(Icons.directions_run), title: new Text("탑승유무")));
-    _items.add(new BottomNavigationBarItem(icon: new Icon(Icons.note), title: new Text("기록")));
     super.initState();
+    boardStatusScreen = BoardStatusScreen();
+    boardYesOrNoScreen = BoardYesOrNoScreen();
+    boardRecordScreen = BoardRecordScreen();
+    pages = [boardStatusScreen, boardYesOrNoScreen, boardRecordScreen];
+    currentPage = boardStatusScreen;
   }
 
   @override
   Widget build(BuildContext context) {
+    final bloc = LoginProvider.of(context);
+    bloc.setContext(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text("School Bus"),
+        title: Text("유치원 어플"),
+        leading: IconButton(icon: Icon(Icons.menu), onPressed: bloc.signOut),
         backgroundColor: Colors.yellow,
       ),
-      body: Container(
-        padding: EdgeInsets.all(32.0),
-        child: Center(
-          child: Column(
-            children: <Widget>[
-              Text(_value),
-            ],
-          ),
-        ),
-      ),
+      body: currentPage,
       bottomNavigationBar: BottomNavigationBar(
-        items: _items,
+        items: buildBarItems(),
         fixedColor: Colors.yellow,
         currentIndex: _currentIndex,
         onTap: onTabTapped,
@@ -48,7 +50,15 @@ class _ParentHomeScreenState extends State<ParentHomeScreen> {
   void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
-      _value = "Current value is: ${_currentIndex.toString()}";
+      currentPage = pages[index];
     });
+  }
+
+  List<BottomNavigationBarItem> buildBarItems() {
+    final List<BottomNavigationBarItem> list = [];
+    list.add(BottomNavigationBarItem(icon: Icon(Icons.directions_bus), title:  Text("승하차 상태", style: TextStyle(fontSize: 12.0))));
+    list.add(BottomNavigationBarItem(icon: Icon(Icons.directions_run), title:  Text("탑승유무", style: TextStyle(fontSize: 12.0))));
+    list.add(BottomNavigationBarItem(icon: Icon(Icons.note), title:  Text("기록", style: TextStyle(fontSize: 12.0))));
+    return list;
   }
 }
