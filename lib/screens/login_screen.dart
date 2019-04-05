@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     final bloc = LoginProvider.of(context);
     bloc.setContext(context);
     init(context, bloc);
