@@ -1,3 +1,4 @@
+import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:beacon_bus/screens/teacher/teacher_activity_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_bus_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_log_screen.dart';
@@ -32,15 +33,18 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bloc = LoginProvider.of(context);
+    bloc.setContext(context);
     return Scaffold(
-      appBar: _buildAppbar(),
+      appBar: _buildAppbar(bloc),
       body: currentPage,
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-  Widget _buildAppbar() {
+  Widget _buildAppbar(LoginBloc bloc) {
     return AppBar(
+      leading: IconButton(icon: Icon(Icons.menu), onPressed: bloc.signOut),
       title: Text("소담 어린이집"),
       centerTitle: true,
       backgroundColor: Colors.yellow,
