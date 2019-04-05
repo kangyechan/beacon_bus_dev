@@ -1,84 +1,31 @@
+import 'dart:async';
+
+import 'package:beacon_bus/blocs/parent/parent_date_helpers.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class ParentBloc {
-  String getCurrentDate() {
-    DateTime now = DateTime.now();
-    DateFormat formatter = DateFormat.M().add_d().add_EEEE();
-    String unFormattedTime = formatter.format(now).toString();
-    return getFormattedDate(unFormattedTime);
-  }
+class ParentBloc extends Object with ParentDateHelpers {
 
-  List<String> getOneWeekDate() {
-    List<String> oneWeekDate = [];
-    DateTime now = DateTime.now();
+  Future<FirebaseUser> get user => FirebaseAuth.instance.currentUser();
 
-    for (int i = 0; i < 7; i++) {
-      var newUnformattedTime = now.add(Duration(days: i));
-      DateFormat formatter = DateFormat.y().add_M().add_d().add_EEEE();
-      String unFormattedTime = formatter.format(newUnformattedTime).toString();
-      oneWeekDate.add(getFormattedDate(unFormattedTime));
-    }
-
-    return oneWeekDate;
-  }
-
-
-  String getFormattedDate(String unFormattedTime) {
-    List<String> split = unFormattedTime.split(" ");
-    String result = "0월 0일";
-    if (split.length == 3) {
-      switch (split[2]) {
-        case 'Monday':
-          split[2] = '월';
-          break;
-        case 'Tuesday':
-          split[2] = '화';
-          break;
-        case 'Wednesday':
-          split[2] = '수';
-          break;
-        case 'Thursday':
-          split[2] = '목';
-          break;
-        case 'Friday':
-          split[2] = '금';
-          break;
-        case 'Saturday':
-          split[2] = '토';
-          break;
-        case 'Sunday':
-          split[2] = '일';
-          break;
+  void changeBoardingStatus(String selectedDate) async {
+    FirebaseUser currentUser = await user;
+    // DB에 저장되어 있는 안타는 날 리스트를 받아온다
+    Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(currentUser.uid).get().then((documentSnapshot) {
+      List<String> notBoardingDateList = List<String>.from(documentSnapshot.data['notBoardingDateList']);
+      // 리스트에 이미 있으면 제거 없으면 추가
+      if (notBoardingDateList.contains(selectedDate)) {
+        notBoardingDateList.remove(selectedDate);
+      } else {
+        notBoardingDateList.add(selectedDate);
       }
-      result = "${split[0]}월 ${split[1]}일 ${split[2]}요일";
-    } else {
-      switch (split[3]) {
-        case 'Monday':
-          split[3] = '월';
-          break;
-        case 'Tuesday':
-          split[3] = '화';
-          break;
-        case 'Wednesday':
-          split[3] = '수';
-          break;
-        case 'Thursday':
-          split[3] = '목';
-          break;
-        case 'Friday':
-          split[3] = '금';
-          break;
-        case 'Saturday':
-          split[3] = '토';
-          break;
-        case 'Sunday':
-          split[3] = '일';
-          break;
-      }
-      result = "${split[0]}년 ${split[1]}월 ${split[2]}일 ${split[3]}요일";
-    }
-    return result;
+      // 업데이트 된 리스트로 DB에 추가
+      Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(currentUser.uid).setData({
+        'notBoardingDateList': notBoardingDateList,
+      }, merge: true);
+    });
   }
 }

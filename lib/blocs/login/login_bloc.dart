@@ -35,7 +35,7 @@ class LoginBloc extends Object with LoginValidators {
 
     _auth.signInWithEmailAndPassword(email: validEmail, password: validPassword)
         .then((FirebaseUser user) {
-      Firestore.instance.collection('Users').document(user.uid).get().then((snapshot) {
+      Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(user.uid).get().then((snapshot) {
         String userType = snapshot.data['type'];
           if (userType == "parent") {
             prefs.setString(USER_TYPE, 'parent');
