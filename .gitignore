@@ -86,3 +86,6 @@ unlinked_spec.ds
 !**/ios/**/default.perspectivev3
 ios/Podfile.lock
 ios/Podfile.lock
+
+google-services.json
+GoogleService-Info.plist
