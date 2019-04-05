@@ -52,6 +52,7 @@ unlinked_spec.ds
 **/android/gradlew.bat
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
+**/android/**/google-services.json
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
@@ -78,6 +79,7 @@ unlinked_spec.ds
 **/ios/Flutter/flutter_assets/
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/Runner/GoogleService-Info.plist
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3
@@ -87,5 +89,4 @@ unlinked_spec.ds
 ios/Podfile.lock
 ios/Podfile.lock
 
-google-services.json
-GoogleService-Info.plist
+
