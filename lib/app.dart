@@ -20,6 +20,7 @@ class BeaconBusApp extends StatelessWidget {
             ),
             home: LoginScreen(),
             routes: {
+              '/login': (context) => LoginScreen(),
               '/parent': (context) => ParentHomeScreen(),
               '/teacher': (context) => TeacherHomeScreen(),
             },

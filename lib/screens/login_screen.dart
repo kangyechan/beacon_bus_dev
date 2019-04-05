@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:beacon_bus/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
     final bloc = LoginProvider.of(context);
     bloc.setContext(context);
     init(context, bloc);
-
     return Scaffold(
       body: _buildBody(context, bloc),
     );
@@ -81,6 +82,9 @@ class LoginScreen extends StatelessWidget {
   }
 
   void init(BuildContext context, LoginBloc bloc) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String userType = prefs.getString(USER_TYPE);
+    print(userType);
     FirebaseAuth.instance.onAuthStateChanged.listen((user) {
       if (user != null) {
         String userType = bloc.prefs.getString(USER_TYPE);
