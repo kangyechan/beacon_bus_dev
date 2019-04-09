@@ -75,5 +75,4 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
       'images/background.JPG',
     );
   }
-
 }
