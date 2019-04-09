@@ -1,6 +1,5 @@
-import 'package:beacon_bus/screens/teacher/teacher_activity_screen.dart';
+import 'package:beacon_bus/blocs/teacher/teacher_provider.dart';
 import 'package:beacon_bus/screens/teacher/teacher_bus_screen.dart';
-import 'package:beacon_bus/screens/teacher/teacher_log_screen.dart';
 import 'package:flutter/material.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
@@ -9,33 +8,34 @@ class TeacherHomeScreen extends StatefulWidget {
 }
 
 class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
-  int _currentIndex = 0;
-  TeacherBusScreen teacherBusScreen;
-  TeacherActivityScreen teacherActivityScreen;
-  TeacherLogScreen teacherLogScreen;
 
-  Widget currentPage;
-
-  List<Widget> pages;
-
-  @override
-  void initState() {
-    super.initState();
-
-    teacherBusScreen = TeacherBusScreen();
-    teacherActivityScreen = TeacherActivityScreen();
-    teacherLogScreen = TeacherLogScreen();
-
-    pages = [teacherBusScreen, teacherActivityScreen, teacherLogScreen];
-    currentPage = teacherBusScreen;
-  }
+  final List<String> _busNumber = ["1호차", "2호차", "3호차", "4호차", "5호차", "6호차"];
+  String dropdownValue;
+  int carNum;
 
   @override
   Widget build(BuildContext context) {
+    final bloc = TeacherProvider.of(context);
+
     return Scaffold(
       appBar: _buildAppbar(),
-      body: currentPage,
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              children: <Widget>[
+                SizedBox(height: 100.0),
+                _buildDropdownButton(),
+                SizedBox(height: 30.0),
+                _buildButton(context, carNum),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _buildBackground(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -47,29 +47,41 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     );
   }
 
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      items: buildBarItems(),
-      fixedColor: Colors.yellow,
-      currentIndex: _currentIndex,
-      onTap: onTabTapped,
+  Widget _buildButton(BuildContext context, int carNum) {
+    return FlatButton(
+      child: Text("운행시작"),
+      color: Colors.yellow,
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => TeacherBusScreen(carNum: carNum,)
+          ),
+        );
+      },
     );
   }
 
-  void onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-      currentPage = pages[index];
-    });
+  Widget _buildDropdownButton() {
+    return  DropdownButton(
+      value: dropdownValue,
+      onChanged: (String value) {
+        setState(() {
+          dropdownValue = value;
+          carNum = _busNumber.indexWhere((num) => num.startsWith(value)) + 1;
+        });
+      },
+      items: _busNumber.map((value) => DropdownMenuItem(
+        value: value,
+        child: Text(value),
+      )).toList(),
+      hint: Text("운행 차량"),
+    );
   }
 
-  List<BottomNavigationBarItem> buildBarItems() {
-    final List<BottomNavigationBarItem> list = [];
-
-    list.add(BottomNavigationBarItem(icon: Icon(Icons.directions_bus), title: Text("버스", style: TextStyle(fontSize: 12.0))));
-    list.add(BottomNavigationBarItem(icon: Icon(Icons.directions_run), title: Text("야외", style: TextStyle(fontSize: 12.0))));
-    list.add(BottomNavigationBarItem(icon: Icon(Icons.note), title: Text("로그", style: TextStyle(fontSize: 12.0))));
-
-    return list;
+  Widget _buildBackground() {
+    return Image.asset(
+      'images/background.JPG',
+    );
   }
 }

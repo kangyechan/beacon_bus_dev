@@ -1,78 +1,79 @@
-import 'package:beacon_bus/blocs/teacher/teacher_provider.dart';
-import 'package:beacon_bus/screens/teacher/board_list_screen.dart';
+import 'package:beacon_bus/screens/teacher/teacher_board_screen.dart';
+import 'package:beacon_bus/screens/teacher/teacher_log_screen.dart';
 import 'package:flutter/material.dart';
 
 class TeacherBusScreen extends StatefulWidget {
+  final int carNum;
+
+  TeacherBusScreen({Key key, this.carNum}): super(key: key);
+
   @override
-  _TeacherBusScreenState createState() => _TeacherBusScreenState();
+  _TeacherBusScreenState createState() => _TeacherBusScreenState(carNum: carNum);
 }
 
 class _TeacherBusScreenState extends State<TeacherBusScreen> {
+  final int carNum;
 
-  final List<String> _busNumber = ["1호차", "2호차", "3호차", "4호차", "5호차", "6호차"];
-  String dropdownValue;
-  int carNum;
+  _TeacherBusScreenState({this.carNum});
+
+  int _currentIndex = 0;
+  TeacherBoardScreen teacherBoardScreen;
+  TeacherLogScreen teacherLogScreen;
+
+  Widget currentPage;
+
+  List<Widget> pages;
+
+  @override
+  void initState() {
+    super.initState();
+
+    teacherBoardScreen = TeacherBoardScreen(carNum: carNum);
+    teacherLogScreen = TeacherLogScreen();
+
+    pages = [teacherBoardScreen, teacherLogScreen];
+    currentPage = teacherBoardScreen;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final bloc = TeacherProvider.of(context);
-
     return Scaffold(
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              children: <Widget>[
-                SizedBox(height: 100.0),
-                _buildDropdownButton(),
-                SizedBox(height: 30.0),
-                _buildButton(context, carNum),
-              ],
-            ),
-          ),
-          Expanded(
-            child: _buildBackground(),
-          ),
-        ],
-      ),
+      appBar: _buildAppbar(),
+      body: currentPage,
+      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-  Widget _buildButton(BuildContext context, int carNum) {
-    return FlatButton(
-      child: Text("운행시작"),
-      color: Colors.yellow,
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => BoardListScreen(carNum: carNum,)
-          ),
-        );
-      },
+  Widget _buildAppbar() {
+    return AppBar(
+      title: Text("소담 어린이집 " + carNum.toString() + " 호차"),
+      centerTitle: true,
+      backgroundColor: Colors.yellow,
     );
   }
 
-  Widget _buildDropdownButton() {
-    return  DropdownButton(
-      value: dropdownValue,
-      onChanged: (String value) {
-        setState(() {
-          dropdownValue = value;
-          carNum = _busNumber.indexWhere((num) => num.startsWith(value)) + 1;
-        });
-      },
-      items: _busNumber.map((value) => DropdownMenuItem(
-        value: value,
-        child: Text(value),
-      )).toList(),
-      hint: Text("운행 차량"),
+  Widget _buildBottomNavigationBar() {
+    return BottomNavigationBar(
+      items: buildBarItems(),
+      fixedColor: Colors.yellow,
+      currentIndex: _currentIndex,
+      onTap: onTabTapped,
     );
   }
 
-  Widget _buildBackground() {
-    return Image.asset(
-      'images/background.JPG',
-    );
+  void onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+      currentPage = pages[index];
+    });
+  }
+
+  List<BottomNavigationBarItem> buildBarItems() {
+    final List<BottomNavigationBarItem> list = [];
+
+    list.add(BottomNavigationBarItem(icon: Icon(Icons.directions_bus), title: Text("버스", style: TextStyle(fontSize: 12.0))));
+    list.add(BottomNavigationBarItem(icon: Icon(Icons.note), title: Text("로그", style: TextStyle(fontSize: 12.0))));
+
+    return list;
   }
 }
