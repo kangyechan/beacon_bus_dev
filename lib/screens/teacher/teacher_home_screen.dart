@@ -19,6 +19,9 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
 
     return Scaffold(
       appBar: _buildAppbar(),
+      drawer: Drawer(
+        child: _buildDrawer(),
+      ),
       body: Column(
         children: <Widget>[
           Expanded(
@@ -44,6 +47,71 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       title: Text("소담 어린이집"),
       centerTitle: true,
       backgroundColor: Colors.yellow,
+    );
+  }
+
+  Widget _buildDrawer() {
+    return Flex(
+        direction: Axis.vertical,
+        children: <Widget>[
+          _buildUserAccounts(),
+          _buildDrawerList(),
+          _logoutDrawer(),
+        ],
+    );
+  }
+
+  Widget _buildUserAccounts() {
+    return Flexible(
+      flex: 2,
+      child: UserAccountsDrawerHeader(
+        accountName: Text("강예찬 선생님"),
+        accountEmail: Text("소담유치원 연두별반"),
+        currentAccountPicture: CircleAvatar(
+          backgroundColor: Colors.white,
+          child: Text(
+            "A",
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerList() {
+    return Flexible(
+      flex: 4,
+      child: Container(
+        child: ListView(
+          children: <Widget>[
+            ListTile(
+              title: Text("야외활동"),
+              trailing: Icon(Icons.navigate_next),
+              onTap: () {
+                print("Item tap");
+              },
+            ),
+            ListTile(
+              title: Text("수신기록"),
+              trailing: Icon(Icons.navigate_next),
+              onTap: () {
+                print("Item tap");
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _logoutDrawer() {
+    return Flexible(
+      flex: 1,
+      child: ListTile(
+        title: Text("로그아웃"),
+        onTap: () {
+          print("Item tap");
+        },
+      ),
     );
   }
 
