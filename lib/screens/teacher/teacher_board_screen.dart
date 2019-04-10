@@ -36,9 +36,9 @@ class _TeacherBoardScreenState extends State<TeacherBoardScreen> {
         padding: const EdgeInsets.all(10.0),
         child: Row(
           children: <Widget>[
-            _buildState(Icon(Icons.check_circle), Colors.green, "탑승 중"),
-            _buildState(Icon(Icons.error), Colors.orange, "미확인"),
+            _buildState(Icon(Icons.check_circle), Colors.green, "탑승중"),
             _buildState(Icon(Icons.cancel), Colors.red, "미탑승"),
+            _buildState(Icon(Icons.error), Colors.orange, "개인이동"),
           ],
         )
       );
