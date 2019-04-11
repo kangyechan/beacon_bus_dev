@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class TeacherBusScreen extends StatefulWidget {
@@ -140,7 +142,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                       ),
                     ),
                     onTap: () {
-                      print("name tap");
+                      _changeState();
                     },
                   ),
                   _divider(),
@@ -258,6 +260,60 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
           _showCheckDialog();
         },
       ),
+    );
+  }
+  void _changeState() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "상태 변경",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text("현재 상태를 변경하시겠습니까?"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(
+                "탑승중",
+                style: TextStyle(
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text(
+                "미탑승",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text(
+                "개인이동",
+                style: TextStyle(
+                  color: Colors.amber,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
   void _showCheckDialog() {

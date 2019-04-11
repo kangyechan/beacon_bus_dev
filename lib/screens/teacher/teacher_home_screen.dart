@@ -1,4 +1,6 @@
-import 'package:beacon_bus/blocs/teacher/teacher_provider.dart';
+import 'dart:async';
+
+import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:beacon_bus/screens/teacher/teacher_activity_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_bus_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,23 +13,21 @@ class TeacherHomeScreen extends StatefulWidget {
 
 class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
 
+  Future<FirebaseUser> get user => FirebaseAuth.instance.currentUser();
+
   final List<String> _busNumber = ["1호차", "2호차", "3호차", "4호차", "5호차", "6호차"];
   String dropdownValue;
   String className;
   int carNum;
 
-  void _signOut() {
-    FirebaseAuth.instance.signOut();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final bloc = TeacherProvider.of(context);
-
+    final bloc = LoginProvider.of(context);
+    bloc.setContext(context);
     return Scaffold(
       appBar: _buildAppbar(),
       drawer: Drawer(
-        child: _buildDrawer(),
+        child: _buildDrawer(bloc),
       ),
       body: Column(
         children: <Widget>[
@@ -64,13 +64,13 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       backgroundColor: Colors.yellow,
     );
   }
-  Widget _buildDrawer() {
+  Widget _buildDrawer(LoginBloc bloc) {
     return Column(
         children: <Widget>[
           _buildUserAccounts(),
           _buildDrawerList(),
           _divider(),
-          _logoutDrawer(),
+          _logoutDrawer(bloc),
         ],
     );
   }
@@ -79,12 +79,23 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       height: 200.0,
       child: UserAccountsDrawerHeader(
         margin: EdgeInsets.all(0.0),
-        accountName: Text("강예찬 선생님"),
-        accountEmail: Text("소담유치원 연두별반"),
+        accountName: Text(
+          "강예찬 선생님",
+          style: TextStyle(
+            fontSize: 15.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        accountEmail: Text(
+          "소담유치원 연두별반",
+          style: TextStyle(
+            fontSize: 14.0,
+          ),
+        ),
         currentAccountPicture: CircleAvatar(
           backgroundColor: Colors.white,
           child: Text(
-            "A",
+            "T",
           ),
         ),
       ),
@@ -95,18 +106,30 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       child: Column(
         children: <Widget>[
           ListTile(
-            title: Text("야외활동"),
-            trailing: Icon(Icons.navigate_next),
+            title: Text(
+              "야외활동",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            trailing: Icon(Icons.navigate_next,
+            ),
             onTap: () {
               _buildActivityCheck();
             },
           ),
           _divider(),
           ListTile(
-            title: Text("수신기록"),
+            title: Text(
+              "승하차 기록",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             trailing: Icon(Icons.navigate_next),
             onTap: () {
-              print("Item tap");
+              Navigator.of(context).pop();
+              Navigator.pushNamed(context, '/teacherlog');
             },
           ),
           _divider(),
@@ -114,12 +137,16 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       ),
     );
   }
-  Widget _logoutDrawer() {
+  Widget _logoutDrawer(LoginBloc bloc) {
     return  ListTile(
-      title: Text("로그아웃"),
+      title: Text(
+        "로그아웃",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       onTap: () {
-        _signOut();
-        Navigator.pushNamedAndRemoveUntil(context, '/login', (Route r) => false);
+        bloc.signOut();
       },
     );
   }
