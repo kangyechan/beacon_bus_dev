@@ -1,9 +1,10 @@
-import 'dart:async';
-
 import 'package:beacon_bus/blocs/login/login_provider.dart';
+import 'package:beacon_bus/blocs/teacher/teacher_bloc.dart';
+import 'package:beacon_bus/blocs/teacher/teacher_provider.dart';
+import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/screens/teacher/teacher_activity_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_bus_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
@@ -13,15 +14,13 @@ class TeacherHomeScreen extends StatefulWidget {
 
 class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
 
-  Future<FirebaseUser> get user => FirebaseAuth.instance.currentUser();
-
-  final List<String> _busNumber = ["1호차", "2호차", "3호차", "4호차", "5호차", "6호차"];
   String dropdownValue;
   String className;
   int carNum;
 
   @override
   Widget build(BuildContext context) {
+    final tbloc = TeacherProvider.of(context);
     final bloc = LoginProvider.of(context);
     bloc.setContext(context);
     return Scaffold(
@@ -36,10 +35,10 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               direction: Axis.vertical,
               children: <Widget>[
                 SizedBox(height: 10.0,),
-                _teacherName(),
+                _teacherName(bloc),
                 _buildReadMe(),
                 SizedBox(height: 10.0,),
-                _buildDropdownButton(),
+                _buildDropdownButton(tbloc),
                 _buildButton(context, carNum),
               ],
             ),
@@ -55,7 +54,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   Widget _buildAppbar() {
     return AppBar(
       title: Text(
-        "소담 어린이집",
+        SCHOOL_NAME,
         style: TextStyle(
           fontWeight: FontWeight.bold,
         ),
@@ -67,27 +66,27 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   Widget _buildDrawer(LoginBloc bloc) {
     return Column(
         children: <Widget>[
-          _buildUserAccounts(),
+          _buildUserAccounts(bloc),
           _buildDrawerList(),
           _divider(),
           _logoutDrawer(bloc),
         ],
     );
   }
-  Widget _buildUserAccounts() {
+  Widget _buildUserAccounts(LoginBloc bloc) {
     return Container(
       height: 200.0,
       child: UserAccountsDrawerHeader(
         margin: EdgeInsets.all(0.0),
         accountName: Text(
-          "강예찬 선생님",
+          bloc.prefs.getString(USER_NAME) + " 선생님",
           style: TextStyle(
             fontSize: 15.0,
             fontWeight: FontWeight.bold,
           ),
         ),
         accountEmail: Text(
-          "소담유치원 연두별반",
+          SCHOOL_NAME +" "+ bloc.prefs.getString(USER_CLASS) + "반",
           style: TextStyle(
             fontSize: 14.0,
           ),
@@ -200,7 +199,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     );
   }
 
-  Widget _teacherName() {
+  Widget _teacherName(LoginBloc bloc) {
     return Flexible(
       flex: 2,
       child: Center(
@@ -217,7 +216,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           child: Padding(
             padding: EdgeInsets.all(5.0),
             child: Text(
-              "강예찬 선생님",
+              bloc.prefs.getString(USER_NAME) + " 선생님",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20.0,
@@ -242,24 +241,36 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         ),
     );
   }
-  Widget _buildDropdownButton() {
+  Widget _buildDropdownButton(TeacherBloc bloc) {
     return  Flexible(
       flex: 1,
-      child: Center(
-        child: DropdownButton(
-          value: dropdownValue,
-          onChanged: (String value) {
-            setState(() {
-              dropdownValue = value;
-              carNum = _busNumber.indexWhere((num) => num.startsWith(value)) + 1;
-            });
-          },
-          items: _busNumber.map((value) => DropdownMenuItem(
-            value: value,
-            child: Text(value),
-          )).toList(),
-          hint: Text("운행 차량"),
-        ),
+      child: StreamBuilder(
+        stream:  Firestore.instance.collection('Kindergarden').document('hamang').collection('Bus').snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) return LinearProgressIndicator();
+
+          List<String> busList = [];
+          snapshot.data.documents.map((DocumentSnapshot document) {
+              busList.add(document.documentID.toString());
+          }).toList();
+
+          return Center(
+            child: DropdownButton(
+              value: dropdownValue,
+              onChanged: (String value) {
+                setState(() {
+                  dropdownValue = value;
+                  carNum = busList.indexWhere((num) => num.startsWith(value)) + 1;
+                });
+              },
+              items: busList.map((value) => DropdownMenuItem(
+                value: value,
+                child: Text(value),
+              )).toList(),
+              hint: Text("운행 차량"),
+            ),
+          );
+        }
       ),
     );
   }

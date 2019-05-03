@@ -1,3 +1,4 @@
+import 'package:beacon_bus/constants.dart';
 import 'package:flutter/material.dart';
 
 
@@ -41,7 +42,7 @@ class _TeacherLogScreenState extends State<TeacherLogScreen> {
         },
       ),
       title: Text(
-        "소담 어린이집",
+        SCHOOL_NAME,
         style: TextStyle(
           fontWeight: FontWeight.bold,
         ),
@@ -81,7 +82,7 @@ class _TeacherLogScreenState extends State<TeacherLogScreen> {
             Flexible(
               child: ListView(
                 children: <Widget>[
-                  _buildLogSection(),
+                  _buildLogSection2(),
                 ],
               ),
             ),
@@ -163,13 +164,38 @@ class _TeacherLogScreenState extends State<TeacherLogScreen> {
         Flexible(
           flex: 1,
           child: Center(
-            child: Text("강예찬"),
+            child: Text("김영희"),
           ),
         ),
         Flexible(
           flex: 1,
           child: Center(
             child: Text("3시 20분"),
+          ),
+        ),
+      ],
+    );
+  }
+  Widget _buildLogSection2() {
+    return Flex(
+      direction: Axis.horizontal,
+      children: <Widget>[
+        Flexible(
+          flex: 1,
+          child: Center(
+            child: Text("4월 11일"),
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          child: Center(
+            child: Text("김영희"),
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          child: Center(
+            child: Text("3시 50분"),
           ),
         ),
       ],
