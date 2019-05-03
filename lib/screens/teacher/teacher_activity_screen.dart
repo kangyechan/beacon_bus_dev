@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:beacon_bus/blocs/login/login_bloc.dart';
+import 'package:beacon_bus/blocs/login/login_provider.dart';
+import 'package:beacon_bus/constants.dart';
 import 'package:flutter/material.dart';
 
 class TeacherActivityScreen extends StatefulWidget {
@@ -17,6 +20,9 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bloc = LoginProvider.of(context);
+    bloc.setContext(context);
+
     return WillPopScope(
       child: Scaffold(
         appBar: _buildAppbar(),
@@ -25,8 +31,9 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
           child: Flex(
             direction: Axis.vertical,
             children: <Widget>[
-              _buildModeSection(),
+              _buildModeSection(bloc),
               _buildStateSection(),
+              _buildStateCount(),
               _buildBoardSection(),
               _buildEndBoard(),
             ],
@@ -41,7 +48,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
   Widget _buildAppbar() {
     return AppBar(
       title: Text(
-        "소담 어린이집 ",
+        SCHOOL_NAME,
         style: TextStyle(
           fontWeight: FontWeight.bold,
         ),
@@ -52,11 +59,11 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
     );
   }
 
-  Widget _buildModeSection() {
+  Widget _buildModeSection(LoginBloc bloc) {
     return Container(
       padding: EdgeInsets.only(bottom: 5.0),
       child: Text(
-        "야외활동 " + "연두별반",
+        "야외활동 " + bloc.prefs.getString(USER_CLASS) + "반",
         style: TextStyle(
           fontWeight: FontWeight.bold,
         ),
@@ -132,7 +139,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
               child: ListView(
                 children: <Widget>[
                   ListTile(
-                    title: Text("강예찬"),
+                    title: Text("김영희"),
                     trailing: IconTheme(
                       data: IconThemeData(
                         color: Colors.red,
@@ -147,7 +154,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
                   ),
                   _divider(),
                   ListTile(
-                    title: Text("최선웅"),
+                    title: Text("송강호"),
                     trailing: IconTheme(
                       data: IconThemeData(
                         color: Colors.green,
@@ -162,7 +169,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
                   ),
                   _divider(),
                   ListTile(
-                    title: Text("박경찬"),
+                    title: Text("류승룡"),
                     trailing: IconTheme(
                       data: IconThemeData(
                         color: Colors.green,
@@ -177,7 +184,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
                   ),
                   _divider(),
                   ListTile(
-                    title: Text("손경진"),
+                    title: Text("류승범"),
                     trailing: IconTheme(
                       data: IconThemeData(
                         color: Colors.green,
@@ -192,7 +199,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
                   ),
                   _divider(),
                   ListTile(
-                    title: Text("박성윤"),
+                    title: Text("이하늬"),
                     trailing: IconTheme(
                       data: IconThemeData(
                         color: Colors.green,
@@ -207,7 +214,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
                   ),
                   _divider(),
                   ListTile(
-                    title: Text("이정은"),
+                    title: Text("이동희"),
                     trailing: IconTheme(
                       data: IconThemeData(
                         color: Colors.green,
@@ -222,7 +229,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
                   ),
                   _divider(),
                   ListTile(
-                    title: Text("추유진"),
+                    title: Text("정우성"),
                     trailing: IconTheme(
                       data: IconThemeData(
                         color: Colors.green,
@@ -242,6 +249,28 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
           ),
         ],
       ),
+    );
+  }
+  Widget _buildStateCount() {
+    return Row(
+      children: <Widget>[
+        Flexible(
+          child:
+          Center(
+            child: Text("6명",
+              style: TextStyle(fontSize: 12.0),
+            ),
+
+          ),
+        ),
+        Flexible(
+          child: Center(
+            child: Text("1명",
+              style: TextStyle(fontSize: 12.0),),
+          ),
+
+        ),
+      ],
     );
   }
   Widget _buildEndBoard() {

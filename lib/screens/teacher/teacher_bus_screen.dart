@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:beacon_bus/constants.dart';
+import 'package:beacon_bus/models/children.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class TeacherBusScreen extends StatefulWidget {
@@ -13,6 +16,10 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   final int carNum;
   _TeacherBusScreenState({this.carNum});
 
+  int boarding = 3;
+  int notBoarding = 1;
+  int unKnown = 0;
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -23,7 +30,6 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
           child: Flex(
             direction: Axis.vertical,
             children: <Widget>[
-              _buildModeSection(),
               _buildStateSection(),
               _buildBoardSection(),
               _buildEndBoard(),
@@ -40,7 +46,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   Widget _buildAppbar() {
     return AppBar(
       title: Text(
-        "소담 어린이집",
+        SCHOOL_NAME +" "+carNum.toString()+"호 차량",
         style: TextStyle(
           fontWeight: FontWeight.bold,
         ),
@@ -51,30 +57,19 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
     );
   }
 
-  Widget _buildModeSection() {
-    return Container(
-      padding: EdgeInsets.only(bottom: 5.0),
-      child: Text(
-        "승하차 " + carNum.toString() + " 호차",
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
   Widget _buildStateSection() {
     return Padding(
-      padding: EdgeInsets.all(5.0),
+      padding: EdgeInsets.only(top: 5.0, right: 5.0, left: 5.0),
       child: Row(
         children: <Widget>[
-          _buildState(Icon(Icons.check_circle), Colors.green, "탑승중"),
-          _buildState(Icon(Icons.cancel), Colors.red, "미탑승"),
-          _buildState(Icon(Icons.error), Colors.orange, "개인이동"),
+          _buildState(Icon(Icons.check_circle), Colors.green, "탑승중", boarding),
+          _buildState(Icon(Icons.cancel), Colors.red, "미탑승", unKnown),
+          _buildState(Icon(Icons.error), Colors.orange, "개인이동", notBoarding),
         ],
       )
     );
   }
-  Widget _buildState(Icon stateIcon, Color stateColor, String name){
+  Widget _buildState(Icon stateIcon, Color stateColor, String name, int count){
     return Flexible(
       flex: 1,
       child: Flex(
@@ -88,9 +83,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
               child: stateIcon,
             ),
           ),
-          Expanded(
-            child: Text(name),
-          ),
+          Text(name+ " "+count.toString()+"명"),
         ],
       ),
     );
@@ -119,6 +112,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
       ),
     );
   }
+
   Widget _buildBoardSection() {
     return Flexible(
       flex: 3,
@@ -127,123 +121,102 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
         children: <Widget>[
           _buildTitleSection(200.0, "현재 탑승 상태"),
           Flexible(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 60.0),
-              child: ListView(
-                children: <Widget>[
-                  ListTile(
-                    title: Text("강예찬"),
-                    trailing: IconTheme(
-                      data: IconThemeData(
-                        color: Colors.red,
-                      ),
-                      child: Icon(
-                        Icons.cancel,
-                      ),
-                    ),
-                    onTap: () {
-                      _changeState();
-                    },
-                  ),
-                  _divider(),
-                  ListTile(
-                    title: Text("최선웅"),
-                    trailing: IconTheme(
-                      data: IconThemeData(
-                        color: Colors.green,
-                      ),
-                      child: Icon(
-                        Icons.check_circle,
-                      ),
-                    ),
-                    onTap: () {
-                      print("name tap");
-                    },
-                  ),
-                  _divider(),
-                  ListTile(
-                    title: Text("박경찬"),
-                    trailing: IconTheme(
-                      data: IconThemeData(
-                        color: Colors.green,
-                      ),
-                      child: Icon(
-                        Icons.check_circle,
-                      ),
-                    ),
-                    onTap: () {
-                      print("name tap");
-                    },
-                  ),
-                  _divider(),
-                  ListTile(
-                    title: Text("손경진"),
-                    trailing: IconTheme(
-                      data: IconThemeData(
-                        color: Colors.green,
-                      ),
-                      child: Icon(
-                        Icons.check_circle,
-                      ),
-                    ),
-                    onTap: () {
-                      print("name tap");
-                    },
-                  ),
-                  _divider(),
-                  ListTile(
-                    title: Text("박성윤"),
-                    trailing: IconTheme(
-                      data: IconThemeData(
-                        color: Colors.orange,
-                      ),
-                      child: Icon(
-                        Icons.error,
-                      ),
-                    ),
-                    onTap: () {
-                      print("name tap");
-                    },
-                  ),
-                  _divider(),
-                  ListTile(
-                    title: Text("이정은"),
-                    trailing: IconTheme(
-                      data: IconThemeData(
-                        color: Colors.green,
-                      ),
-                      child: Icon(
-                        Icons.check_circle,
-                      ),
-                    ),
-                    onTap: () {
-                      print("name tap");
-                    },
-                  ),
-                  _divider(),
-                  ListTile(
-                    title: Text("추유진"),
-                    trailing: IconTheme(
-                      data: IconThemeData(
-                        color: Colors.green,
-                      ),
-                      child: Icon(
-                        Icons.check_circle,
-                      ),
-                    ),
-                    onTap: () {
-                      print("name tap");
-                    },
-                  ),
-                  _divider(),
-                ],
-              ),
-            ),
+            child: _buildBoardMember(),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildBoardMember() {
+    return StreamBuilder(
+      stream:  Firestore
+          .instance
+          .collection('Kindergarden')
+          .document('hamang')
+          .collection('Children')
+          .where('busNum', isEqualTo: carNum.toString())
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return LinearProgressIndicator();
+        return _buildMemberList(context, snapshot.data.documents);
+      }
+    );
+  }
+
+  Widget _buildMemberList(BuildContext context, List<DocumentSnapshot> snapshot) {
+    return GridView.count(
+      crossAxisCount: 3,
+      padding: EdgeInsets.all(10.0),
+      childAspectRatio: 8.0 / 8.0,
+      children: snapshot.map((data) => _buildMemberListItem(context, data)).toList(),
+    );
+  }
+
+  Widget _buildMemberListItem(BuildContext context, DocumentSnapshot data) {
+    final children = Children.fromSnapshot(data);
+    return Padding(
+      key: ValueKey(children.phoneNumber),
+      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[300]),
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Image(
+                image: AssetImage('images/adddefault.JPG'),
+              ),
+            ),
+            Expanded(
+              child: ListTile(
+                title: Text(
+                  children.name,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                  ),
+                ),
+                trailing: _buildStateIcon(children.boardState),
+                onTap: () {
+                  _changeState();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStateIcon(bool boardState) {
+    // notBoardingDate가 없을때 조건도 추가해야함.
+   if(boardState) {
+     return IconTheme(
+       data: IconThemeData(
+         color: Colors.green,
+       ),
+       child: Icon(
+         Icons.check_circle,
+         size: 20.0,
+       ),
+     );
+   } else {
+     return IconTheme(
+       data: IconThemeData(
+         color: Colors.red,
+       ),
+       child: Icon(
+         Icons.cancel,
+         size: 20.0,
+       ),
+     );
+   }
+  }
+
   Widget _buildEndBoard() {
     return Padding(
       padding: EdgeInsets.all(10.0),
@@ -262,6 +235,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
       ),
     );
   }
+
   void _changeState() {
     showDialog(
       context: context,
@@ -402,11 +376,4 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
       },
     );
   }
-
-  Widget _divider() {
-    return Divider(
-      height: 1.0,
-    );
-  }
-
 }
