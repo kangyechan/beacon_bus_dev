@@ -211,7 +211,6 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   Widget _buildMemberListItem(BuildContext context, DocumentSnapshot data) {
     final children = Children.fromSnapshot(data);
     return Padding(
-      key: ValueKey(children.phoneNumber),
       padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
       child: Container(
         decoration: BoxDecoration(
