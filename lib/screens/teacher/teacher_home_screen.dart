@@ -5,6 +5,7 @@ import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/screens/teacher/teacher_activity_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_bus_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
@@ -60,23 +61,26 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         ),
       ),
       centerTitle: true,
-      backgroundColor: Colors.yellow,
+      backgroundColor: Color(0xFFC9EBF7),
     );
   }
   Widget _buildDrawer(LoginBloc bloc) {
     return Column(
-        children: <Widget>[
-          _buildUserAccounts(bloc),
-          _buildDrawerList(),
-          _divider(),
-          _logoutDrawer(bloc),
-        ],
+      children: <Widget>[
+        _buildUserAccounts(bloc),
+        _buildDrawerList(),
+        _divider(),
+        _logoutDrawer(bloc),
+      ],
     );
   }
   Widget _buildUserAccounts(LoginBloc bloc) {
     return Container(
       height: 200.0,
       child: UserAccountsDrawerHeader(
+        decoration: BoxDecoration(
+          color: Color(0xFFC9EBF7),
+        ),
         margin: EdgeInsets.all(0.0),
         accountName: Text(
           bloc.prefs.getString(USER_NAME) + " 선생님",
@@ -132,6 +136,20 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             },
           ),
           _divider(),
+          ListTile(
+            title: Text(
+              "알람 테스트",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            trailing: Icon(Icons.navigate_next),
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.pushNamed(context, '/notification');
+            },
+          ),
+          _divider(),
         ],
       ),
     );
@@ -166,7 +184,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               child: Text(
                 "확인",
                 style: TextStyle(
-                  color: Colors.amber,
+                  color: Color(0xFF1EA8E0),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -185,7 +203,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               child: Text(
                 "취소",
                 style: TextStyle(
-                  color: Colors.amber,
+                  color: Color(0xFF1EA8E0),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -208,7 +226,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: Colors.yellow,
+                color: Color(0xFFC9EBF7),
                 width: 2.0,
               ),
             ),
@@ -232,45 +250,45 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     return Flexible(
       flex: 1,
       child: Text(
-          "탑승할 차량 번호를 선택하고\n"
-          "운행시작 버튼을 눌러주세요.",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 15.0,
-          ),
+        "탑승할 차량 번호를 선택하고\n"
+            "운행시작 버튼을 눌러주세요.",
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 15.0,
         ),
+      ),
     );
   }
   Widget _buildDropdownButton(TeacherBloc bloc) {
     return  Flexible(
       flex: 1,
       child: StreamBuilder(
-        stream:  Firestore.instance.collection('Kindergarden').document('hamang').collection('Bus').snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) return LinearProgressIndicator();
+          stream:  Firestore.instance.collection('Kindergarden').document('hamang').collection('Bus').snapshots(),
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
 
-          List<String> busList = [];
-          snapshot.data.documents.map((DocumentSnapshot document) {
+            List<String> busList = [];
+            snapshot.data.documents.map((DocumentSnapshot document) {
               busList.add(document.documentID.toString());
-          }).toList();
+            }).toList();
 
-          return Center(
-            child: DropdownButton(
-              value: dropdownValue,
-              onChanged: (String value) {
-                setState(() {
-                  dropdownValue = value;
-                  carNum = busList.indexWhere((num) => num.startsWith(value)) + 1;
-                });
-              },
-              items: busList.map((value) => DropdownMenuItem(
-                value: value,
-                child: Text(value),
-              )).toList(),
-              hint: Text("운행 차량"),
-            ),
-          );
-        }
+            return Center(
+              child: DropdownButton(
+                value: dropdownValue,
+                onChanged: (String value) {
+                  setState(() {
+                    dropdownValue = value;
+                    carNum = busList.indexWhere((num) => num.startsWith(value)) + 1;
+                  });
+                },
+                items: busList.map((value) => DropdownMenuItem(
+                  value: value,
+                  child: Text(value),
+                )).toList(),
+                hint: Text("운행 차량"),
+              ),
+            );
+          }
       ),
     );
   }
@@ -286,7 +304,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        color: Colors.yellow,
+        color: Color(0xFFC9EBF7),
         onPressed: () {
           if(carNum == null) {
             _selectCarNum();
@@ -301,7 +319,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return CupertinoAlertDialog(
           title: Text(
             "운행 차량 선택",
             style: TextStyle(
@@ -310,12 +328,11 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           ),
           content: Text("탑승하는 차량을 확인해 주세요."),
           actions: <Widget>[
-            FlatButton(
+            CupertinoButton(
               child: Text(
                 "확인",
                 style: TextStyle(
-                  color: Colors.amber,
-                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1EA8E0),
                 ),
               ),
               onPressed: () {
@@ -331,7 +348,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return CupertinoAlertDialog(
           title: Text(
             "운행 시작",
             style: TextStyle(
@@ -340,12 +357,11 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           ),
           content: Text(carNum.toString() + "호차 운행을 시작하시겠습니까?"),
           actions: <Widget>[
-            FlatButton(
+            CupertinoButton(
               child: Text(
                 "운행 시작",
                 style: TextStyle(
-                  color: Colors.amber,
-                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1EA8E0),
                 ),
               ),
               onPressed: () {
@@ -358,12 +374,11 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 );
               },
             ),
-            FlatButton(
+            CupertinoButton(
               child: Text(
                 "취소",
                 style: TextStyle(
-                  color: Colors.amber,
-                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1EA8E0),
                 ),
               ),
               onPressed: () {
@@ -386,7 +401,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   Widget _divider() {
     return Divider(
       height: 0.5,
-      color: Colors.yellow,
+      color: Color(0xFFC9EBF7),
     );
   }
 }
