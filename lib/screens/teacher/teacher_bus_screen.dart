@@ -29,9 +29,6 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   @override
   void initState() {
     super.initState();
-    _getCount("board");
-    _getCount("unknown");
-    _getCount("notboard");
     flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
 
     var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
@@ -42,6 +39,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         selectNotification: onSelectNotification);
   }
+
   Future onSelectNotification(String payload) {
     debugPrint("payload : $payload");
     showDialog(
@@ -64,25 +62,6 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
         payload: stateAlarm);
   }
 
-  void _getCount(String boardingState) {
-    Firestore.instance
-        .collection('Kindergarden')
-        .document('hamang')
-        .collection('Children')
-        .where('busNum', isEqualTo: carNum.toString())
-        .where('boardState', isEqualTo: boardingState)
-        .snapshots().listen((data) {
-      setState(() {
-        if(boardingState == "board") {
-          boarding = data.documents.length;
-        } else if(boardingState == "unknown") {
-          unKnown = data.documents.length;
-        } else {
-          notBoarding = data.documents.length;
-        }
-      });
-    });
-  }
   void _setStateChanged(String boardStateName) {
     setState(() {
       if(boardStateName == '탑승중') {
@@ -140,15 +119,68 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
         padding: EdgeInsets.only(top: 5.0, right: 5.0, left: 5.0),
         child: Row(
           children: <Widget>[
-            _buildState(Icon(Icons.check_circle), Colors.green, "탑승중", boarding),
-            _buildState(Icon(Icons.cancel), Colors.red, "미탑승", unKnown),
-            _buildState(Icon(Icons.error), Colors.orange, "개인이동", notBoarding),
+            _buildState(Icon(Icons.check_circle), Colors.green, "탑승중"),
+            _buildState(Icon(Icons.cancel), Colors.red, "미탑승"),
+            _buildState(Icon(Icons.error), Colors.orange, "개인이동"),
           ],
         )
     );
   }
 
-  Widget _buildState(Icon stateIcon, Color stateColor, String name, int count){
+  Widget _buildState(Icon stateIcon, Color stateColor, String name) {
+    Widget countSection;
+    if (name == "탑승중") {
+      countSection = StreamBuilder<QuerySnapshot>(
+          stream: Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('Children')
+              .where('busNum', isEqualTo: carNum.toString())
+              .where('boardState', isEqualTo: 'board')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
+            boarding = snapshot.data.documents.length;
+            return _countSectionContents(
+                stateIcon, stateColor, name, boarding);
+          }
+      );
+    } else if (name == '미탑승') {
+      countSection = StreamBuilder<QuerySnapshot>(
+          stream: Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('Children')
+              .where('busNum', isEqualTo: carNum.toString())
+              .where('boardState', isEqualTo: 'unknown')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
+            unKnown = snapshot.data.documents.length;
+            return _countSectionContents(stateIcon, stateColor, name, unKnown);
+          }
+      );
+    } else {
+      countSection = StreamBuilder<QuerySnapshot>(
+          stream: Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('Children')
+              .where('busNum', isEqualTo: carNum.toString())
+              .where('boardState', isEqualTo: 'notboard')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
+            notBoarding = snapshot.data.documents.length;
+            return _countSectionContents(stateIcon, stateColor, name, notBoarding);
+          }
+      );
+    }
+    return countSection;
+  }
+
+  Widget _countSectionContents(Icon stateIcon, Color stateColor,
+      String name, int count){
     return Flexible(
       flex: 1,
       child: FlatButton(
@@ -166,7 +198,9 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                 child: stateIcon,
               ),
             ),
-            Text(name+ " "+count.toString()+"명"),
+            Text(
+              name+ " "+count.toString()+"명",
+            ),
           ],
         ),
       ),
@@ -215,17 +249,17 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
 
   Widget _buildBoardMember() {
     return StreamBuilder(
-        stream:  Firestore.instance
-            .collection('Kindergarden')
-            .document('hamang')
-            .collection('Children')
-            .where('busNum', isEqualTo: carNum.toString())
-            .where('boardState', isEqualTo: boardingState)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return LinearProgressIndicator();
-          return _buildMemberList(context, snapshot.data.documents);
-        }
+      stream:  Firestore.instance
+          .collection('Kindergarden')
+          .document('hamang')
+          .collection('Children')
+          .where('busNum', isEqualTo: carNum.toString())
+          .where('boardState', isEqualTo: boardingState)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return LinearProgressIndicator();
+        return _buildMemberList(context, snapshot.data.documents);
+      }
     );
   }
 
