@@ -10,7 +10,9 @@ import 'package:intl/intl.dart';
 
 class TeacherBusScreen extends StatefulWidget {
   final int carNum;
+
   TeacherBusScreen({Key key, this.carNum}): super(key: key);
+
   @override
   _TeacherBusScreenState createState() => _TeacherBusScreenState(carNum: carNum);
 }
@@ -20,6 +22,8 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   _TeacherBusScreenState({this.carNum});
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
+  int limitDistance;
   String boardingState = "board";
   String boardingStateTitle = "현재 탑승 명단";
   int boarding;
@@ -29,9 +33,6 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   @override
   void initState() {
     super.initState();
-    _getCount("board");
-    _getCount("unknown");
-    _getCount("notboard");
     flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
 
     var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
@@ -42,6 +43,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
   }
+
   Future onSelectNotification(String payload) {
     debugPrint("payload : $payload");
     showDialog(
@@ -52,7 +54,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
       ),
     );
   }
-  showNotification(String stateAlarm) async {
+  showNotification(int major, String stateAlarm) async {
     var android = new AndroidNotificationDetails(
         'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
         priority: Priority.High,importance: Importance.Max
@@ -60,29 +62,10 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
     var iOS = new IOSNotificationDetails();
     var platform = new NotificationDetails(android, iOS);
     await flutterLocalNotificationsPlugin.show(
-        0, '승하차 알림', stateAlarm, platform,
+        major, '승하차 알림', stateAlarm, platform,
         payload: stateAlarm);
   }
 
-  void _getCount(String boardingState) {
-    Firestore.instance
-        .collection('Kindergarden')
-        .document('hamang')
-        .collection('Children')
-        .where('busNum', isEqualTo: carNum.toString())
-        .where('boardState', isEqualTo: boardingState)
-        .snapshots().listen((data) {
-      setState(() {
-        if(boardingState == "board") {
-          boarding = data.documents.length;
-        } else if(boardingState == "unknown") {
-          unKnown = data.documents.length;
-        } else {
-          notBoarding = data.documents.length;
-        }
-      });
-    });
-  }
   void _setStateChanged(String boardStateName) {
     setState(() {
       if(boardStateName == '탑승중') {
@@ -140,15 +123,68 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
         padding: EdgeInsets.only(top: 5.0, right: 5.0, left: 5.0),
         child: Row(
           children: <Widget>[
-            _buildState(Icon(Icons.check_circle), Colors.green, "탑승중", boarding),
-            _buildState(Icon(Icons.cancel), Colors.red, "미탑승", unKnown),
-            _buildState(Icon(Icons.error), Colors.orange, "개인이동", notBoarding),
+            _buildState(Icon(Icons.check_circle), Colors.green, "탑승중"),
+            _buildState(Icon(Icons.cancel), Colors.red, "미탑승"),
+            _buildState(Icon(Icons.error), Colors.orange, "개인이동"),
           ],
         )
     );
   }
 
-  Widget _buildState(Icon stateIcon, Color stateColor, String name, int count){
+  Widget _buildState(Icon stateIcon, Color stateColor, String name) {
+    Widget countSection;
+    if (name == "탑승중") {
+      countSection = StreamBuilder<QuerySnapshot>(
+          stream: Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('Children')
+              .where('busNum', isEqualTo: carNum.toString())
+              .where('boardState', isEqualTo: 'board')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
+            boarding = snapshot.data.documents.length;
+            return _countSectionContents(
+                stateIcon, stateColor, name, boarding);
+          }
+      );
+    } else if (name == '미탑승') {
+      countSection = StreamBuilder<QuerySnapshot>(
+          stream: Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('Children')
+              .where('busNum', isEqualTo: carNum.toString())
+              .where('boardState', isEqualTo: 'unknown')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
+            unKnown = snapshot.data.documents.length;
+            return _countSectionContents(stateIcon, stateColor, name, unKnown);
+          }
+      );
+    } else {
+      countSection = StreamBuilder<QuerySnapshot>(
+          stream: Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('Children')
+              .where('busNum', isEqualTo: carNum.toString())
+              .where('boardState', isEqualTo: 'notboard')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
+            notBoarding = snapshot.data.documents.length;
+            return _countSectionContents(stateIcon, stateColor, name, notBoarding);
+          }
+      );
+    }
+    return countSection;
+  }
+
+  Widget _countSectionContents(Icon stateIcon, Color stateColor,
+      String name, int count){
     return Flexible(
       flex: 1,
       child: FlatButton(
@@ -166,7 +202,9 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                 child: stateIcon,
               ),
             ),
-            Text(name+ " "+count.toString()+"명"),
+            Text(
+              name+ " "+count.toString()+"명",
+            ),
           ],
         ),
       ),
@@ -273,7 +311,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                   ],
                 ),
                 onPressed: () {
-                  _changeState(children.id, children.name, children.boardState);
+                  _changeState(children.id, int.parse(children.beaconMajor), children.name, children.boardState);
                 },
               ),
             ),
@@ -345,7 +383,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
     );
   }
 
-  void _changeStateSave(String id, String name, String currentState, String state) {
+  void _changeStateSave(String id, int major, String name, String currentState, String state) {
     if (currentState != state) {
       Firestore.instance
           .collection('Kindergarden')
@@ -358,17 +396,17 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
             .toString(),
       });
       if (state == 'board') {
-        showNotification(name + '이 승차했습니다.');
+        showNotification(major, name + '이 승차했습니다.');
       } else if (state == 'notboard') {
-        showNotification(name + '이 개인이동 합니다.');
+        showNotification(major, name + '이 개인이동 합니다.');
       } else {
-        showNotification(name + '이 하차했습니다.');
+        showNotification(major, name + '이 하차했습니다.');
       }
     }
     Navigator.of(context).pop();
   }
 
-  void _changeState(String id, String name, String currentState) {
+  void _changeState(String id, int major, String name, String currentState) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -406,7 +444,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                 ],
               ),
               onPressed: () {
-                _changeStateSave(id, name, currentState, 'board');
+                _changeStateSave(id, major, name, currentState, 'board');
               },
             ),
             CupertinoButton(
@@ -434,7 +472,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                 ],
               ),
               onPressed: () {
-                _changeStateSave(id, name, currentState, 'unknown');
+                _changeStateSave(id, major, name, currentState, 'unknown');
               },
             ),
             CupertinoButton(
@@ -462,7 +500,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                 ],
               ),
               onPressed: () {
-                _changeStateSave(id, name, currentState, 'notboard');
+                _changeStateSave(id, major, name, currentState, 'notboard');
               },
             ),
           ],

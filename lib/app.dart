@@ -7,6 +7,7 @@ import 'package:beacon_bus/screens/parent/parent_home_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_log_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:beacon_bus/screens/beacon/beacon_screen.dart';
+
 class BeaconBusApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -25,7 +26,7 @@ class BeaconBusApp extends StatelessWidget {
               '/parent': (context) => ParentHomeScreen(),
               '/teacher': (context) => TeacherHomeScreen(),
               '/teacherlog': (context) => TeacherLogScreen(),
-              '/beacon':(context)=>BeaconScreen(),
+              '/beacon':(context) => BeaconScreen(),
             },
           ),
         ),

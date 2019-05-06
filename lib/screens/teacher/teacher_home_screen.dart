@@ -14,6 +14,7 @@ class TeacherHomeScreen extends StatefulWidget {
 }
 
 class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
+
   String dropdownValue;
   String teacherName;
   String className;
@@ -39,14 +40,10 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             child: Flex(
               direction: Axis.vertical,
               children: <Widget>[
-                SizedBox(
-                  height: 10.0,
-                ),
+                SizedBox(height: 10.0,),
                 _teacherName(bloc),
                 _buildReadMe(),
-                SizedBox(
-                  height: 10.0,
-                ),
+                SizedBox(height: 10.0,),
                 _buildDropdownButton(tbloc),
                 _buildButton(context, carNum),
               ],
@@ -72,7 +69,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       backgroundColor: Color(0xFFC9EBF7),
     );
   }
-
   Widget _buildDrawer(LoginBloc bloc) {
     return Column(
       children: <Widget>[
@@ -83,7 +79,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       ],
     );
   }
-
   Widget _buildUserAccounts(LoginBloc bloc) {
     return Container(
       height: 200.0,
@@ -93,12 +88,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         ),
         margin: EdgeInsets.all(0.0),
         accountName: StreamBuilder<DocumentSnapshot>(
-            stream: Firestore.instance
-                .collection('Kindergarden')
-                .document('hamang')
-                .collection('Users')
-                .document(uid)
-                .snapshots(),
+            stream: Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(uid).snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return Text(" ");
               String name = snapshot.data.data['name'];
@@ -109,14 +99,10 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               );
-            }),
+            }
+        ),
         accountEmail: StreamBuilder<DocumentSnapshot>(
-            stream: Firestore.instance
-                .collection('Kindergarden')
-                .document('hamang')
-                .collection('Users')
-                .document(uid)
-                .snapshots(),
+            stream: Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(uid).snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return Text(" ");
               String classroom = snapshot.data.data['class'];
@@ -126,7 +112,9 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   fontSize: 14.0,
                 ),
               );
-            }),
+            }
+        ),
+
         currentAccountPicture: CircleAvatar(
           backgroundColor: Colors.white,
           child: Text(
@@ -136,7 +124,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       ),
     );
   }
-
   Widget _buildDrawerList(LoginBloc bloc) {
     return Expanded(
       child: Column(
@@ -148,8 +135,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            trailing: Icon(
-              Icons.navigate_next,
+            trailing: Icon(Icons.navigate_next,
             ),
             onTap: () {
               _buildActivityCheck(className);
@@ -170,13 +156,26 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             },
           ),
           _divider(),
+          ListTile(
+            title: Text(
+              "비콘 테스트",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            trailing: Icon(Icons.navigate_next),
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.pushNamed(context, '/beacon');
+            },
+          ),
+          _divider(),
         ],
       ),
     );
   }
-
   Widget _logoutDrawer(LoginBloc bloc) {
-    return ListTile(
+    return  ListTile(
       title: Text(
         "로그아웃",
         style: TextStyle(
@@ -188,7 +187,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       },
     );
   }
-
   void _buildActivityCheck(String className) {
     showDialog(
       context: context,
@@ -215,9 +213,8 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => TeacherActivityScreen(
-                            className: className,
-                          )),
+                      builder: (context) => TeacherActivityScreen(className: className,)
+                  ),
                 );
               },
             ),
@@ -255,7 +252,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           child: Padding(
             padding: EdgeInsets.all(5.0),
             child: Text(
-              bloc.prefs.getString(USER_NAME)+" 선생님",
+              bloc.prefs.getString(USER_NAME) + " 선생님",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20.0,
@@ -267,7 +264,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       ),
     );
   }
-
   Widget _buildReadMe() {
     return Flexible(
       flex: 1,
@@ -281,16 +277,11 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       ),
     );
   }
-
   Widget _buildDropdownButton(TeacherBloc bloc) {
-    return Flexible(
+    return  Flexible(
       flex: 1,
       child: StreamBuilder(
-          stream: Firestore.instance
-              .collection('Kindergarden')
-              .document('hamang')
-              .collection('Bus')
-              .snapshots(),
+          stream:  Firestore.instance.collection('Kindergarden').document('hamang').collection('Bus').snapshots(),
           builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (!snapshot.hasData) return LinearProgressIndicator();
 
@@ -305,20 +296,18 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 onChanged: (String value) {
                   setState(() {
                     dropdownValue = value;
-                    carNum =
-                        busList.indexWhere((num) => num.startsWith(value)) + 1;
+                    carNum = busList.indexWhere((num) => num.startsWith(value)) + 1;
                   });
                 },
-                items: busList
-                    .map((value) => DropdownMenuItem(
-                          value: value,
-                          child: Text(value),
-                        ))
-                    .toList(),
+                items: busList.map((value) => DropdownMenuItem(
+                  value: value,
+                  child: Text(value),
+                )).toList(),
                 hint: Text("운행 차량"),
               ),
             );
-          }),
+          }
+      ),
     );
   }
 
@@ -335,7 +324,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         ),
         color: Color(0xFFC9EBF7),
         onPressed: () {
-          if (carNum == null) {
+          if(carNum == null) {
             _selectCarNum();
           } else {
             _startCheck(carNum);
@@ -344,7 +333,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       ),
     );
   }
-
   void _selectCarNum() {
     showDialog(
       context: context,
@@ -374,7 +362,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       },
     );
   }
-
   void _startCheck(int carNum) {
     showDialog(
       context: context,
@@ -401,9 +388,8 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => TeacherBusScreen(
-                            carNum: carNum,
-                          )),
+                      builder: (context) => TeacherBusScreen(carNum: carNum,)
+                  ),
                 );
               },
             ),
@@ -429,8 +415,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         .collection('Kindergarden')
         .document('hamang')
         .collection('Bus')
-        .document(busNum.toString() + '호차')
-        .updateData({
+        .document(busNum.toString()+'호차').updateData({
       'teacher': teacherName,
     });
   }

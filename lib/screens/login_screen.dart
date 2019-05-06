@@ -1,7 +1,7 @@
-import 'package:beacon_bus/blocs/login/login_provider.dart';
-import 'package:beacon_bus/constants.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:beacon_bus/blocs/login/login_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:beacon_bus/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -20,9 +20,7 @@ class LoginScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: ListView(
         children: <Widget>[
-          SizedBox(
-            height: 200.0,
-          ),
+          SizedBox(height: 200.0,),
           Image.asset('images/background.JPG'),
           _emailField(bloc),
           _passwordField(bloc),
@@ -42,7 +40,8 @@ class LoginScreen extends StatelessWidget {
           decoration: InputDecoration(
               hintText: 'you@example.com',
               labelText: 'Email Address',
-              errorText: snapshot.error),
+              errorText: snapshot.error
+          ),
         );
       },
     );
@@ -75,7 +74,8 @@ class LoginScreen extends StatelessWidget {
               if (snapshot.hasData) {
                 bloc.submit();
               }
-            });
+            }
+        );
       },
     );
   }
@@ -88,11 +88,9 @@ class LoginScreen extends StatelessWidget {
       if (user != null) {
         String userType = bloc.prefs.getString(USER_TYPE);
         if (userType == "teacher") {
-          Navigator.pushNamedAndRemoveUntil(
-              context, '/beacon', (Route r) => false);
+          Navigator.pushNamedAndRemoveUntil(context, '/teacher', (Route r) => false);
         } else if (userType == "parent") {
-          Navigator.pushNamedAndRemoveUntil(
-              context, '/parent', (Route r) => false);
+          Navigator.pushNamedAndRemoveUntil(context, '/parent', (Route r) => false);
         }
       }
     });

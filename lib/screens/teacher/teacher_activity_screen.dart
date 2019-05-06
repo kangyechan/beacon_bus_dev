@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:beacon_bus/blocs/login/login_bloc.dart';
 import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
@@ -25,9 +24,9 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
-  String dropdownDistanceValue;
-  List<String> distanceList = ['10 M', '15 M', '20 M', '25 M', '30 M', '35 M', '40 M', '45 M', '50 M', '60 M', '70 M', '80 M', '90 M', '100 M'];
-  int activityDistance = 20;
+  String dropdownDistanceValue = '20 M';
+  int limitDistance = 20;
+  List<String> distanceList = ['5 M', '10 M', '15 M', '20 M', '25 M', '30 M'];
   String activityState = "in";
   String activityStateTitle = "현재 범위 내";
   int rangeIn;
@@ -36,8 +35,6 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
   @override
   void initState() {
     super.initState();
-    _getCount("in");
-    _getCount("out");
     flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
 
     var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
@@ -48,6 +45,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
   }
+
   Future onSelectNotification(String payload) {
     debugPrint("payload : $payload");
     showDialog(
@@ -58,7 +56,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
       ),
     );
   }
-  showNotification(String stateAlarm) async {
+  showNotification(int major, String stateAlarm) async {
     var android = new AndroidNotificationDetails(
         'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
         priority: Priority.High,importance: Importance.Max
@@ -66,26 +64,8 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
     var iOS = new IOSNotificationDetails();
     var platform = new NotificationDetails(android, iOS);
     await flutterLocalNotificationsPlugin.show(
-        0, '승하차 알림', stateAlarm, platform,
+        major, '승하차 알림', stateAlarm, platform,
         payload: stateAlarm);
-  }
-
-  void _getCount(String activityState) {
-    Firestore.instance
-        .collection('Kindergarden')
-        .document('hamang')
-        .collection('Children')
-        .where('classRoom', isEqualTo: className)
-        .where('activityState', isEqualTo: activityState)
-        .snapshots().listen((data) {
-      setState(() {
-        if(activityState == "in") {
-          rangeIn = data.documents.length;
-        } else {
-          rangeOut = data.documents.length;
-        }
-      });
-    });
   }
 
   void _setStateChanged(String boardStateName) {
@@ -145,15 +125,52 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
       padding: EdgeInsets.only(top: 5.0, right: 5.0, left: 5.0),
       child: Row(
         children: <Widget>[
-          _buildState(Icon(Icons.check_circle), Colors.green, "범위 내", rangeIn),
-          _buildState(Icon(Icons.cancel), Colors.red, "범위 밖", rangeOut),
+          _buildState(Icon(Icons.check_circle), Colors.green, "범위 내"),
+          _buildState(Icon(Icons.cancel), Colors.red, "범위 밖"),
           _buildDistanceButton(),
         ],
       ),
     );
   }
 
-  Widget _buildState(Icon stateIcon, Color stateColor, String name, int count){
+  Widget _buildState(Icon stateIcon, Color stateColor, String name) {
+    Widget countSection;
+    if (name == "범위 내") {
+      countSection = StreamBuilder<QuerySnapshot>(
+          stream: Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('Children')
+              .where('classRoom', isEqualTo: className)
+              .where('activityState', isEqualTo: 'in')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
+            rangeIn = snapshot.data.documents.length;
+            return _countSectionContents(stateIcon, stateColor, name, rangeIn);
+          }
+      );
+    } else {
+      countSection = StreamBuilder<QuerySnapshot>(
+          stream: Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('Children')
+              .where('classRoom', isEqualTo: className)
+              .where('activityState', isEqualTo: 'out')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
+            rangeOut = snapshot.data.documents.length;
+            return _countSectionContents(stateIcon, stateColor, name, rangeOut);
+          }
+      );
+    }
+    return countSection;
+  }
+
+  Widget _countSectionContents(Icon stateIcon, Color stateColor,
+      String name, int count){
     return Flexible(
       flex: 1,
       child: FlatButton(
@@ -189,6 +206,13 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
           onChanged: (String value) {
             setState(() {
               dropdownDistanceValue = value;
+              if(value.length == 3) {
+                limitDistance = int.parse(value.substring(0,1));
+                print(limitDistance);
+              } else {
+                limitDistance = int.parse(value.substring(0,2));
+                print(limitDistance);
+              }
             });
           },
           items: distanceList.map((value) => DropdownMenuItem(
@@ -301,7 +325,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
                   ],
                 ),
                 onPressed: () {
-                  _changeState(children.id, children.name, children.activityState);
+                  _changeState(children.id, int.parse(children.beaconMajor), children.name, children.activityState);
                 },
               ),
             ),
@@ -354,7 +378,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
     );
   }
 
-  void _changeStateSave(String id, String name, String currentState, String state) {
+  void _changeStateSave(String id, int major, String name, String currentState, String state) {
     if (currentState != state) {
       Firestore.instance
           .collection('Kindergarden')
@@ -367,15 +391,15 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
             .toString(),
       });
       if (state == 'in') {
-        showNotification(name + '이 범위 안에 들어왔습니다.');
+        showNotification(major, name + '이 범위 안에 들어왔습니다.');
       } else {
-        showNotification(name + '이 범위를 이탈했습니다.');
+        showNotification(major, name + '이 범위를 이탈했습니다.');
       }
     }
     Navigator.of(context).pop();
   }
 
-  void _changeState(String id, String name, String currentState) {
+  void _changeState(String id, int major, String name, String currentState) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -412,7 +436,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
                 ],
               ),
               onPressed: () {
-                _changeStateSave(id, name, currentState, 'in');
+                _changeStateSave(id, major, name, currentState, 'in');
               },
             ),
             CupertinoButton(
@@ -439,7 +463,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
                 ],
               ),
               onPressed: () {
-                _changeStateSave(id, name, currentState, 'out');
+                _changeStateSave(id, major, name, currentState, 'out');
               },
             ),
           ],
