@@ -23,7 +23,8 @@ dependencies:
   intl: ^0.15.7
   firebase_auth: 0.7.0
   cloud_firestore: 0.8.2+3
-  shared_preferences: 0.4.3
+  shared_preferences: ^0.5.2
+  flutter_local_notifications: ^0.3.9
 
 dev_dependencies:
   flutter_test:

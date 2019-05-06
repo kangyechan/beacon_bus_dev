@@ -9,6 +9,7 @@ class Children {
   final String classRoom;
   final String busNum;
   final String boardState;
+  final String activityState;
   final String changeStateTime;
 
   final String beaconUid;
@@ -26,6 +27,7 @@ class Children {
         assert(map['classRoom'] != null),
         assert(map['busNum'] != null),
         assert(map['boardState'] != null),
+        assert(map['activityState'] != null),
         assert(map['changeStateTime'] != null),
 
         assert(map['beaconUid'] != null),
@@ -40,6 +42,7 @@ class Children {
         classRoom = map['classRoom'],
         busNum = map['busNum'],
         boardState = map['boardState'],
+        activityState = map['activityState'],
         changeStateTime = map['changeStateTime'],
 
         beaconUid = map['beaconUid'],

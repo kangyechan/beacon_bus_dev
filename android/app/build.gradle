@@ -27,6 +27,12 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 android {
     compileSdkVersion 28
 
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.core:core:1.0.1'
+        }
+    }
+
     lintOptions {
         disable 'InvalidPackage'
     }

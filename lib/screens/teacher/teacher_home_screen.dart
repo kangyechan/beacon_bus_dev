@@ -16,7 +16,9 @@ class TeacherHomeScreen extends StatefulWidget {
 class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
 
   String dropdownValue;
+  String teacherName;
   String className;
+  String uid;
   int carNum;
 
   @override
@@ -24,6 +26,9 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     final tbloc = TeacherProvider.of(context);
     final bloc = LoginProvider.of(context);
     bloc.setContext(context);
+    uid = bloc.prefs.getString(USER_ID);
+    teacherName = bloc.prefs.getString(USER_NAME);
+    className = bloc.prefs.getString(USER_CLASS);
     return Scaffold(
       appBar: _buildAppbar(),
       drawer: Drawer(
@@ -68,7 +73,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     return Column(
       children: <Widget>[
         _buildUserAccounts(bloc),
-        _buildDrawerList(),
+        _buildDrawerList(bloc),
         _divider(),
         _logoutDrawer(bloc),
       ],
@@ -82,19 +87,34 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           color: Color(0xFFC9EBF7),
         ),
         margin: EdgeInsets.all(0.0),
-        accountName: Text(
-          bloc.prefs.getString(USER_NAME) + " 선생님",
-          style: TextStyle(
-            fontSize: 15.0,
-            fontWeight: FontWeight.bold,
-          ),
+        accountName: StreamBuilder<DocumentSnapshot>(
+            stream: Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(uid).snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return Text(" ");
+              String name = snapshot.data.data['name'];
+              return Text(
+                name + " 선생님",
+                style: TextStyle(
+                  fontSize: 15.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            }
         ),
-        accountEmail: Text(
-          SCHOOL_NAME +" "+ bloc.prefs.getString(USER_CLASS) + "반",
-          style: TextStyle(
-            fontSize: 14.0,
-          ),
+        accountEmail: StreamBuilder<DocumentSnapshot>(
+            stream: Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(uid).snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return Text(" ");
+              String classroom = snapshot.data.data['class'];
+              return Text(
+                SCHOOL_NAME + " " + classroom + "반",
+                style: TextStyle(
+                  fontSize: 14.0,
+                ),
+              );
+            }
         ),
+
         currentAccountPicture: CircleAvatar(
           backgroundColor: Colors.white,
           child: Text(
@@ -104,7 +124,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       ),
     );
   }
-  Widget _buildDrawerList() {
+  Widget _buildDrawerList(LoginBloc bloc) {
     return Expanded(
       child: Column(
         children: <Widget>[
@@ -118,7 +138,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             trailing: Icon(Icons.navigate_next,
             ),
             onTap: () {
-              _buildActivityCheck();
+              _buildActivityCheck(className);
             },
           ),
           _divider(),
@@ -133,20 +153,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             onTap: () {
               Navigator.of(context).pop();
               Navigator.pushNamed(context, '/teacherlog');
-            },
-          ),
-          _divider(),
-          ListTile(
-            title: Text(
-              "알람 테스트",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            trailing: Icon(Icons.navigate_next),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.pushNamed(context, '/notification');
             },
           ),
           _divider(),
@@ -167,25 +173,24 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       },
     );
   }
-  void _buildActivityCheck() {
+  void _buildActivityCheck(String className) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return CupertinoAlertDialog(
           title: Text(
-            "야외활동 신호측정",
+            "활동 시작",
             style: TextStyle(
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("야외활동 신호측정을 시작하시겠습니까?"),
+          content: Text(className + "반 야외활동을 시작하시겠습니까?"),
           actions: <Widget>[
-            FlatButton(
+            CupertinoButton(
               child: Text(
                 "확인",
                 style: TextStyle(
                   color: Color(0xFF1EA8E0),
-                  fontWeight: FontWeight.bold,
                 ),
               ),
               onPressed: () {
@@ -199,12 +204,11 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 );
               },
             ),
-            FlatButton(
+            CupertinoButton(
               child: Text(
                 "취소",
                 style: TextStyle(
                   color: Color(0xFF1EA8E0),
-                  fontWeight: FontWeight.bold,
                 ),
               ),
               onPressed: () {
@@ -365,6 +369,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 ),
               ),
               onPressed: () {
+                _setBusTeacherName(teacherName, carNum);
                 Navigator.of(context).pop();
                 Navigator.push(
                   context,
@@ -389,6 +394,16 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         );
       },
     );
+  }
+
+  _setBusTeacherName(String teacherName, int busNum) {
+    Firestore.instance
+        .collection('Kindergarden')
+        .document('hamang')
+        .collection('Bus')
+        .document(busNum.toString()+'호차').updateData({
+      'teacher': teacherName,
+    });
   }
 
   Widget _buildBackground() {

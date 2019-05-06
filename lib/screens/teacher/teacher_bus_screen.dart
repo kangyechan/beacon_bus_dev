@@ -5,6 +5,7 @@ import 'package:beacon_bus/models/children.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 
 class TeacherBusScreen extends StatefulWidget {
@@ -18,7 +19,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   final int carNum;
   _TeacherBusScreenState({this.carNum});
 
-
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   String boardingState = "board";
   String boardingStateTitle = "현재 탑승 명단";
   int boarding;
@@ -31,7 +32,36 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
     _getCount("board");
     _getCount("unknown");
     _getCount("notboard");
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
 
+    var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
+    var initializationSettingsIOS = new IOSInitializationSettings();
+    var initializationSettings = new InitializationSettings(
+        initializationSettingsAndroid, initializationSettingsIOS);
+
+    flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        selectNotification: onSelectNotification);
+  }
+  Future onSelectNotification(String payload) {
+    debugPrint("payload : $payload");
+    showDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text('승하차 알림'),
+        content: Text('$payload'),
+      ),
+    );
+  }
+  showNotification(String stateAlarm) async {
+    var android = new AndroidNotificationDetails(
+        'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
+        priority: Priority.High,importance: Importance.Max
+    );
+    var iOS = new IOSNotificationDetails();
+    var platform = new NotificationDetails(android, iOS);
+    await flutterLocalNotificationsPlugin.show(
+        0, '승하차 알림', stateAlarm, platform,
+        payload: stateAlarm);
   }
 
   void _getCount(String boardingState) {
@@ -243,7 +273,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                   ],
                 ),
                 onPressed: () {
-                  _changeState(children.id, children.boardState);
+                  _changeState(children.id, children.name, children.boardState);
                 },
               ),
             ),
@@ -315,7 +345,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
     );
   }
 
-  void _changeStateSave(String id, String currentState, String state) {
+  void _changeStateSave(String id, String name, String currentState, String state) {
     if (currentState != state) {
       Firestore.instance
           .collection('Kindergarden')
@@ -327,11 +357,18 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
             .format(DateTime.now())
             .toString(),
       });
+      if (state == 'board') {
+        showNotification(name + '이 승차했습니다.');
+      } else if (state == 'notboard') {
+        showNotification(name + '이 개인이동 합니다.');
+      } else {
+        showNotification(name + '이 하차했습니다.');
+      }
     }
     Navigator.of(context).pop();
   }
 
-  void _changeState(String id, String currentState) {
+  void _changeState(String id, String name, String currentState) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -369,7 +406,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                 ],
               ),
               onPressed: () {
-                _changeStateSave(id, currentState, 'board');
+                _changeStateSave(id, name, currentState, 'board');
               },
             ),
             CupertinoButton(
@@ -397,7 +434,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                 ],
               ),
               onPressed: () {
-                _changeStateSave(id, currentState, 'unknown');
+                _changeStateSave(id, name, currentState, 'unknown');
               },
             ),
             CupertinoButton(
@@ -425,7 +462,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                 ],
               ),
               onPressed: () {
-                _changeStateSave(id, currentState, 'notboard');
+                _changeStateSave(id, name, currentState, 'notboard');
               },
             ),
           ],
@@ -535,6 +572,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                 ),
               ),
               onPressed: () {
+                _setBusTeacherName("", carNum);
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
@@ -554,5 +592,15 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
         );
       },
     );
+  }
+
+  _setBusTeacherName(String teacherName, int busNum) {
+    Firestore.instance
+        .collection('Kindergarden')
+        .document('hamang')
+        .collection('Bus')
+        .document(busNum.toString()+'호차').updateData({
+      'teacher': teacherName,
+    });
   }
 }
