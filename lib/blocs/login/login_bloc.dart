@@ -37,6 +37,13 @@ class LoginBloc extends Object with LoginValidators {
         .then((FirebaseUser user) {
       Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(user.uid).get().then((snapshot) {
         String userType = snapshot.data['type'];
+        String userName = snapshot.data['name'];
+        String userClass = snapshot.data['class'];
+        String childId = snapshot.data['childId'];
+        prefs.setString(USER_NAME, userName);
+        prefs.setString(USER_CLASS, userClass);
+        prefs.setString(USER_ID, user.uid);
+        prefs.setString(CHILD_ID, childId);
           if (userType == "parent") {
             prefs.setString(USER_TYPE, 'parent');
             Navigator.pushNamedAndRemoveUntil(_context, '/login', (Route r) => false);
@@ -61,6 +68,10 @@ class LoginBloc extends Object with LoginValidators {
     _auth.signOut().then((done) {
       Navigator.pushNamedAndRemoveUntil(_context, '/login', (Route r) => false);
       prefs.setString(USER_TYPE, "");
+      prefs.setString(USER_NAME, "");
+      prefs.setString(USER_CLASS, "");
+      prefs.setString(CHILD_ID, "");
+      prefs.setString(USER_ID, "");
     });
   }
 

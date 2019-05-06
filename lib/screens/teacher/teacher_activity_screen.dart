@@ -1,12 +1,387 @@
+import 'dart:async';
+
+import 'package:beacon_bus/blocs/login/login_bloc.dart';
+import 'package:beacon_bus/blocs/login/login_provider.dart';
+import 'package:beacon_bus/constants.dart';
 import 'package:flutter/material.dart';
 
-class TeacherActivityScreen extends StatelessWidget {
+class TeacherActivityScreen extends StatefulWidget {
+  final String className;
+
+  TeacherActivityScreen({Key key, this.className}) : super(key: key);
+
+  @override
+  _TeacherActivityScreenState createState() => _TeacherActivityScreenState(className: className);
+}
+
+class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
+  final String className;
+  _TeacherActivityScreenState({this.className});
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text("야외활동"),
+    final bloc = LoginProvider.of(context);
+    bloc.setContext(context);
+
+    return WillPopScope(
+      child: Scaffold(
+        appBar: _buildAppbar(),
+        body: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Flex(
+            direction: Axis.vertical,
+            children: <Widget>[
+              _buildModeSection(bloc),
+              _buildStateSection(),
+              _buildStateCount(),
+              _buildBoardSection(),
+              _buildEndBoard(),
+            ],
+          ),
+        ),
+      ),
+      onWillPop: () {
+        return Future(() => false);
+      },
+    );
+  }
+  Widget _buildAppbar() {
+    return AppBar(
+      title: Text(
+        SCHOOL_NAME,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      centerTitle: true,
+      automaticallyImplyLeading: false,
+      backgroundColor: Colors.yellow,
+    );
+  }
+
+  Widget _buildModeSection(LoginBloc bloc) {
+    return Container(
+      padding: EdgeInsets.only(bottom: 5.0),
+      child: Text(
+        "야외활동 " + bloc.prefs.getString(USER_CLASS) + "반",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
+  Widget _buildStateSection() {
+    return Padding(
+      padding: EdgeInsets.all(5.0),
+      child: Row(
+        children: <Widget>[
+          _buildState(Icon(Icons.check_circle), Colors.green, "범위 내"),
+          _buildState(Icon(Icons.cancel), Colors.red, "범위 밖"),
+        ],
+      ),
+    );
+  }
+  Widget _buildState(Icon stateIcon, Color stateColor, String name){
+    return Flexible(
+      flex: 1,
+      child: Flex(
+        direction: Axis.horizontal,
+        children: <Widget>[
+          Expanded(
+            child: IconTheme(
+              data: IconThemeData(
+                color: stateColor,
+              ),
+              child: stateIcon,
+            ),
+          ),
+          Expanded(
+            child: Text(name),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildTitleSection(double width, String title) {
+    return Container(
+      width: width,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.yellow,
+            width: 2.0,
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(10.0),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20.0,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+  Widget _buildBoardSection() {
+    return Flexible(
+      flex: 3,
+      child: Flex(
+        direction: Axis.vertical,
+        children: <Widget>[
+          _buildTitleSection(200.0, "현재 위치 상태"),
+          Flexible(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 60.0),
+              child: ListView(
+                children: <Widget>[
+                  ListTile(
+                    title: Text("김영희"),
+                    trailing: IconTheme(
+                      data: IconThemeData(
+                        color: Colors.red,
+                      ),
+                      child: Icon(
+                        Icons.cancel,
+                      ),
+                    ),
+                    onTap: () {
+                      print("name tap");
+                    },
+                  ),
+                  _divider(),
+                  ListTile(
+                    title: Text("송강호"),
+                    trailing: IconTheme(
+                      data: IconThemeData(
+                        color: Colors.green,
+                      ),
+                      child: Icon(
+                        Icons.check_circle,
+                      ),
+                    ),
+                    onTap: () {
+                      print("name tap");
+                    },
+                  ),
+                  _divider(),
+                  ListTile(
+                    title: Text("류승룡"),
+                    trailing: IconTheme(
+                      data: IconThemeData(
+                        color: Colors.green,
+                      ),
+                      child: Icon(
+                        Icons.check_circle,
+                      ),
+                    ),
+                    onTap: () {
+                      print("name tap");
+                    },
+                  ),
+                  _divider(),
+                  ListTile(
+                    title: Text("류승범"),
+                    trailing: IconTheme(
+                      data: IconThemeData(
+                        color: Colors.green,
+                      ),
+                      child: Icon(
+                        Icons.check_circle,
+                      ),
+                    ),
+                    onTap: () {
+                      print("name tap");
+                    },
+                  ),
+                  _divider(),
+                  ListTile(
+                    title: Text("이하늬"),
+                    trailing: IconTheme(
+                      data: IconThemeData(
+                        color: Colors.green,
+                      ),
+                      child: Icon(
+                        Icons.check_circle,
+                      ),
+                    ),
+                    onTap: () {
+                      print("name tap");
+                    },
+                  ),
+                  _divider(),
+                  ListTile(
+                    title: Text("이동희"),
+                    trailing: IconTheme(
+                      data: IconThemeData(
+                        color: Colors.green,
+                      ),
+                      child: Icon(
+                        Icons.check_circle,
+                      ),
+                    ),
+                    onTap: () {
+                      print("name tap");
+                    },
+                  ),
+                  _divider(),
+                  ListTile(
+                    title: Text("정우성"),
+                    trailing: IconTheme(
+                      data: IconThemeData(
+                        color: Colors.green,
+                      ),
+                      child: Icon(
+                        Icons.check_circle,
+                      ),
+                    ),
+                    onTap: () {
+                      print("name tap");
+                    },
+                  ),
+                  _divider(),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildStateCount() {
+    return Row(
+      children: <Widget>[
+        Flexible(
+          child:
+          Center(
+            child: Text("6명",
+              style: TextStyle(fontSize: 12.0),
+            ),
+
+          ),
+        ),
+        Flexible(
+          child: Center(
+            child: Text("1명",
+              style: TextStyle(fontSize: 12.0),),
+          ),
+
+        ),
+      ],
+    );
+  }
+  Widget _buildEndBoard() {
+    return Padding(
+      padding: EdgeInsets.all(10.0),
+      child: FlatButton(
+        padding: EdgeInsets.all(10.0),
+        color: Colors.yellow,
+        child: Text(
+          "활동 종료",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        onPressed: () {
+          _showCheckDialog();
+        },
+      ),
+    );
+  }
+  void _showCheckDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "활동 종료",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text("모든 학생의 상태를 확인하셨나요?"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(
+                "확인완료",
+                style: TextStyle(
+                  color: Colors.amber,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showCloseDialog();
+              },
+            ),
+            FlatButton(
+              child: Text(
+                "아니오",
+                style: TextStyle(
+                  color: Colors.amber,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _showCloseDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "활동 종료",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text("활동을 정말 종료하시겠습니까?"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(
+                "활동 종료",
+                style: TextStyle(
+                  color: Colors.amber,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text(
+                "취소",
+                style: TextStyle(
+                  color: Colors.amber,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _divider() {
+    return Divider(
+      height: 1.0,
+    );
+  }
+
 }

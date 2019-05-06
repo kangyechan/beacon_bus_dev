@@ -1,9 +1,10 @@
 import 'package:beacon_bus/blocs/parent/parent_provider.dart';
-import 'package:beacon_bus/blocs/parent/widgets/board_schedule_list_item.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'board_schedule_list_item.dart';
 
 class BoardScheduleList extends StatelessWidget {
   @override

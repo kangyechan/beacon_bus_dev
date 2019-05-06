@@ -2,14 +2,17 @@ import 'dart:async';
 
 import 'package:beacon_bus/blocs/parent/parent_date_helpers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ParentBloc extends Object with ParentDateHelpers {
 
+  SharedPreferences prefs;
   Future<FirebaseUser> get user => FirebaseAuth.instance.currentUser();
+
+  ParentBloc() {
+    loadSharedPrefs();
+  }
 
   void changeBoardingStatus(String selectedDate) async {
     FirebaseUser currentUser = await user;
@@ -27,5 +30,9 @@ class ParentBloc extends Object with ParentDateHelpers {
         'notBoardingDateList': notBoardingDateList,
       }, merge: true);
     });
+  }
+
+  loadSharedPrefs() async {
+    prefs = await SharedPreferences.getInstance();
   }
 }

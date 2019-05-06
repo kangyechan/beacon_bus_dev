@@ -1,7 +1,7 @@
+import 'package:beacon_bus/screens/parent/widgets/board_schedule_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:beacon_bus/blocs/parent/parent_provider.dart';
-import '../../blocs/parent/widgets/board_schedule_list.dart';
 
 
 class BoardYesOrNoScreen extends StatelessWidget {
