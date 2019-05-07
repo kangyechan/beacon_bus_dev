@@ -4,8 +4,8 @@ import 'package:beacon_bus/blocs/teacher/teacher_provider.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/screens/teacher/teacher_activity_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_bus_screen.dart';
-import 'package:beacon_bus/screens/teacher/teacher_log_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +19,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   String dropdownValue;
   String teacherName;
   String className;
-  String uid;
   int carNum;
 
   @override
@@ -27,7 +26,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     final tbloc = TeacherProvider.of(context);
     final bloc = LoginProvider.of(context);
     bloc.setContext(context);
-    uid = bloc.prefs.getString(USER_ID);
     teacherName = bloc.prefs.getString(USER_NAME);
     className = bloc.prefs.getString(USER_CLASS);
     return Scaffold(
@@ -83,45 +81,52 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   Widget _buildUserAccounts(LoginBloc bloc) {
     return Container(
       height: 200.0,
-      child: UserAccountsDrawerHeader(
-        decoration: BoxDecoration(
-          color: Color(0xFFC9EBF7),
-        ),
-        margin: EdgeInsets.all(0.0),
-        accountName: StreamBuilder<DocumentSnapshot>(
-            stream: Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(uid).snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return Text(" ");
-              String name = snapshot.data.data['name'];
-              return Text(
-                name + " 선생님",
-                style: TextStyle(
-                  fontSize: 15.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              );
-            }
-        ),
-        accountEmail: StreamBuilder<DocumentSnapshot>(
-            stream: Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(uid).snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return Text(" ");
-              String classroom = snapshot.data.data['class'];
-              return Text(
-                SCHOOL_NAME + " " + classroom + "반",
-                style: TextStyle(
-                  fontSize: 14.0,
-                ),
-              );
-            }
-        ),
+      child: FutureBuilder<FirebaseUser>(
+        future: bloc.currentUser,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return LinearProgressIndicator();
+          FirebaseUser user = snapshot.data;
+          return UserAccountsDrawerHeader(
+            decoration: BoxDecoration(
+              color: Color(0xFFC9EBF7),
+            ),
+            margin: EdgeInsets.all(0.0),
+            accountName: StreamBuilder<DocumentSnapshot>(
+                stream: Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(user.uid).snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return Text(" ");
+                  String name = snapshot.data.data['name'];
+                  return Text(
+                    name + " 선생님",
+                    style: TextStyle(
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  );
+                }
+            ),
+            accountEmail: StreamBuilder<DocumentSnapshot>(
+                stream: Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(user.uid).snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return Text(" ");
+                  String classroom = snapshot.data.data['class'];
+                  return Text(
+                    SCHOOL_NAME + " " + classroom + "반",
+                    style: TextStyle(
+                      fontSize: 14.0,
+                    ),
+                  );
+                }
+            ),
 
-        currentAccountPicture: CircleAvatar(
-          backgroundColor: Colors.white,
-          child: Text(
-            "T",
-          ),
-        ),
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Text(
+                "T",
+              ),
+            ),
+          );
+        }
       ),
     );
   }

@@ -25,35 +25,38 @@ class _TeacherBusLogScreenState extends State<TeacherBusLogScreen> {
   }
 
   Widget _buildSearchNum() {
-    return FutureBuilder(
-      future: Firestore.instance.collection('Kindergarden').document('hamang').collection('Bus').getDocuments(),
-      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (!snapshot.hasData) return LinearProgressIndicator();
+    return Container(
+      width: 70.0,
+      child: FutureBuilder(
+        future: Firestore.instance.collection('Kindergarden').document('hamang').collection('Bus').getDocuments(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) return LinearProgressIndicator();
 
-        List<String> busList = ['전체'];
-        snapshot.data.documents.map((DocumentSnapshot document) {
-          busList.add(document.documentID.toString());
-        }).toList();
+          List<String> busList = ['전체'];
+          snapshot.data.documents.map((DocumentSnapshot document) {
+            busList.add(document.documentID.toString());
+          }).toList();
 
-        return Container(
-          margin: EdgeInsets.only(top: 10.0),
-          child: DropdownButton(
-            value: dropdownValue,
-            onChanged: (String value) {
-              setState(() {
-                dropdownValue = value;
-                if(value == '전체') { busNum = null; }
-                else { busNum = busList.indexWhere((num) => num.startsWith(value)).toString(); }
-              });
-            },
-            items: busList.map((value) => DropdownMenuItem(
-              value: value,
-              child: Text(value),
-            )).toList(),
-            hint: Text("전체"),
-          ),
-        );
-      },
+          return Container(
+            margin: EdgeInsets.only(top: 10.0),
+            child: DropdownButton(
+              value: dropdownValue,
+              onChanged: (String value) {
+                setState(() {
+                  dropdownValue = value;
+                  if(value == '전체') { busNum = null; }
+                  else { busNum = busList.indexWhere((num) => num.startsWith(value)).toString(); }
+                });
+              },
+              items: busList.map((value) => DropdownMenuItem(
+                value: value,
+                child: Text(value),
+              )).toList(),
+              hint: Text("전체"),
+            ),
+          );
+        },
+      ),
     );
   }
   Widget _buildSearchButton() {
@@ -105,7 +108,7 @@ class _TeacherBusLogScreenState extends State<TeacherBusLogScreen> {
   }
   Widget _buildListTitle() {
     return Container(
-      padding: EdgeInsets.only(bottom: 10.0),
+      padding: EdgeInsets.only(bottom: 10.0, left: 20.0, right: 20.0),
       child: Row(
         children: <Widget>[
           _buildListTitleName('이름'),
@@ -132,7 +135,7 @@ class _TeacherBusLogScreenState extends State<TeacherBusLogScreen> {
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance.collection('Kindergarden')
           .document('hamang')
-          .collection('Children')
+          .collection('Log')
           .where('name', isEqualTo: searchText)
           .where('busNum', isEqualTo: busNum)
           .snapshots(),
@@ -147,20 +150,34 @@ class _TeacherBusLogScreenState extends State<TeacherBusLogScreen> {
 
   Widget _logListContents(BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView(
-      padding: EdgeInsets.only(top:10.0, left: 20.0, right: 20.0),
+      padding: EdgeInsets.only(top:5.0, left: 20.0, right: 20.0),
       children: snapshot.map((data) => _logListItem(context, data)).toList(),
     );
   }
 
   Widget _logListItem(BuildContext context, DocumentSnapshot data) {
-    final children = Children.fromSnapshot(data);
+    String name = data.data['name'];
+    Map map = Map.from(data.data['boardRecord']);
     return Container(
+      padding: EdgeInsets.all(10.0),
       child: Row(
         children: <Widget>[
-          Text(children.name),
-          Text(children.busNum),
-          Text(children.classRoom),
+          _buildLogListItem(name),
+          _buildLogListItem(map['date']),
+          _buildLogListItem(map['board']),
+          _buildLogListItem(map['unknown']),
         ],
+      ),
+    );
+  }
+  Widget _buildLogListItem(String name) {
+    return Expanded(
+      child: Text(
+        name,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 12.0,
+        ),
       ),
     );
   }

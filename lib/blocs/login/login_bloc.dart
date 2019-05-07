@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
 import 'package:beacon_bus/blocs/login/login_validators.dart';
@@ -12,22 +14,27 @@ class LoginBloc extends Object with LoginValidators {
   BuildContext _context;
   SharedPreferences prefs;
 
+
+  LoginBloc() {
+    loadSharedPrefs();
+    getCurrentUserAndSetChildId();
+  }
+
+  Future<FirebaseUser> get currentUser => FirebaseAuth.instance.currentUser();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final _email = BehaviorSubject<String>();
   final _password = BehaviorSubject<String>();
-
-
-  LoginBloc() {
-    loadSharedPrefs();
-  }
+  final _childId = BehaviorSubject<String>();
 
   Observable<String> get email => _email.stream.transform(validateEmail);
   Observable<String> get password => _password.stream.transform(validatePassword);
   Observable<String> get submitValid => Observable.combineLatest2(email, password, (e, p) => "" + e + p);
+  Observable<String> get childId => _childId.stream;
 
   Function(String) get changeEmail => _email.sink.add;
   Function(String) get changePassword => _password.sink.add;
+  Function(String) get setChildId => _childId.sink.add;
 
   submit() {
     final validEmail = _email.value;
@@ -70,6 +77,15 @@ class LoginBloc extends Object with LoginValidators {
       prefs.setString(USER_TYPE, "");
       prefs.setString(USER_NAME, "");
       prefs.setString(USER_CLASS, "");
+    });
+  }
+
+  getCurrentUserAndSetChildId() async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    // childId를 가져와서 Stream에 넣는다..
+    Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(user.uid).get().then((documentSnapshot) {
+      String childId = documentSnapshot.data['childId'];
+      setChildId(childId);
     });
   }
 

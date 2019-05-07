@@ -15,7 +15,6 @@ class Children {
   final String beaconUid;
   final String beaconMajor;
   final String beaconMinor;
-  final int distance;
 
   final DocumentReference reference;
 
@@ -34,7 +33,6 @@ class Children {
         assert(map['beaconUid'] != null),
         assert(map['beaconMajor'] != null),
         assert(map['beaconMinor'] != null),
-        assert(map['distance'] != null),
 
         id = map['id'],
         phoneNumber = map['phoneNumber'],
@@ -49,8 +47,7 @@ class Children {
 
         beaconUid = map['beaconUid'],
         beaconMajor = map['beaconMajor'],
-        beaconMinor = map['beaconMinor'],
-        distance = map['distance'];
+        beaconMinor = map['beaconMinor'];
 
   Children.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);
