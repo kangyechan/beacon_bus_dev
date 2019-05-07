@@ -60,20 +60,20 @@ class _HeaderState extends State<Header> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: EdgeInsets.all(8.0),
       child: Column(
         children: <Widget>[
-          new Form(
+          Form(
             key: _formKey,
             child: _formType == FormType.generic
-                ? new _FormGeneric(
+                ? _FormGeneric(
               running: widget.running,
             )
-                : new _FormIBeacon(
+                : _FormIBeacon(
               running: widget.running,
             ),
           ),
-          new _Button(
+          _Button(
             running: widget.running,
             onTap: _onTapSubmit,
           ),
@@ -94,21 +94,15 @@ class _Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6.0),
-      child: new GestureDetector(
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 6.0),
+      child: GestureDetector(
         onTap: onTap,
-        child: new Container(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
-          decoration: new BoxDecoration(
-            color: running ? Colors.deepOrange : Colors.teal,
-            borderRadius: new BorderRadius.all(
-              new Radius.circular(6.0),
-            ),
-          ),
-          child: new Text(
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
+          child: Text(
             running ? 'Stop' : 'Start',
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white),
           ),
         ),
       ),

@@ -45,7 +45,7 @@ class _BeaconScreenState extends State<BeaconScreen> {
 
   Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView(
-      padding: const EdgeInsets.only(top: 20.0),
+      padding: EdgeInsets.only(top: 20.0),
       children: snapshot.map((data) => _buildListItem(context, data)).toList(),
     );
   }
@@ -54,7 +54,7 @@ class _BeaconScreenState extends State<BeaconScreen> {
     final userdata = Children.fromSnapshot(data);
     return Padding(
       key: ValueKey(userdata.phoneNumber),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Container(
           alignment: Alignment.center,
           height: 68,
