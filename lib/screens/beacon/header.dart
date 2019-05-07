@@ -99,6 +99,7 @@ class _Button extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
+          color: Colors.black,
           padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
           child: Text(
             running ? 'Stop' : 'Start',
