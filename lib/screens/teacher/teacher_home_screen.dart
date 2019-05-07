@@ -4,6 +4,7 @@ import 'package:beacon_bus/blocs/teacher/teacher_provider.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/screens/teacher/teacher_activity_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_bus_screen.dart';
+import 'package:beacon_bus/screens/teacher/teacher_log_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -142,38 +143,32 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             },
           ),
           _divider(),
-          ListTile(
-            title: Text(
-              "승하차 기록",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            trailing: Icon(Icons.navigate_next),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.pushNamed(context, '/teacherlog');
-            },
-          ),
+          _buildListTile('활동기록', '/teacherlog'),
           _divider(),
-          ListTile(
-            title: Text(
-              "비콘 테스트",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            trailing: Icon(Icons.navigate_next),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.pushNamed(context, '/beacon');
-            },
-          ),
+          _buildListTile('마이페이지', '/teachermypage'),
+          _divider(),
+          _buildListTile('비콘 테스트', '/beacon'),
           _divider(),
         ],
       ),
     );
   }
+  Widget _buildListTile(String listName, String route) {
+    return ListTile(
+      title: Text(
+        listName,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      trailing: Icon(Icons.navigate_next),
+      onTap: () {
+        Navigator.of(context).pop();
+        Navigator.pushNamed(context, route);
+      },
+    );
+  }
+
   Widget _logoutDrawer(LoginBloc bloc) {
     return  ListTile(
       title: Text(
@@ -183,7 +178,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         ),
       ),
       onTap: () {
-        bloc.signOut();
+        _logoutCheck(bloc);
       },
     );
   }
@@ -280,33 +275,33 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   Widget _buildDropdownButton(TeacherBloc bloc) {
     return  Flexible(
       flex: 1,
-      child: StreamBuilder(
-          stream:  Firestore.instance.collection('Kindergarden').document('hamang').collection('Bus').snapshots(),
-          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (!snapshot.hasData) return LinearProgressIndicator();
+      child: FutureBuilder(
+        future:  Firestore.instance.collection('Kindergarden').document('hamang').collection('Bus').getDocuments(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) return LinearProgressIndicator();
 
-            List<String> busList = [];
-            snapshot.data.documents.map((DocumentSnapshot document) {
-              busList.add(document.documentID.toString());
-            }).toList();
+          List<String> busList = [];
+          snapshot.data.documents.map((DocumentSnapshot document) {
+            busList.add(document.documentID.toString());
+          }).toList();
 
-            return Center(
-              child: DropdownButton(
-                value: dropdownValue,
-                onChanged: (String value) {
-                  setState(() {
-                    dropdownValue = value;
-                    carNum = busList.indexWhere((num) => num.startsWith(value)) + 1;
-                  });
-                },
-                items: busList.map((value) => DropdownMenuItem(
-                  value: value,
-                  child: Text(value),
-                )).toList(),
-                hint: Text("운행 차량"),
-              ),
-            );
-          }
+          return Center(
+            child: DropdownButton(
+              value: dropdownValue,
+              onChanged: (String value) {
+                setState(() {
+                  dropdownValue = value;
+                  carNum = busList.indexWhere((num) => num.startsWith(value)) + 1;
+                });
+              },
+              items: busList.map((value) => DropdownMenuItem(
+                value: value,
+                child: Text(value),
+              )).toList(),
+              hint: Text("운행 차량"),
+            ),
+          );
+        },
       ),
     );
   }
@@ -410,6 +405,47 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     );
   }
 
+  void _logoutCheck(LoginBloc bloc) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text(
+            "로그아웃",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text("로그아웃 하시겠습니까?"),
+          actions: <Widget>[
+            CupertinoButton(
+              child: Text(
+                "확인",
+                style: TextStyle(
+                  color: Color(0xFF1EA8E0),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                bloc.signOut();
+              },
+            ),
+            CupertinoButton(
+              child: Text(
+                "취소",
+                style: TextStyle(
+                  color: Color(0xFF1EA8E0),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
   _setBusTeacherName(String teacherName, int busNum) {
     Firestore.instance
         .collection('Kindergarden')
@@ -419,14 +455,12 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       'teacher': teacherName,
     });
   }
-
   Widget _buildBackground() {
     return Image.asset(
       'images/background.JPG',
       fit: BoxFit.fitWidth,
     );
   }
-
   Widget _divider() {
     return Divider(
       height: 0.5,

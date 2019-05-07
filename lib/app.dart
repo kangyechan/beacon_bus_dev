@@ -5,6 +5,7 @@ import 'package:beacon_bus/screens/login_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_home_screen.dart';
 import 'package:beacon_bus/screens/parent/parent_home_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_log_screen.dart';
+import 'package:beacon_bus/screens/teacher/teacher_mypage_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:beacon_bus/screens/beacon/beacon_screen.dart';
 
@@ -26,6 +27,7 @@ class BeaconBusApp extends StatelessWidget {
               '/parent': (context) => ParentHomeScreen(),
               '/teacher': (context) => TeacherHomeScreen(),
               '/teacherlog': (context) => TeacherLogScreen(),
+              '/teachermypage': (context) => TeacherMyPageScreen(),
               '/beacon':(context) => BeaconScreen(),
             },
           ),

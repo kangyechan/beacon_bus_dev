@@ -1,34 +1,43 @@
 import 'package:beacon_bus/constants.dart';
+import 'package:beacon_bus/screens/teacher/teacher_activitylog_screen.dart';
+import 'package:beacon_bus/screens/teacher/teacher_buslog_screen.dart';
 import 'package:flutter/material.dart';
-
+import '../../blocs/login/login_provider.dart';
 
 class TeacherLogScreen extends StatefulWidget {
-  final int carNum;
-
-  const TeacherLogScreen({Key key, this.carNum}): super(key: key);
-
   @override
-  _TeacherLogScreenState createState() => _TeacherLogScreenState(carNum: carNum);
+  _TeacherLogScreenState createState() => _TeacherLogScreenState();
 }
 
 class _TeacherLogScreenState extends State<TeacherLogScreen> {
-  final int carNum;
+  List<Widget> pages;
+  int _currentIndex = 0;
+  Widget currentPage;
 
-  _TeacherLogScreenState({this.carNum});
+  TeacherBusLogScreen teacherBusLogScreen;
+  TeacherActivityLogScreen teacherActivityLogScreen;
+
+  @override
+  void initState() {
+    super.initState();
+    teacherBusLogScreen = TeacherBusLogScreen();
+    teacherActivityLogScreen = TeacherActivityLogScreen();
+    pages = [teacherBusLogScreen, teacherActivityLogScreen];
+    currentPage = teacherBusLogScreen;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final bloc = LoginProvider.of(context);
+    bloc.setContext(context);
     return Scaffold(
       appBar: _buildAppbar(),
-      body: Padding(
-        padding: EdgeInsets.all(20.0),
-        child: Row(
-          children: <Widget>[
-            _inCheck(),
-            SizedBox(width: 20.0,),
-            _outCheck(),
-          ],
-        )
+      body: currentPage,
+      bottomNavigationBar: BottomNavigationBar(
+        items: buildBarItems(),
+        fixedColor: Color(0xFF1EA8E0),
+        currentIndex: _currentIndex,
+        onTap: onTabTapped,
       ),
     );
   }
@@ -42,163 +51,27 @@ class _TeacherLogScreenState extends State<TeacherLogScreen> {
         },
       ),
       title: Text(
-        SCHOOL_NAME,
+        SCHOOL_NAME+" 활동기록",
         style: TextStyle(
           fontWeight: FontWeight.bold,
         ),
       ),
       centerTitle: true,
-      backgroundColor: Colors.yellow,
+      backgroundColor: Color(0xFFC9EBF7),
     );
   }
 
-  Widget _inCheck() {
-    return Flexible(
-      flex: 1,
-      child: Flex(
-        direction: Axis.vertical,
-        children: <Widget>[
-          _checkTitleSection("승차"),
-          _checkSubSection(),
-          Flexible(
-            child: ListView(
-              children: <Widget>[
-                _buildLogSection(),
-              ],
-            ),
-          ),
-        ],
-      )
-    );
+  void onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+      currentPage = pages[index];
+    });
   }
-  Widget _outCheck() {
-    return Flexible(
-        flex: 1,
-        child: Flex(
-          direction: Axis.vertical,
-          children: <Widget>[
-            _checkTitleSection("하차"),
-            _checkSubSection(),
-            Flexible(
-              child: ListView(
-                children: <Widget>[
-                  _buildLogSection2(),
-                ],
-              ),
-            ),
-          ],
-        )
-    );
-  }
-  Widget _checkTitleSection(String title) {
-    return Center(
-      child: Container(
-        width: 70.0,
-        margin: EdgeInsets.only(bottom: 5.0),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: Colors.yellow,
-              width: 2.0,
-            ),
-          ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.only(bottom: 5.0),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20.0,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-  Widget _checkSubSection() {
-    return Container(
-      margin: EdgeInsets.only(top: 5.0, bottom: 10.0),
-      child: Flex(
-        direction: Axis.horizontal,
-        children: <Widget>[
-          Flexible(
-            flex: 1,
-            child: _buildSubSection("날짜"),
-          ),
-          Flexible(
-            flex: 1,
-            child: _buildSubSection("이름"),
-          ),
-          Flexible(
-            flex: 1,
-            child: _buildSubSection("시간"),
-          ),
-        ],
-      ),
-    );
-  }
-  Widget _buildSubSection(String subtitle) {
-    return Center(
-      child: Text(
-        subtitle,
-        style: TextStyle(
-          fontSize: 15.0,
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
-        ),
-      ),
-    );
-  }
-  Widget _buildLogSection() {
-    return Flex(
-      direction: Axis.horizontal,
-      children: <Widget>[
-        Flexible(
-          flex: 1,
-          child: Center(
-            child: Text("4월 11일"),
-          ),
-        ),
-        Flexible(
-          flex: 1,
-          child: Center(
-            child: Text("김영희"),
-          ),
-        ),
-        Flexible(
-          flex: 1,
-          child: Center(
-            child: Text("3시 20분"),
-          ),
-        ),
-      ],
-    );
-  }
-  Widget _buildLogSection2() {
-    return Flex(
-      direction: Axis.horizontal,
-      children: <Widget>[
-        Flexible(
-          flex: 1,
-          child: Center(
-            child: Text("4월 11일"),
-          ),
-        ),
-        Flexible(
-          flex: 1,
-          child: Center(
-            child: Text("김영희"),
-          ),
-        ),
-        Flexible(
-          flex: 1,
-          child: Center(
-            child: Text("3시 50분"),
-          ),
-        ),
-      ],
-    );
+
+  List<BottomNavigationBarItem> buildBarItems() {
+    final List<BottomNavigationBarItem> list = [];
+    list.add(BottomNavigationBarItem(icon: Icon(Icons.directions_bus), title:  Text("승하차 기록", style: TextStyle(fontSize: 12.0))));
+    list.add(BottomNavigationBarItem(icon: Icon(Icons.directions_run), title:  Text("야외활동 기록", style: TextStyle(fontSize: 12.0))));
+    return list;
   }
 }
