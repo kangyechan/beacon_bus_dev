@@ -25,10 +25,6 @@ class Header extends StatefulWidget {
 
 class _HeaderState extends State<Header> {
   FormType _formType;
-  TextEditingController _id1Controller;
-  TextEditingController _id2Controller;
-  TextEditingController _id3Controller;
-
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
 
   @override
@@ -36,16 +32,6 @@ class _HeaderState extends State<Header> {
     super.initState();
 
     _formType = Platform.isIOS ? FormType.iBeacon : FormType.generic;
-
-    _id1Controller = TextEditingController();
-    _id2Controller = TextEditingController();
-    _id3Controller = TextEditingController();
-  }
-
-  void _onFormTypeChanged(FormType value) {
-    setState(() {
-      _formType = value;
-    });
   }
 
   void _onTapSubmit() {
@@ -56,19 +42,9 @@ class _HeaderState extends State<Header> {
         return;
       }
       List<dynamic> ids = [];
-      if (_id1Controller.value.text.isNotEmpty) {
-        ids.add(_id1Controller.value.text);
 
-        if (_id2Controller.value.text.isNotEmpty) {
-          ids.add(_id2Controller.value.text);
-
-          if (_id3Controller.value.text.isNotEmpty) {
-            ids.add(_id3Controller.value.text);
-          }
-        }
-      }
       BeaconRegion region =
-          BeaconRegion(identifier: widget.regionIdentifier, ids: ids);
+      BeaconRegion(identifier: widget.regionIdentifier, ids: ids);
 
       // ignore: missing_enum_constant_in_switch
       switch (_formType) {
@@ -87,56 +63,15 @@ class _HeaderState extends State<Header> {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: <Widget>[
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: new Text(
-                'Beacon format',
-                style: Theme.of(context).textTheme.title,
-              ),
-            ),
-          ),
-          new Row(
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              new Flexible(
-                  child: new RadioListTile(
-                value: FormType.generic,
-                groupValue: _formType,
-                onChanged: widget.running
-                    ? null
-                    : (Platform.isAndroid ? _onFormTypeChanged : null),
-                title: new Text(Platform.isAndroid
-                    ? 'Generic'
-                    : 'Generic (not supported on iOS)'),
-              )),
-              new Flexible(
-                  child: new RadioListTile(
-                value: FormType.iBeacon,
-                groupValue: _formType,
-                onChanged: widget.running ? null : _onFormTypeChanged,
-                title: const Text('iBeacon'),
-              )),
-            ],
-          ),
           new Form(
             key: _formKey,
             child: _formType == FormType.generic
                 ? new _FormGeneric(
-                    running: widget.running,
-                    id1Controller: _id1Controller,
-                    id2Controller: _id2Controller,
-                    id3Controller: _id3Controller,
-                  )
+              running: widget.running,
+            )
                 : new _FormIBeacon(
-                    running: widget.running,
-                    id1Controller: _id1Controller,
-                    id2Controller: _id2Controller,
-                    id3Controller: _id3Controller,
-                  ),
-          ),
-          new SizedBox(
-            height: 10.0,
+              running: widget.running,
+            ),
           ),
           new _Button(
             running: widget.running,
@@ -183,37 +118,13 @@ class _Button extends StatelessWidget {
 
 enum FormType { generic, iBeacon }
 
-class _TextFieldDecoration extends InputDecoration {
-  const _TextFieldDecoration()
-      : super(
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 6.0, horizontal: 10.0),
-          border: const OutlineInputBorder(
-            borderRadius: const BorderRadius.all(
-              const Radius.circular(5.0),
-            ),
-            borderSide: const BorderSide(
-              color: Colors.black,
-              width: 1.0,
-            ),
-          ),
-        );
-}
-
 class _FormGeneric extends StatelessWidget {
-  const _FormGeneric(
-      {Key key,
-      this.running,
-      this.id1Controller,
-      this.id2Controller,
-      this.id3Controller})
-      : super(key: key);
+  const _FormGeneric({
+    Key key,
+    this.running,
+  }) : super(key: key);
 
   final bool running;
-  final TextEditingController id1Controller;
-  final TextEditingController id2Controller;
-  final TextEditingController id3Controller;
-
   @override
   Widget build(BuildContext context) {
     return Container();
@@ -221,63 +132,15 @@ class _FormGeneric extends StatelessWidget {
 }
 
 class _FormIBeacon extends StatelessWidget {
-  const _FormIBeacon(
-      {Key key,
-      this.running,
-      this.id1Controller,
-      this.id2Controller,
-      this.id3Controller})
-      : super(key: key);
+  const _FormIBeacon({
+    Key key,
+    this.running,
+  }) : super(key: key);
 
   final bool running;
-  final TextEditingController id1Controller;
-  final TextEditingController id2Controller;
-  final TextEditingController id3Controller;
 
   @override
   Widget build(BuildContext context) {
-    return new Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        new TextFormField(
-          enabled: !running,
-          validator: (String value) {
-            if (value.isEmpty) {
-              return 'required';
-            }
-          },
-          controller: id1Controller,
-          decoration: const _TextFieldDecoration().copyWith(hintText: 'UDID'),
-        ),
-        new SizedBox(
-          height: 10.0,
-        ),
-        new Row(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            new Flexible(
-              child: new TextFormField(
-                enabled: !running,
-                controller: id2Controller,
-                decoration: const _TextFieldDecoration()
-                    .copyWith(hintText: 'Major (optional)'),
-              ),
-            ),
-            new SizedBox(
-              width: 10.0,
-            ),
-            new Flexible(
-              child: new TextFormField(
-                enabled: !running,
-                controller: id3Controller,
-                decoration: const _TextFieldDecoration()
-                    .copyWith(hintText: 'Minor (optional)'),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
+    return Container();
   }
 }

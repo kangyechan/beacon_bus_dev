@@ -1,3 +1,4 @@
+import 'package:beacon_bus/models/children.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -50,7 +51,7 @@ class _BeaconScreenState extends State<BeaconScreen> {
   }
 
   Widget _buildListItem(BuildContext context, DocumentSnapshot data) {
-    final userdata = UserData.fromSnapshot(data);
+    final userdata = Children.fromSnapshot(data);
     return Padding(
       key: ValueKey(userdata.phoneNumber),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -68,47 +69,4 @@ class _BeaconScreenState extends State<BeaconScreen> {
                   : Icon(Icons.check_circle, color: Colors.red))),
     );
   }
-}
-
-class UserData {
-  final String beaconMajor;
-  final String beaconMinor;
-  final String beaconUid;
-  String boardState;
-  final String busNum;
-  final String classRoom;
-  final String id;
-  final String name;
-  final String phoneNumber;
-  int connectTime = 0;
-  int noConnectTime = 0;
-  bool link = false;
-  final DocumentReference reference;
-
-  UserData.fromMap(Map<String, dynamic> map, {this.reference})
-      : assert(map['beaconMajor'] != null),
-        assert(map['beaconMinor'] != null),
-        assert(map['beaconUid'] != null),
-        assert(map['boardState'] != null),
-        assert(map['busNum'] != null),
-        assert(map['classRoom'] != null),
-        assert(map['id'] != null),
-        assert(map['name'] != null),
-        assert(map['phoneNumber'] != null),
-        beaconMajor = map['beaconMajor'],
-        beaconMinor = map['beaconMinor'],
-        beaconUid = map['beaconUid'],
-        boardState = map['boardState'],
-        busNum = map['busNum'],
-        classRoom = map['classRoom'],
-        id = map['id'],
-        name = map['name'],
-        phoneNumber = map['phoneNumber'];
-
-  UserData.fromSnapshot(DocumentSnapshot snapshot)
-      : this.fromMap(snapshot.data, reference: snapshot.reference);
-
-  @override
-  String toString() =>
-      "UserData<$beaconMajor:$beaconMinor:$beaconUid:$boardState:$busNum:$name:$phoneNumber";
 }
