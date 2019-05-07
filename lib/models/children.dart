@@ -8,13 +8,16 @@ class Children {
   final String name;
   final String classRoom;
   final String busNum;
-  final String boardState;
+  String boardState;
   final String activityState;
   final String changeStateTime;
 
   final String beaconUid;
   final String beaconMajor;
   final String beaconMinor;
+  int connectTime = 0;
+  int noConnectTime = 0;
+  bool link = false;
 
   final DocumentReference reference;
 
