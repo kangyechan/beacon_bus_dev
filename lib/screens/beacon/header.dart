@@ -152,13 +152,6 @@ class _HeaderState extends State<Header> {
               ),
               onPressed: () {
                 _countMember(carNum, className);
-                if (_checkMember > 0) {
-                  Navigator.of(context).pop();
-                  _showStateCheckDialog(_checkMember);
-                } else {
-                  Navigator.of(context).pop();
-                  _showCloseDialog(context);
-                }
               },
             ),
             CupertinoButton(
@@ -232,6 +225,8 @@ class _HeaderState extends State<Header> {
   }
 
   _countMember(int carNum, String className){
+
+
     if(carNum != null) {
       Firestore.instance
           .collection('Kindergarden')
@@ -241,7 +236,15 @@ class _HeaderState extends State<Header> {
           .where('boardState', isEqualTo: 'board')
           .getDocuments().then((data) =>
       _checkMember = data.documents.length
-      );
+      ).then((data) {
+        if (_checkMember > 0) {
+          Navigator.of(context).pop();
+          _showStateCheckDialog(_checkMember);
+        } else {
+          Navigator.of(context).pop();
+          _showCloseDialog(context);
+        }
+      });
     } else {
       Firestore.instance
           .collection('Kindergarden')
@@ -251,7 +254,15 @@ class _HeaderState extends State<Header> {
           .where('activityState', isEqualTo: 'out')
           .getDocuments().then((data) =>
       _checkMember = data.documents.length
-      );
+      ).then((data) {
+        if (_checkMember > 0) {
+          Navigator.of(context).pop();
+          _showStateCheckDialog(_checkMember);
+        } else {
+          Navigator.of(context).pop();
+          _showCloseDialog(context);
+        }
+      });
     }
   }
 

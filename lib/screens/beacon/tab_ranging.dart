@@ -37,7 +37,7 @@ class RangingTab extends ListTab {
         .document('hamang')
         .collection('Children')
         .where('busNum', isEqualTo: _busNum)
-        .where('className', isEqualTo: _className)
+        .where('classRoom', isEqualTo: _className)
         .snapshots()
         .forEach((data) {
       data.documents.forEach((data) {
