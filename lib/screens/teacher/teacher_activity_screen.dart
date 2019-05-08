@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
+import 'package:beacon_bus/screens/beacon/tab_ranging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -95,7 +96,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
             children: <Widget>[
               _buildStateSection(),
               _buildBoardSection(),
-              _buildEndBoard(),
+              RangingTab('', className),
             ],
           ),
         ),
@@ -359,25 +360,6 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
     }
   }
 
-  Widget _buildEndBoard() {
-    return Padding(
-      padding: EdgeInsets.all(10.0),
-      child: FlatButton(
-        padding: EdgeInsets.all(10.0),
-        color: Color(0xFFC9EBF7),
-        child: Text(
-          "활동 종료",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        onPressed: () {
-          _showCheckDialog();
-        },
-      ),
-    );
-  }
-
   void _changeStateSave(String id, int major, String name, String currentState, String state) {
     if (currentState != state) {
       Firestore.instance
@@ -464,128 +446,6 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
               ),
               onPressed: () {
                 _changeStateSave(id, major, name, currentState, 'out');
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showCheckDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Text(
-            "활동 종료",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text("모든 학생의 상태를 확인하셨나요?"),
-          actions: <Widget>[
-            CupertinoButton(
-              child: Text(
-                "확인완료",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                if(rangeOut > 0){
-                  Navigator.of(context).pop();
-                  _showStateCheckDialog(rangeOut);
-                } else {
-                  Navigator.of(context).pop();
-                  _showCloseDialog();
-                }
-              },
-            ),
-            CupertinoButton(
-              child: Text(
-                "아니오",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showStateCheckDialog(int count) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return CupertinoAlertDialog(
-            title: Text(
-              "종료 실패",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: Text(
-                count.toString() + "명이 범위 밖에 있습니다.\n"
-                    "인원을 확인해주세요."
-            ),
-            actions: <Widget>[
-              CupertinoButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  "인원 확인",
-                  style: TextStyle(
-                    color: Color(0xFF1EA8E0),
-                  ),
-                ),
-              ),
-            ],
-          );
-        }
-    );
-  }
-
-  void _showCloseDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Text(
-            "활동 종료",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text("활동을 정말 종료하시겠습니까?"),
-          actions: <Widget>[
-            CupertinoButton(
-              child: Text(
-                "활동 종료",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-            ),
-            CupertinoButton(
-              child: Text(
-                "취소",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
               },
             ),
           ],

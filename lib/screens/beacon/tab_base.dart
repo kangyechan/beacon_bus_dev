@@ -18,8 +18,6 @@ abstract class ListTab extends StatefulWidget {
   _ListTabState createState() => new _ListTabState();
 }
 
-class ListTabData {}
-
 class _ListTabState extends State<ListTab> {
   List<ListTabResult> _results = [];
   StreamSubscription<ListTabResult> _subscription;
@@ -39,6 +37,7 @@ class _ListTabState extends State<ListTab> {
 
     _subscriptionStartedTimestamp = DateTime.now().millisecondsSinceEpoch;
     _subscription = widget.stream(region).listen((result) {
+
       result.elapsedTimeSeconds = (DateTime.now().millisecondsSinceEpoch -
           _subscriptionStartedTimestamp) ~/
           1000;

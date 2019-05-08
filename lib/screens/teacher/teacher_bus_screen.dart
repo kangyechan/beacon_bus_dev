@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 class TeacherBusScreen extends StatefulWidget {
   final int carNum;
 
+
   TeacherBusScreen({Key key, this.carNum}): super(key: key);
 
   @override
@@ -94,7 +95,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
             children: <Widget>[
               _buildStateSection(),
               _buildBoardSection(),
-              RangingTab(),
+              RangingTab(carNum.toString(), ''),
             ],
           ),
         ),
@@ -425,9 +426,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                   ),
                 ],
               ),
-              onPressed: () {
-                _changeStateSave(id, major, name, currentState, 'board');
-              },
+              onPressed: () =>  _changeStateSave(id, major, name, currentState, 'board'),
             ),
             CupertinoButton(
               child: Row(
@@ -489,138 +488,5 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
         );
       },
     );
-  }
-
-  void _showCheckDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Text(
-            "운행 종료",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text("모든 학생의 상태를 확인하셨나요?"),
-          actions: <Widget>[
-            CupertinoButton(
-              child: Text(
-                "확인완료",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                if(boarding > 0){
-                  Navigator.of(context).pop();
-                  _showStateCheckDialog(boarding);
-                } else {
-                  Navigator.of(context).pop();
-                  _showCloseDialog();
-                }
-              },
-            ),
-            CupertinoButton(
-              child: Text(
-                "아니오",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showStateCheckDialog(int count) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return CupertinoAlertDialog(
-            title: Text(
-              "종료 실패",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: Text(
-                count.toString() + "명이 탑승중 입니다.\n"
-                    "차량을 확인해주세요."
-            ),
-            actions: <Widget>[
-              CupertinoButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  "차량 확인",
-                  style: TextStyle(
-                    color: Color(0xFF1EA8E0),
-                  ),
-                ),
-              ),
-            ],
-          );
-        }
-    );
-  }
-
-  void _showCloseDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Text(
-            "운행 종료",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text("운행을 정말 종료하시겠습니까?"),
-          actions: <Widget>[
-            CupertinoButton(
-              child: Text(
-                "운행 종료",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                _setBusTeacherName("", carNum);
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-            ),
-            CupertinoButton(
-              child: Text(
-                "취소",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  _setBusTeacherName(String teacherName, int busNum) {
-    Firestore.instance
-        .collection('Kindergarden')
-        .document('hamang')
-        .collection('Bus')
-        .document(busNum.toString()+'호차').updateData({
-      'teacher': teacherName,
-    });
   }
 }

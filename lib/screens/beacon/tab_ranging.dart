@@ -7,9 +7,28 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'tab_base.dart';
 
 class RangingTab extends ListTab {
+  String _busNum;
+  String _className;
   int check = 0;
   bool turnon = false;
   List<Children> userResults = [];
+
+  RangingTab.origin() {
+    this._busNum = '';
+    this._className = '';
+  }
+  RangingTab(String busNum, String className) {
+    if(busNum == '') {
+      this._busNum = null;
+    } else {
+      this._busNum = busNum;
+    }
+    if(className == '') {
+      this._className = null;
+    } else {
+      this._className = className;
+    }
+  }
 
   @override
   Stream<ListTabResult> stream(BeaconRegion region) {
@@ -17,6 +36,8 @@ class RangingTab extends ListTab {
         .collection('Kindergarden')
         .document('hamang')
         .collection('Children')
+        .where('busNum', isEqualTo: _busNum)
+        .where('className', isEqualTo: _className)
         .snapshots()
         .forEach((data) {
       data.documents.forEach((data) {
@@ -42,30 +63,63 @@ class RangingTab extends ListTab {
             }
           }
         }
-        for (var data in userResults) {
-          if (data.link == true) {
-            data.connectTime++;
-            data.noConnectTime = 0;
-            if (data.connectTime == 10) {
-              Firestore.instance
-                  .collection('Kindergarden')
-                  .document('hamang')
-                  .collection('Children')
-                  .document(data.id)
-                  .updateData({'boardState': 'board'});
-            }
-          } else {
-            data.noConnectTime++;
-            data.connectTime = 0;
-            if (data.boardState == 'board') {
-              if (data.noConnectTime == 10) {
-                data.boardState = 'unknown';
+        if(_className == null && _busNum != null) {
+          for (var data in userResults) {
+            if (data.link == true) {
+              data.connectTime++;
+              data.noConnectTime = 0;
+              if (data.connectTime == 10) {
                 Firestore.instance
                     .collection('Kindergarden')
                     .document('hamang')
                     .collection('Children')
                     .document(data.id)
-                    .updateData({'boardState': 'unknown'});
+                    .updateData({'boardState': 'board'});
+              }
+            } else {
+              data.noConnectTime++;
+              data.connectTime = 0;
+              if (data.boardState == 'board') {
+                if (data.noConnectTime == 10) {
+                  data.boardState = 'unknown';
+                  Firestore.instance
+                      .collection('Kindergarden')
+                      .document('hamang')
+                      .collection('Children')
+                      .document(data.id)
+                      .updateData({'boardState': 'unknown'});
+                }
+              }
+            }
+          }
+        } else if(_className != null && _busNum == null){
+          print("className test"+ _className);
+          for (var data in userResults) {
+            print(userResults);
+            if (data.link == true) {
+              data.connectTime++;
+              data.noConnectTime = 0;
+              if (data.connectTime == 10) {
+                Firestore.instance
+                    .collection('Kindergarden')
+                    .document('hamang')
+                    .collection('Children')
+                    .document(data.id)
+                    .updateData({'activityState': 'in'});
+              }
+            } else {
+              data.noConnectTime++;
+              data.connectTime = 0;
+              if (data.activityState == 'in') {
+                if (data.noConnectTime == 10) {
+                  data.activityState = 'out';
+                  Firestore.instance
+                      .collection('Kindergarden')
+                      .document('hamang')
+                      .collection('Children')
+                      .document(data.id)
+                      .updateData({'activityState': 'out'});
+                }
               }
             }
           }
