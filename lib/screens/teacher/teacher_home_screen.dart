@@ -1,6 +1,4 @@
 import 'package:beacon_bus/blocs/login/login_provider.dart';
-import 'package:beacon_bus/blocs/teacher/teacher_bloc.dart';
-import 'package:beacon_bus/blocs/teacher/teacher_provider.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/screens/teacher/teacher_activity_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_bus_screen.dart';
@@ -10,8 +8,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
-  static int carNum;
-  static String className;
 
   @override
   _TeacherHomeScreenState createState() => _TeacherHomeScreenState();
@@ -31,29 +27,32 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     teacherName = bloc.prefs.getString(USER_NAME);
     className = bloc.prefs.getString(USER_CLASS);
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: _buildAppbar(),
       drawer: Drawer(
         child: _buildDrawer(bloc),
       ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: Flex(
-              direction: Axis.vertical,
-              children: <Widget>[
-                SizedBox(height: 10.0,),
-                _teacherName(teacherName),
-                _buildReadMe(teacherName),
-                SizedBox(height: 10.0,),
-                _buildDropdownButton(),
-                _buildButton(context, carNum),
-              ],
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: Flex(
+                direction: Axis.vertical,
+                children: <Widget>[
+                  SizedBox(height: 10.0,),
+                  _teacherName(teacherName),
+                  _buildReadMe(teacherName),
+                  SizedBox(height: 10.0,),
+                  _buildDropdownButton(),
+                  _buildButton(context, carNum),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: _buildBackground(),
-          ),
-        ],
+            Expanded(
+              child: _buildBackground(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -159,8 +158,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           _divider(),
           _buildListTile('마이페이지', '/teachermypage'),
           _divider(),
-          _buildListTile('비콘 테스트', '/beacon'),
-          _divider(),
         ],
       ),
     );
@@ -257,7 +254,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 setState(() {
                   dropdownValue = value;
                   carNum = busList.indexWhere((num) => num.startsWith(value)) + 1;
-                  TeacherHomeScreen.carNum=carNum;
                 });
               },
               items: busList.map((value) => DropdownMenuItem(
@@ -289,7 +285,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             _selectCarNum();
           } else {
             _setBusTeacherName(teacherName, carNum);
-            Navigator.of(context).pop();
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -383,7 +378,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   }
   Widget _buildBackground() {
     return Image.asset(
-      'images/background.JPG',
+      'images/teacherhome.png',
       fit: BoxFit.fitWidth,
     );
   }

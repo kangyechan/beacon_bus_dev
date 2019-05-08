@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:beacon_bus/models/children.dart';
 import 'package:beacons/beacons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'tab_base.dart';
 
 class RangingTab extends ListTab {
+
   String _busNum;
   String _className;
   int check = 0;
@@ -65,6 +67,7 @@ class RangingTab extends ListTab {
         }
         if(_className == null && _busNum != null) {
           for (var data in userResults) {
+            print(userResults);
             if (data.link == true) {
               data.connectTime++;
               data.noConnectTime = 0;
@@ -93,7 +96,6 @@ class RangingTab extends ListTab {
             }
           }
         } else if(_className != null && _busNum == null){
-          print("className test"+ _className);
           for (var data in userResults) {
             print(userResults);
             if (data.link == true) {

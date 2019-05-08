@@ -12,7 +12,6 @@ import 'package:intl/intl.dart';
 class TeacherBusScreen extends StatefulWidget {
   final int carNum;
 
-
   TeacherBusScreen({Key key, this.carNum}): super(key: key);
 
   @override
@@ -25,7 +24,6 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
-  int limitDistance;
   String boardingState = "board";
   String boardingStateTitle = "현재 탑승 명단";
   int boarding;
@@ -87,16 +85,19 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: _buildAppbar(),
-        body: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Flex(
-            direction: Axis.vertical,
-            children: <Widget>[
-              _buildStateSection(),
-              _buildBoardSection(),
-              RangingTab(carNum.toString(), ''),
-            ],
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: Flex(
+              direction: Axis.vertical,
+              children: <Widget>[
+                _buildStateSection(),
+                _buildBoardSection(),
+                _buildButtonSection(),
+              ],
+            ),
           ),
         ),
       ),
@@ -366,6 +367,37 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
     }
   }
 
+  Widget _buildButtonSection() {
+    return Center(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Center(
+              child: RangingTab(carNum.toString(), ''),
+            ),
+          ),
+          Expanded(
+            child: Center(
+              child: FlatButton(
+                color: Color(0xFFC9EBF7),
+                padding: EdgeInsets.all(10.0),
+                child: Text(
+                  "종료",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                onPressed: () {
+                  _showCheckDialog();
+                },
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   void _changeStateSave(String id, int major, String name, String currentState, String state) {
     if (currentState != state) {
       Firestore.instance
@@ -489,4 +521,135 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
       },
     );
   }
+
+  void _showCheckDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text(
+            "측정 종료",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text("모든 학생을 확인하셨나요?"),
+          actions: <Widget>[
+            CupertinoButton(
+              child: Text(
+                "확인",
+                style: TextStyle(
+                  color: Color(0xFF1EA8E0),
+                ),
+              ),
+              onPressed: () {
+                if(boarding > 0) {
+                  Navigator.of(context).pop();
+                  _showStateCheckDialog(boarding);
+                } else {
+                  Navigator.of(context).pop();
+                  _showCloseDialog();
+                }
+              },
+            ),
+            CupertinoButton(
+              child: Text(
+                "취소",
+                style: TextStyle(
+                  color: Color(0xFF1EA8E0),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _showStateCheckDialog(int count) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            title: Text(
+              "종료 실패",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Text(
+                count.toString() + "명이 아직 탑승 중 입니다.\n"
+                    "다시 한 번 확인해주세요."
+            ),
+            actions: <Widget>[
+              CupertinoButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  "확인",
+                  style: TextStyle(
+                    color: Color(0xFF1EA8E0),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+    );
+  }
+  void _showCloseDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text(
+            "측정 종료",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text("신호측정을 정말 종료하시겠습니까?"),
+          actions: <Widget>[
+            CupertinoButton(
+              child: Text(
+                "확인",
+                style: TextStyle(
+                  color: Color(0xFF1EA8E0),
+                ),
+              ),
+              onPressed: () {
+                _setBusTeacherName('', carNum);
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
+            CupertinoButton(
+              child: Text(
+                "취소",
+                style: TextStyle(
+                  color: Color(0xFF1EA8E0),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  _setBusTeacherName(String teacherName, int busNum) {
+    Firestore.instance
+        .collection('Kindergarden')
+        .document('hamang')
+        .collection('Bus')
+        .document(busNum.toString()+'호차').updateData({
+      'teacher': teacherName,
+    });
+  }
+
 }
