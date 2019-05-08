@@ -20,7 +20,7 @@ class _BeaconScreenState extends State<BeaconScreen> {
         ),
         body: Column(
           children: <Widget>[
-            RangingTab(),
+//            RangingTab(),
             Expanded(child: _buildBody(context)),
           ],
         ),

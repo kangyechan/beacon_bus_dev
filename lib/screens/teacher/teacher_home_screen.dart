@@ -10,6 +10,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
+  static int carNum;
+  static String className;
+
   @override
   _TeacherHomeScreenState createState() => _TeacherHomeScreenState();
 }
@@ -17,13 +20,12 @@ class TeacherHomeScreen extends StatefulWidget {
 class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
 
   String dropdownValue;
-  String teacherName;
-  String className;
+  String teacherName = '';
+  String className = '';
   int carNum;
 
   @override
   Widget build(BuildContext context) {
-    final tbloc = TeacherProvider.of(context);
     final bloc = LoginProvider.of(context);
     bloc.setContext(context);
     teacherName = bloc.prefs.getString(USER_NAME);
@@ -40,10 +42,10 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               direction: Axis.vertical,
               children: <Widget>[
                 SizedBox(height: 10.0,),
-                _teacherName(bloc),
-                _buildReadMe(),
+                _teacherName(teacherName),
+                _buildReadMe(teacherName),
                 SizedBox(height: 10.0,),
-                _buildDropdownButton(tbloc),
+                _buildDropdownButton(),
                 _buildButton(context, carNum),
               ],
             ),
@@ -72,7 +74,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     return Column(
       children: <Widget>[
         _buildUserAccounts(bloc),
-        _buildDrawerList(bloc),
+        _buildDrawerList(className),
         _divider(),
         _logoutDrawer(bloc),
       ],
@@ -118,7 +120,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   );
                 }
             ),
-
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
@@ -130,7 +131,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       ),
     );
   }
-  Widget _buildDrawerList(LoginBloc bloc) {
+  Widget _buildDrawerList(String className) {
     return Expanded(
       child: Column(
         children: <Widget>[
@@ -144,7 +145,13 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             trailing: Icon(Icons.navigate_next,
             ),
             onTap: () {
-              _buildActivityCheck(className);
+              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TeacherActivityScreen(className: className,)
+                ),
+              );
             },
           ),
           _divider(),
@@ -187,55 +194,8 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       },
     );
   }
-  void _buildActivityCheck(String className) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Text(
-            "활동 시작",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text(className + "반 야외활동을 시작하시겠습니까?"),
-          actions: <Widget>[
-            CupertinoButton(
-              child: Text(
-                "확인",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TeacherActivityScreen(className: className,)
-                  ),
-                );
-              },
-            ),
-            CupertinoButton(
-              child: Text(
-                "취소",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 
-  Widget _teacherName(LoginBloc bloc) {
+  Widget _teacherName(String name) {
     return Flexible(
       flex: 2,
       child: Center(
@@ -252,7 +212,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           child: Padding(
             padding: EdgeInsets.all(5.0),
             child: Text(
-              bloc.prefs.getString(USER_NAME) + " 선생님",
+              name+ " 선생님",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20.0,
@@ -264,12 +224,12 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       ),
     );
   }
-  Widget _buildReadMe() {
+  Widget _buildReadMe(String name) {
     return Flexible(
       flex: 1,
       child: Text(
-        "탑승할 차량 번호를 선택하고\n"
-            "운행시작 버튼을 눌러주세요.",
+        name + "선생님 안녕하세요.\n"
+        "탑승할 차량 번호를 선택해주세요.",
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 15.0,
@@ -277,7 +237,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       ),
     );
   }
-  Widget _buildDropdownButton(TeacherBloc bloc) {
+  Widget _buildDropdownButton() {
     return  Flexible(
       flex: 1,
       child: FutureBuilder(
@@ -297,6 +257,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 setState(() {
                   dropdownValue = value;
                   carNum = busList.indexWhere((num) => num.startsWith(value)) + 1;
+                  TeacherHomeScreen.carNum=carNum;
                 });
               },
               items: busList.map((value) => DropdownMenuItem(
@@ -317,7 +278,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       child: FlatButton(
         padding: EdgeInsets.all(10.0),
         child: Text(
-          "운행시작",
+          "차량 선택",
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -327,7 +288,14 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           if(carNum == null) {
             _selectCarNum();
           } else {
-            _startCheck(carNum);
+            _setBusTeacherName(teacherName, carNum);
+            Navigator.of(context).pop();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => TeacherBusScreen(carNum: carNum,)
+              ),
+            );
           }
         },
       ),
@@ -349,53 +317,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             CupertinoButton(
               child: Text(
                 "확인",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-  void _startCheck(int carNum) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Text(
-            "운행 시작",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text(carNum.toString() + "호차 운행을 시작하시겠습니까?"),
-          actions: <Widget>[
-            CupertinoButton(
-              child: Text(
-                "운행 시작",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                _setBusTeacherName(teacherName, carNum);
-                Navigator.of(context).pop();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TeacherBusScreen(carNum: carNum,)
-                  ),
-                );
-              },
-            ),
-            CupertinoButton(
-              child: Text(
-                "취소",
                 style: TextStyle(
                   color: Color(0xFF1EA8E0),
                 ),
