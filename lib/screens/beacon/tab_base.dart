@@ -66,13 +66,11 @@ class _ListTabState extends State<ListTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Header(
-        regionIdentifier: 'test',
-        running: _running,
-        onStart: _onStart,
-        onStop: _onStop,
-      ),
+    return Header(
+      regionIdentifier: 'test',
+      running: _running,
+      onStart: _onStart,
+      onStop: _onStop,
     );
   }
 }

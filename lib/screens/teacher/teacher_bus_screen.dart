@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
+import 'package:beacon_bus/screens/beacon/tab_ranging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -93,7 +94,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
             children: <Widget>[
               _buildStateSection(),
               _buildBoardSection(),
-              _buildEndBoard(),
+              RangingTab(),
             ],
           ),
         ),
@@ -362,25 +363,6 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
         ),
       );
     }
-  }
-
-  Widget _buildEndBoard() {
-    return Padding(
-      padding: EdgeInsets.all(10.0),
-      child: FlatButton(
-        padding: EdgeInsets.all(10.0),
-        color: Color(0xFFC9EBF7),
-        child: Text(
-          "운행 종료",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        onPressed: () {
-          _showCheckDialog();
-        },
-      ),
-    );
   }
 
   void _changeStateSave(String id, int major, String name, String currentState, String state) {

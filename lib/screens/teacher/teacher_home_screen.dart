@@ -118,7 +118,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   );
                 }
             ),
-
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
@@ -327,7 +326,14 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           if(carNum == null) {
             _selectCarNum();
           } else {
-            _startCheck(carNum);
+            _setBusTeacherName(teacherName, carNum);
+            Navigator.of(context).pop();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => TeacherBusScreen(carNum: carNum,)
+              ),
+            );
           }
         },
       ),
@@ -349,53 +355,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             CupertinoButton(
               child: Text(
                 "확인",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-  void _startCheck(int carNum) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Text(
-            "운행 시작",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text(carNum.toString() + "호차 운행을 시작하시겠습니까?"),
-          actions: <Widget>[
-            CupertinoButton(
-              child: Text(
-                "운행 시작",
-                style: TextStyle(
-                  color: Color(0xFF1EA8E0),
-                ),
-              ),
-              onPressed: () {
-                _setBusTeacherName(teacherName, carNum);
-                Navigator.of(context).pop();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TeacherBusScreen(carNum: carNum,)
-                  ),
-                );
-              },
-            ),
-            CupertinoButton(
-              child: Text(
-                "취소",
                 style: TextStyle(
                   color: Color(0xFF1EA8E0),
                 ),
