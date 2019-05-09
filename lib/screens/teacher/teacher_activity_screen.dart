@@ -1,13 +1,12 @@
 import 'dart:async';
 
-import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
 import 'package:beacon_bus/screens/beacon/tab_ranging.dart';
+import 'package:beacon_bus/screens/teacher/widgets/alarm.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 
 class TeacherActivityScreen extends StatefulWidget {
@@ -23,51 +22,15 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
   final String className;
   _TeacherActivityScreenState({this.className});
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  Alarm alarm = new Alarm();
 
-  String dropdownDistanceValue = '20 M';
-  int limitDistance = 20;
+  String dropdownDistanceValue = '5 M';
+  int limitDistance = 5;
   List<String> distanceList = ['5 M', '10 M', '15 M', '20 M', '25 M', '30 M'];
   String activityState = "in";
   String activityStateTitle = "현재 범위 내";
   int rangeIn;
   int rangeOut;
-
-  @override
-  void initState() {
-    super.initState();
-    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
-
-    var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
-    var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
-
-    flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: onSelectNotification);
-  }
-
-  Future onSelectNotification(String payload) {
-    debugPrint("payload : $payload");
-    showDialog(
-      context: context,
-      builder: (_) => CupertinoAlertDialog(
-        title: Text('승하차 알림'),
-        content: Text('$payload'),
-      ),
-    );
-  }
-  showNotification(int major, String stateAlarm) async {
-    var android = new AndroidNotificationDetails(
-        'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
-        priority: Priority.High,importance: Importance.Max
-    );
-    var iOS = new IOSNotificationDetails();
-    var platform = new NotificationDetails(android, iOS);
-    await flutterLocalNotificationsPlugin.show(
-        major, '승하차 알림', stateAlarm, platform,
-        payload: stateAlarm);
-  }
 
   void _setStateChanged(String boardStateName) {
     setState(() {
@@ -375,7 +338,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
                 color: Color(0xFFC9EBF7),
                 padding: EdgeInsets.all(10.0),
                 child: Text(
-                  "종료",
+                  "활동 종료",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                   ),
@@ -404,9 +367,9 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
             .toString(),
       });
       if (state == 'in') {
-        showNotification(major, name + '이 범위 안에 들어왔습니다.');
+        alarm.showNotification(major, name + '이 범위로 들어왔습니다.');
       } else {
-        showNotification(major, name + '이 범위를 이탈했습니다.');
+        alarm.showNotification(major, name + '이 범위를 이탈했습니다.');
       }
     }
     Navigator.of(context).pop();
@@ -491,7 +454,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
           title: Text(
-            "측정 종료",
+            "활동 종료",
             style: TextStyle(
               fontWeight: FontWeight.bold,
             ),
@@ -543,7 +506,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
               ),
             ),
             content: Text(
-                count.toString() + "명이 아직 탑승 중 입니다.\n"
+                count.toString() + "명이 범위 밖에 있습니다.\n"
                     "다시 한 번 확인해주세요."
             ),
             actions: <Widget>[
@@ -574,7 +537,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("신호측정을 정말 종료하시겠습니까?"),
+          content: Text("이상이 없습니다.\n활동을 정말 종료하시겠습니까?"),
           actions: <Widget>[
             CupertinoButton(
               child: Text(

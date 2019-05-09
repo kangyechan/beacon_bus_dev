@@ -39,12 +39,9 @@ class LoginScreen extends StatelessWidget {
   Widget _buildAppTitle() {
     return Container(
       child: Center(
-        child: Text(
-          "SAFE ZONE",
-          style: TextStyle(
-            fontSize: 40.0,
-            color: Color(0xFF1EA8E0),
-          ),
+        child: Image.asset(
+          'images/safezone.JPG',
+          fit: BoxFit.contain,
         ),
       ),
     );
@@ -58,7 +55,7 @@ class LoginScreen extends StatelessWidget {
           keyboardType: TextInputType.emailAddress,
           decoration: InputDecoration(
               hintText: 'you@example.com',
-              labelText: 'Email Address',
+              labelText: '이메일',
               errorText: snapshot.error
           ),
         );
@@ -74,7 +71,7 @@ class LoginScreen extends StatelessWidget {
           onChanged: bloc.changePassword,
           decoration: InputDecoration(
             hintText: 'Password',
-            labelText: 'Password',
+            labelText: '비밀번호',
             errorText: snapshot.error,
           ),
         );

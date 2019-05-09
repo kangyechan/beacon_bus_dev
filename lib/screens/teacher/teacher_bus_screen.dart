@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
+import 'package:beacon_bus/screens/teacher/widgets/alarm.dart';
 import 'package:beacon_bus/screens/beacon/tab_ranging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 
 class TeacherBusScreen extends StatefulWidget {
@@ -22,55 +22,25 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   final int carNum;
   _TeacherBusScreenState({this.carNum});
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  Alarm alarm = new Alarm();
 
   String boardingState = "board";
-  String boardingStateTitle = "현재 탑승 명단";
+  String boardingStateTitle = "현재 탑승중";
   int boarding;
   int notBoarding;
   int unKnown;
-
-  @override
-  void initState() {
-    super.initState();
-    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
-
-    var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
-    var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
-
-    flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: onSelectNotification);
-  }
-
-  void onSelectNotification(String payload) {
-    print(payload);
-  }
-
-  showNotification(int major, String stateAlarm) async {
-    var android = new AndroidNotificationDetails(
-        'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
-        priority: Priority.High,importance: Importance.Max
-    );
-    var iOS = new IOSNotificationDetails();
-    var platform = new NotificationDetails(android, iOS);
-    await flutterLocalNotificationsPlugin.show(
-        major, '승하차 알림', stateAlarm, platform,
-        payload: stateAlarm);
-  }
 
   void _setStateChanged(String boardStateName) {
     setState(() {
       if(boardStateName == '탑승중') {
         boardingState = "board";
-        boardingStateTitle = "현재 탑승 명단";
+        boardingStateTitle = "현재 탑승중";
       } else if(boardStateName == '미탑승') {
         boardingState = "unknown";
-        boardingStateTitle = "현재 미탑승 명단";
+        boardingStateTitle = "현재 미탑승중";
       } else {
         boardingState = "notboard";
-        boardingStateTitle = "금일 개인이동 명단";
+        boardingStateTitle = "오늘 개인이동";
       }
     });
   }
@@ -379,7 +349,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                 color: Color(0xFFC9EBF7),
                 padding: EdgeInsets.all(10.0),
                 child: Text(
-                  "종료",
+                  "운행 종료",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                   ),
@@ -408,11 +378,11 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
             .toString(),
       });
       if (state == 'board') {
-        showNotification(major, name + '이 승차했습니다.');
+        alarm.showNotification(major, name + '이 승차했습니다.');
       } else if (state == 'notboard') {
-        showNotification(major, name + '이 개인이동 합니다.');
+        alarm.showNotification(major, name + '이 개인이동 합니다.');
       } else {
-        showNotification(major, name + '이 하차했습니다.');
+        alarm.showNotification(major, name + '이 하차했습니다.');
       }
     }
     Navigator.of(context).pop();
@@ -525,7 +495,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
           title: Text(
-            "측정 종료",
+            "운행 종료",
             style: TextStyle(
               fontWeight: FontWeight.bold,
             ),
@@ -577,7 +547,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
               ),
             ),
             content: Text(
-                count.toString() + "명이 아직 탑승 중 입니다.\n"
+                count.toString() + "명이 탑승중 입니다.\n"
                     "다시 한 번 확인해주세요."
             ),
             actions: <Widget>[
@@ -603,12 +573,12 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
           title: Text(
-            "측정 종료",
+            "운행 종료",
             style: TextStyle(
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("신호측정을 정말 종료하시겠습니까?"),
+          content: Text("이상이 없습니다.\n운행을 정말 종료하시겠습니까?"),
           actions: <Widget>[
             CupertinoButton(
               child: Text(
