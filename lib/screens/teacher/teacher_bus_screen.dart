@@ -26,9 +26,24 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
 
   String boardingState = "board";
   String boardingStateTitle = "현재 탑승중";
+  int busSize;
   int boarding;
   int notBoarding;
   int unKnown;
+
+  @override
+  void initState() {
+    super.initState();
+    Firestore.instance
+    .collection('Kindergarden')
+    .document('hamang')
+    .collection('Bus')
+    .where('number', isEqualTo: carNum)
+    .snapshots()
+    .listen((data) =>
+      busSize = int.parse(data.documents[0]['distance']
+    ));
+  }
 
   void _setStateChanged(String boardStateName) {
     setState(() {
@@ -47,21 +62,18 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
 
   @override
   Widget build(BuildContext context) {
-    MediaQueryData queryData;
-    queryData = MediaQuery.of(context);
     return WillPopScope(
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: _buildAppbar(),
         body: SafeArea(
           child: Container(
-            width: queryData.size.width,
             child: Padding(
               padding: EdgeInsets.all(20.0),
               child: Flex(
                 direction: Axis.vertical,
                 children: <Widget>[
-                  _buildStateSection(queryData),
+                  _buildStateSection(),
                   _buildBoardSection(),
                   _buildButtonSection(),
                 ],
@@ -90,9 +102,8 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
     );
   }
 
-  Widget _buildStateSection(MediaQueryData  queryData) {
+  Widget _buildStateSection() {
     return Container(
-      width: queryData.size.width,
       child: Flex(
         direction: Axis.horizontal,
         children: <Widget>[
@@ -340,7 +351,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
         children: <Widget>[
           Expanded(
             child: Center(
-              child: RangingTab(carNum.toString(), ''),
+              child: RangingTab(carNum.toString(), '', busSize),
             ),
           ),
           Expanded(
@@ -355,6 +366,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                   ),
                 ),
                 onPressed: () {
+                  print(busSize);
                   _showCheckDialog();
                 },
               ),
@@ -591,7 +603,6 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                 _setBusTeacherName('', carNum);
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
-                dispose();
               },
             ),
             CupertinoButton(

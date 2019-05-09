@@ -26,7 +26,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
 
   String dropdownDistanceValue = '5 M';
   int limitDistance = 5;
-  List<String> distanceList = ['5 M', '10 M', '15 M', '20 M', '25 M', '30 M'];
+  List<String> distanceList = ['3 M', '5 M', '10 M', '15 M', '20 M', '25 M', '30 M'];
   String activityState = "in";
   String activityStateTitle = "현재 범위 내";
   int rangeIn;
@@ -46,21 +46,18 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    MediaQueryData queryData;
-    queryData = MediaQuery.of(context);
     return WillPopScope(
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: _buildAppbar(),
         body: SafeArea(
           child: Container(
-            width: queryData.size.width,
             child: Padding(
               padding: EdgeInsets.all(20.0),
               child: Flex(
                 direction: Axis.vertical,
                 children: <Widget>[
-                  _buildStateSection(queryData),
+                  _buildStateSection(),
                   _buildBoardSection(),
                   _buildButtonSection(),
                 ],
@@ -89,9 +86,8 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
     );
   }
 
-  Widget _buildStateSection(MediaQueryData queryData) {
+  Widget _buildStateSection() {
     return Container(
-      width: queryData.size.width,
       child: Flex(
         direction: Axis.horizontal,
         children: <Widget>[
@@ -329,7 +325,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
         children: <Widget>[
           Expanded(
             child: Center(
-              child: RangingTab('', className),
+              child: RangingTab('', className, limitDistance),
             ),
           ),
           Expanded(

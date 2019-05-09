@@ -230,7 +230,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     return Flexible(
       flex: 1,
       child: Text(
-        name + "선생님 안녕하세요.\n"
+        name + " 선생님 안녕하세요.\n"
         "탑승할 차량 번호를 선택해주세요.",
         textAlign: TextAlign.center,
         style: TextStyle(

@@ -22,7 +22,9 @@ dependencies:
   rxdart: ^0.20.0
   intl: ^0.15.7
   firebase_auth: ^0.8.4+2
+  firebase_storage: ^2.1.0
   cloud_firestore: ^0.9.13+1
+  image_picker: ^0.6.0
   shared_preferences: 0.4.3
   flutter_local_notifications: ^0.6.0
   beacons:
