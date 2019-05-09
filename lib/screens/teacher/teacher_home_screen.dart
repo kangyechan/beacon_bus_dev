@@ -22,6 +22,8 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    MediaQueryData queryData;
+    queryData = MediaQuery.of(context);
     final bloc = LoginProvider.of(context);
     bloc.setContext(context);
     teacherName = bloc.prefs.getString(USER_NAME);
@@ -33,25 +35,28 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         child: _buildDrawer(bloc),
       ),
       body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Flex(
-                direction: Axis.vertical,
-                children: <Widget>[
-                  SizedBox(height: 10.0,),
-                  _teacherName(teacherName),
-                  _buildReadMe(teacherName),
-                  SizedBox(height: 10.0,),
-                  _buildDropdownButton(),
-                  _buildButton(context, carNum),
-                ],
+        child: Container(
+          width: queryData.size.width,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: Flex(
+                  direction: Axis.vertical,
+                  children: <Widget>[
+                    SizedBox(height: 10.0,),
+                    _teacherName(teacherName),
+                    _buildReadMe(teacherName),
+                    SizedBox(height: 10.0,),
+                    _buildDropdownButton(),
+                    _buildButton(context, carNum),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: _buildBackground(),
-            ),
-          ],
+              Expanded(
+                child: _buildBackground(queryData),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -237,33 +242,36 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   Widget _buildDropdownButton() {
     return  Flexible(
       flex: 1,
-      child: FutureBuilder(
-        future:  Firestore.instance.collection('Kindergarden').document('hamang').collection('Bus').getDocuments(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) return LinearProgressIndicator();
+      child: Container(
+        width: 100.0,
+        child: FutureBuilder(
+          future:  Firestore.instance.collection('Kindergarden').document('hamang').collection('Bus').getDocuments(),
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
 
-          List<String> busList = [];
-          snapshot.data.documents.map((DocumentSnapshot document) {
-            busList.add(document.documentID.toString());
-          }).toList();
+            List<String> busList = [];
+            snapshot.data.documents.map((DocumentSnapshot document) {
+              busList.add(document.documentID.toString());
+            }).toList();
 
-          return Center(
-            child: DropdownButton(
-              value: dropdownValue,
-              onChanged: (String value) {
-                setState(() {
-                  dropdownValue = value;
-                  carNum = busList.indexWhere((num) => num.startsWith(value)) + 1;
-                });
-              },
-              items: busList.map((value) => DropdownMenuItem(
-                value: value,
-                child: Text(value),
-              )).toList(),
-              hint: Text("운행 차량"),
-            ),
-          );
-        },
+            return Center(
+              child: DropdownButton(
+                value: dropdownValue,
+                onChanged: (String value) {
+                  setState(() {
+                    dropdownValue = value;
+                    carNum = busList.indexWhere((num) => num.startsWith(value)) + 1;
+                  });
+                },
+                items: busList.map((value) => DropdownMenuItem(
+                  value: value,
+                  child: Text(value),
+                )).toList(),
+                hint: Text("운행 차량"),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -376,10 +384,13 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       'teacher': teacherName,
     });
   }
-  Widget _buildBackground() {
-    return Image.asset(
-      'images/teacherhome.png',
-      fit: BoxFit.fitWidth,
+  Widget _buildBackground(MediaQueryData  queryData) {
+    return Container(
+      width: queryData.size.width,
+      child: Image.asset(
+        'images/teacherhome.png',
+        fit: BoxFit.fill,
+      ),
     );
   }
   Widget _divider() {

@@ -28,9 +28,8 @@ class _TeacherLogScreenState extends State<TeacherLogScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = LoginProvider.of(context);
-    bloc.setContext(context);
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: _buildAppbar(),
       body: currentPage,
       bottomNavigationBar: BottomNavigationBar(

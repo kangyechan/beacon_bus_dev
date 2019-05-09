@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:beacon_bus/models/children.dart';
 import 'package:beacons/beacons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'tab_base.dart';
 
