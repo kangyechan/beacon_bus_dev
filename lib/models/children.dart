@@ -18,6 +18,7 @@ class Children {
   int connectTime = 0;
   int noConnectTime = 0;
   bool link = false;
+  List notBoardingDateList;
 
   final DocumentReference reference;
 
@@ -50,7 +51,8 @@ class Children {
 
         beaconUid = map['beaconUid'],
         beaconMajor = map['beaconMajor'],
-        beaconMinor = map['beaconMinor'];
+        beaconMinor = map['beaconMinor'],
+        notBoardingDateList = map['notBoardingDateList'];
 
   Children.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);

@@ -26,20 +26,24 @@ class LoginBloc extends Object with LoginValidators {
   final _email = BehaviorSubject<String>();
   final _password = BehaviorSubject<String>();
   final _childId = BehaviorSubject<String>();
+  final _loading = BehaviorSubject<bool>();
+
 
   Observable<String> get email => _email.stream.transform(validateEmail);
   Observable<String> get password => _password.stream.transform(validatePassword);
   Observable<String> get submitValid => Observable.combineLatest2(email, password, (e, p) => "" + e + p);
   Observable<String> get childId => _childId.stream;
+  Observable<bool> get loading => _loading.stream;
 
   Function(String) get changeEmail => _email.sink.add;
   Function(String) get changePassword => _password.sink.add;
   Function(String) get setChildId => _childId.sink.add;
+  Function(bool) get setLoadingState => _loading.sink.add;
 
   submit() {
     final validEmail = _email.value;
     final validPassword = _password.value;
-
+    setLoadingState(true);
     _auth.signInWithEmailAndPassword(email: validEmail, password: validPassword)
         .then((FirebaseUser user) {
       Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(user.uid).get().then((snapshot) {
@@ -47,19 +51,16 @@ class LoginBloc extends Object with LoginValidators {
         String userName = snapshot.data['name'];
         String userClass = snapshot.data['class'];
         String childId = snapshot.data['childId'];
-        String profileImageUrl = snapshot.data['profileImageUrl'];
         prefs.setString(USER_NAME, userName);
         prefs.setString(USER_CLASS, userClass);
-        prefs.setString(USER_ID, user.uid);
-        prefs.setString(CHILD_ID, childId);
-        prefs.setString(USER_IMAGEURL, profileImageUrl);
-          if (userType == "parent") {
-            prefs.setString(USER_TYPE, 'parent');
-            Navigator.pushNamedAndRemoveUntil(_context, '/login', (Route r) => false);
-          } else if (userType == "teacher") {
-            prefs.setString(USER_TYPE, 'teacher');
-            Navigator.pushNamedAndRemoveUntil(_context, '/login', (Route r) => false);
-          }
+        setLoadingState(false);
+        if (userType == "parent") {
+          prefs.setString(USER_TYPE, 'parent');
+          Navigator.pushNamedAndRemoveUntil(_context, '/login', (Route r) => false);
+        } else if (userType == "teacher") {
+          prefs.setString(USER_TYPE, 'teacher');
+          Navigator.pushNamedAndRemoveUntil(_context, '/login', (Route r) => false);
+        }
       });
     });
   }
@@ -83,16 +84,25 @@ class LoginBloc extends Object with LoginValidators {
   }
 
   getCurrentUserAndSetChildId() async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    // childId를 가져와서 Stream에 넣는다..
-    Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(user.uid).get().then((documentSnapshot) {
-      String childId = documentSnapshot.data['childId'];
-      setChildId(childId);
+    FirebaseAuth.instance.currentUser().then((FirebaseUser user) {
+      Firestore.instance
+          .collection('Kindergarden')
+          .document('hamang')
+          .collection('Users')
+          .document(user.uid)
+          .get()
+          .then((documentSnapshot) {
+        String childId = documentSnapshot.data['childId'];
+        setChildId(childId);
+      });
     });
+    // childId를 가져와서 Stream에 넣는다..
   }
 
   dispose() {
     _email.close();
     _password.close();
+    _loading.close();
+    _childId.close();
   }
 }
