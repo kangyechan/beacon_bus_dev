@@ -2,7 +2,6 @@ import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/screens/teacher/teacher_activitylog_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_buslog_screen.dart';
 import 'package:flutter/material.dart';
-import '../../blocs/login/login_provider.dart';
 
 class TeacherLogScreen extends StatefulWidget {
   @override

@@ -1,6 +1,4 @@
-import 'package:beacon_bus/constants.dart';
 import 'package:flutter/material.dart';
-
 
 class TeacherMyPageScreen extends StatefulWidget {
 

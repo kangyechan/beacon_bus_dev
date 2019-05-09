@@ -16,7 +16,7 @@ class Alarm {
         onSelectNotification: onSelectNotification);
   }
 
-  void onSelectNotification(String payload) {
+  Future onSelectNotification(String payload) {
     print(payload);
   }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:beacon_bus/models/children.dart';
+import 'package:beacon_bus/screens/teacher/widgets/alarm.dart';
 import 'package:beacons/beacons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -11,8 +12,9 @@ class RangingTab extends ListTab {
   String _busNum;
   String _className;
   int check = 0;
-  bool turnon = false;
   List<Children> userResults = [];
+
+  Alarm alarm = new Alarm();
 
   RangingTab.origin() {
     this._busNum = '';
@@ -77,6 +79,7 @@ class RangingTab extends ListTab {
                     .collection('Children')
                     .document(data.id)
                     .updateData({'boardState': 'board'});
+                alarm.showNotification(int.parse(data.beaconMajor), data.name + '이 승차했습니다.');
               }
             } else {
               data.noConnectTime++;
@@ -90,6 +93,7 @@ class RangingTab extends ListTab {
                       .collection('Children')
                       .document(data.id)
                       .updateData({'boardState': 'unknown'});
+                  alarm.showNotification(int.parse(data.beaconMajor), data.name + '이 하차했습니다.');
                 }
               }
             }
@@ -107,6 +111,7 @@ class RangingTab extends ListTab {
                     .collection('Children')
                     .document(data.id)
                     .updateData({'activityState': 'in'});
+                alarm.showNotification(int.parse(data.beaconMajor), data.name + '이 범위로 들어왔습니다.');
               }
             } else {
               data.noConnectTime++;
@@ -120,6 +125,7 @@ class RangingTab extends ListTab {
                       .collection('Children')
                       .document(data.id)
                       .updateData({'activityState': 'out'});
+                  alarm.showNotification(int.parse(data.beaconMajor), data.name + '이 범위를 이탈했습니다.');
                 }
               }
             }
