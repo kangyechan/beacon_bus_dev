@@ -16,8 +16,6 @@ class TeacherHomeScreen extends StatefulWidget {
 class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
 
   String dropdownValue;
-  String teacherName = '';
-  String className = '';
   int carNum;
 
   @override
@@ -26,8 +24,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     queryData = MediaQuery.of(context);
     final bloc = LoginProvider.of(context);
     bloc.setContext(context);
-    teacherName = bloc.prefs.getString(USER_NAME);
-    className = bloc.prefs.getString(USER_CLASS);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _buildAppbar(),
@@ -37,25 +33,39 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       body: SafeArea(
         child: Container(
           width: queryData.size.width,
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                child: Flex(
-                  direction: Axis.vertical,
-                  children: <Widget>[
-                    SizedBox(height: 10.0,),
-                    _teacherName(teacherName),
-                    _buildReadMe(teacherName),
-                    SizedBox(height: 10.0,),
-                    _buildDropdownButton(),
-                    _buildButton(context, carNum),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: _buildBackground(queryData),
-              ),
-            ],
+          child: FutureBuilder<FirebaseUser>(
+            future: bloc.currentUser,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return LinearProgressIndicator();
+              FirebaseUser user = snapshot.data;
+              return Column(
+                children: <Widget>[
+                  Expanded(
+                    child: StreamBuilder<DocumentSnapshot>(
+                      stream: Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(user.uid).snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) return Text(" ");
+                        String name = snapshot.data.data['name'];
+                        return Flex(
+                          direction: Axis.vertical,
+                          children: <Widget>[
+                            SizedBox(height: 10.0,),
+                            _teacherName(name),
+                            _buildReadMe(name),
+                            SizedBox(height: 10.0,),
+                            _buildDropdownButton(),
+                            _buildButton(context, name, carNum),
+                          ],
+                        );
+                      }
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildBackground(queryData),
+                  ),
+                ],
+              );
+            }
           ),
         ),
       ),
@@ -78,7 +88,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     return Column(
       children: <Widget>[
         _buildUserAccounts(bloc),
-        _buildDrawerList(className),
+        _buildDrawerList(bloc),
         _divider(),
         _logoutDrawer(bloc),
       ],
@@ -135,35 +145,49 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       ),
     );
   }
-  Widget _buildDrawerList(String className) {
+  Widget _buildDrawerList(LoginBloc bloc) {
     return Expanded(
-      child: Column(
-        children: <Widget>[
-          ListTile(
-            title: Text(
-              "야외활동",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
+      child: FutureBuilder<FirebaseUser>(
+        future: bloc.currentUser,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return LinearProgressIndicator();
+          FirebaseUser user = snapshot.data;
+          return Column(
+            children: <Widget>[
+              StreamBuilder<DocumentSnapshot>(
+                stream: Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(user.uid).snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return Text(" ");
+                  String className = snapshot.data.data['class'];
+                  return ListTile(
+                    title: Text(
+                      "야외활동",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    trailing: Icon(Icons.navigate_next,
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => TeacherActivityScreen(className: className,)
+                        ),
+                      );
+                    },
+                  );
+                }
               ),
-            ),
-            trailing: Icon(Icons.navigate_next,
-            ),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => TeacherActivityScreen(className: className,)
-                ),
-              );
-            },
-          ),
-          _divider(),
-          _buildListTile('활동기록', '/teacherlog'),
-          _divider(),
-          _buildListTile('마이페이지', '/teachermypage'),
-          _divider(),
-        ],
+              _divider(),
+              _buildListTile('활동기록', '/teacherlog'),
+              _divider(),
+              _buildListTile('마이페이지', '/teachermypage'),
+              _divider(),
+            ],
+          );
+        }
       ),
     );
   }
@@ -276,7 +300,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     );
   }
 
-  Widget _buildButton(BuildContext context, int carNum) {
+  Widget _buildButton(BuildContext context, String teacherName, int carNum) {
     return Flexible(
       flex: 1,
       child: FlatButton(

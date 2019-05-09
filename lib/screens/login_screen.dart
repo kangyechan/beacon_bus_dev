@@ -3,6 +3,7 @@ import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:progress_hud_v2/progress_hud.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
@@ -18,23 +19,29 @@ class LoginScreen extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, LoginBloc bloc) {
     return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 50.0),
-        child: ListView(
-          children: <Widget>[
-            SizedBox(height: 100.0,),
-            _buildAppTitle(),
-            Image.asset(
-              'images/parenthome.png',
+      child: Stack(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 50.0),
+            child: ListView(
+              children: <Widget>[
+                SizedBox(height: 100.0,),
+                _buildAppTitle(),
+                Image.asset(
+                  'images/parenthome.png',
+                ),
+                _emailField(bloc),
+                _passwordField(bloc),
+                _loginButton(bloc),
+              ],
             ),
-            _emailField(bloc),
-            _passwordField(bloc),
-            _loginButton(bloc),
-          ],
-        ),
+          ),
+          _buildProgressHud(bloc),
+        ],
       ),
     );
   }
+
 
   Widget _buildAppTitle() {
     return Container(
@@ -46,6 +53,7 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _emailField(LoginBloc bloc) {
     return StreamBuilder(
       stream: bloc.email,
@@ -74,6 +82,7 @@ class LoginScreen extends StatelessWidget {
             labelText: '비밀번호',
             errorText: snapshot.error,
           ),
+          obscureText: true,
         );
       },
     );
@@ -98,6 +107,26 @@ class LoginScreen extends StatelessWidget {
             }
         );
       },
+    );
+  }
+
+  Widget _buildProgressHud(LoginBloc bloc) {
+    return StreamBuilder<Object>(
+        stream: bloc.loading,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return Container();
+          bool loading = snapshot.data;
+          print(loading);
+          double opacity = 0;
+          opacity = loading ? 1.0 : 0.0;
+          return Opacity(opacity: opacity, child: ProgressHUD(
+            backgroundColor: Colors.black12,
+            color: Colors.white,
+            containerColor: Theme.of(context).accentColor,
+            borderRadius: 5.0,
+            text: '',
+          ),);
+        }
     );
   }
 
