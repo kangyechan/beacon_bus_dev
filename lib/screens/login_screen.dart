@@ -11,25 +11,44 @@ class LoginScreen extends StatelessWidget {
     bloc.setContext(context);
     init(context, bloc);
     return Scaffold(
+      backgroundColor: Colors.white,
       body: _buildBody(context, bloc),
     );
   }
 
   Widget _buildBody(BuildContext context, LoginBloc bloc) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40.0),
-      child: ListView(
-        children: <Widget>[
-          SizedBox(height: 200.0,),
-          Image.asset('images/background.JPG'),
-          _emailField(bloc),
-          _passwordField(bloc),
-          _loginButton(bloc),
-        ],
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 50.0),
+        child: ListView(
+          children: <Widget>[
+            SizedBox(height: 100.0,),
+            _buildAppTitle(),
+            Image.asset(
+              'images/parenthome.png',
+            ),
+            _emailField(bloc),
+            _passwordField(bloc),
+            _loginButton(bloc),
+          ],
+        ),
       ),
     );
   }
 
+  Widget _buildAppTitle() {
+    return Container(
+      child: Center(
+        child: Text(
+          "SAFE ZONE",
+          style: TextStyle(
+            fontSize: 40.0,
+            color: Color(0xFF1EA8E0),
+          ),
+        ),
+      ),
+    );
+  }
   Widget _emailField(LoginBloc bloc) {
     return StreamBuilder(
       stream: bloc.email,
@@ -68,8 +87,13 @@ class LoginScreen extends StatelessWidget {
       stream: bloc.submitValid,
       builder: (context, snapshot) {
         return RaisedButton(
-            child: Text('로그인'),
-            color: Theme.of(context).accentColor,
+            child: Text(
+              '로그인',
+              style:TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            color: Color(0xFFC9EBF7),
             onPressed: () {
               if (snapshot.hasData) {
                 bloc.submit();

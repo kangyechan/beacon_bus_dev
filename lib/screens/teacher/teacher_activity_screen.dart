@@ -83,21 +83,26 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = LoginProvider.of(context);
-    bloc.setContext(context);
-
+    MediaQueryData queryData;
+    queryData = MediaQuery.of(context);
     return WillPopScope(
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: _buildAppbar(),
-        body: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Flex(
-            direction: Axis.vertical,
-            children: <Widget>[
-              _buildStateSection(),
-              _buildBoardSection(),
-              _buildButtonSection(),
-            ],
+        body: SafeArea(
+          child: Container(
+            width: queryData.size.width,
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Flex(
+                direction: Axis.vertical,
+                children: <Widget>[
+                  _buildStateSection(queryData),
+                  _buildBoardSection(),
+                  _buildButtonSection(),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -121,14 +126,15 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
     );
   }
 
-  Widget _buildStateSection() {
-    return Padding(
-      padding: EdgeInsets.only(top: 5.0, right: 5.0, left: 5.0),
-      child: Row(
+  Widget _buildStateSection(MediaQueryData queryData) {
+    return Container(
+      width: queryData.size.width,
+      child: Flex(
+        direction: Axis.horizontal,
         children: <Widget>[
-          _buildState(Icon(Icons.check_circle), Colors.green, "범위 내"),
-          _buildState(Icon(Icons.cancel), Colors.red, "범위 밖"),
-          _buildDistanceButton(),
+          Flexible(flex: 1, child: _buildState(Icon(Icons.check_circle), Colors.green, "범위 내")),
+          Flexible(flex: 1, child: _buildState(Icon(Icons.cancel), Colors.red, "범위 밖")),
+          Flexible(flex: 1, child: _buildDistanceButton()),
         ],
       ),
     );
@@ -172,56 +178,50 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
 
   Widget _countSectionContents(Icon stateIcon, Color stateColor,
       String name, int count){
-    return Flexible(
-      flex: 1,
-      child: FlatButton(
-        padding: EdgeInsets.all(5.0),
-        onPressed: () {
-          _setStateChanged(name);
-        },
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: IconTheme(
-                data: IconThemeData(
-                  color: stateColor,
-                ),
-                child: stateIcon,
+    return FlatButton(
+      padding: EdgeInsets.all(5.0),
+      onPressed: () {
+        _setStateChanged(name);
+      },
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: IconTheme(
+              data: IconThemeData(
+                color: stateColor,
               ),
+              child: stateIcon,
             ),
-            Text(
-              name+ " "+count.toString()+"명",
-            ),
-          ],
-        ),
+          ),
+          Text(
+            name+ " "+count.toString()+"명",
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildDistanceButton() {
-    return Flexible(
-      flex: 1,
-      child: Center(
-        child: DropdownButton(
-          value: dropdownDistanceValue,
-          onChanged: (String value) {
-            setState(() {
-              dropdownDistanceValue = value;
-              if(value.length == 3) {
-                limitDistance = int.parse(value.substring(0,1));
-                print(limitDistance);
-              } else {
-                limitDistance = int.parse(value.substring(0,2));
-                print(limitDistance);
-              }
-            });
-          },
-          items: distanceList.map((value) => DropdownMenuItem(
-            value: value,
-            child: Text(value),
-          )).toList(),
-          hint: Text("범위 지정"),
-        ),
+    return Center(
+      child: DropdownButton(
+        value: dropdownDistanceValue,
+        onChanged: (String value) {
+          setState(() {
+            dropdownDistanceValue = value;
+            if(value.length == 3) {
+              limitDistance = int.parse(value.substring(0,1));
+              print(limitDistance);
+            } else {
+              limitDistance = int.parse(value.substring(0,2));
+              print(limitDistance);
+            }
+          });
+        },
+        items: distanceList.map((value) => DropdownMenuItem(
+          value: value,
+          child: Text(value),
+        )).toList(),
+        hint: Text("범위 지정"),
       ),
     );
   }
@@ -586,6 +586,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
+                dispose();
               },
             ),
             CupertinoButton(

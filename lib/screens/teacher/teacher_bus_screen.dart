@@ -44,16 +44,10 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
         onSelectNotification: onSelectNotification);
   }
 
-  Future onSelectNotification(String payload) {
-    debugPrint("payload : $payload");
-    showDialog(
-      context: context,
-      builder: (_) => CupertinoAlertDialog(
-        title: Text('승하차 알림'),
-        content: Text('$payload'),
-      ),
-    );
+  void onSelectNotification(String payload) {
+    print(payload);
   }
+
   showNotification(int major, String stateAlarm) async {
     var android = new AndroidNotificationDetails(
         'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
@@ -83,20 +77,25 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
 
   @override
   Widget build(BuildContext context) {
+    MediaQueryData queryData;
+    queryData = MediaQuery.of(context);
     return WillPopScope(
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: _buildAppbar(),
         body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Flex(
-              direction: Axis.vertical,
-              children: <Widget>[
-                _buildStateSection(),
-                _buildBoardSection(),
-                _buildButtonSection(),
-              ],
+          child: Container(
+            width: queryData.size.width,
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Flex(
+                direction: Axis.vertical,
+                children: <Widget>[
+                  _buildStateSection(queryData),
+                  _buildBoardSection(),
+                  _buildButtonSection(),
+                ],
+              ),
             ),
           ),
         ),
@@ -121,16 +120,17 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
     );
   }
 
-  Widget _buildStateSection() {
-    return Padding(
-        padding: EdgeInsets.only(top: 5.0, right: 5.0, left: 5.0),
-        child: Row(
-          children: <Widget>[
-            _buildState(Icon(Icons.check_circle), Colors.green, "탑승중"),
-            _buildState(Icon(Icons.cancel), Colors.red, "미탑승"),
-            _buildState(Icon(Icons.error), Colors.orange, "개인이동"),
-          ],
-        )
+  Widget _buildStateSection(MediaQueryData  queryData) {
+    return Container(
+      width: queryData.size.width,
+      child: Flex(
+        direction: Axis.horizontal,
+        children: <Widget>[
+          Flexible(flex: 1, child: _buildState(Icon(Icons.check_circle), Colors.green, "탑승중")),
+          Flexible(flex: 1, child: _buildState(Icon(Icons.cancel), Colors.red, "미탑승")),
+          Flexible(flex: 1, child: _buildState(Icon(Icons.error), Colors.orange, "개인이동")),
+        ],
+      ),
     );
   }
 
@@ -188,28 +188,25 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
 
   Widget _countSectionContents(Icon stateIcon, Color stateColor,
       String name, int count){
-    return Flexible(
-      flex: 1,
-      child: FlatButton(
-        padding: EdgeInsets.all(5.0),
-        onPressed: () {
-          _setStateChanged(name);
-        },
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: IconTheme(
-                data: IconThemeData(
-                  color: stateColor,
-                ),
-                child: stateIcon,
+    return FlatButton(
+      padding: EdgeInsets.all(5.0),
+      onPressed: () {
+        _setStateChanged(name);
+      },
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: IconTheme(
+              data: IconThemeData(
+                color: stateColor,
               ),
+              child: stateIcon,
             ),
-            Text(
-              name+ " "+count.toString()+"명",
-            ),
-          ],
-        ),
+          ),
+          Text(
+            name+ " "+count.toString()+"명",
+          ),
+        ],
       ),
     );
   }
@@ -624,6 +621,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                 _setBusTeacherName('', carNum);
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
+                dispose();
               },
             ),
             CupertinoButton(
@@ -651,5 +649,4 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
       'teacher': teacherName,
     });
   }
-
 }

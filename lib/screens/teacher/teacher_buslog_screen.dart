@@ -1,4 +1,3 @@
-import 'package:beacon_bus/models/children.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -150,7 +149,7 @@ class _TeacherBusLogScreenState extends State<TeacherBusLogScreen> {
 
   Widget _logListContents(BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView(
-      padding: EdgeInsets.only(top:5.0, left: 20.0, right: 20.0),
+      padding: EdgeInsets.only(top:5.0, left: 10.0, right: 10.0),
       children: snapshot.map((data) => _logListItem(context, data)).toList(),
     );
   }
@@ -159,7 +158,7 @@ class _TeacherBusLogScreenState extends State<TeacherBusLogScreen> {
     String name = data.data['name'];
     Map map = Map.from(data.data['boardRecord']);
     return Container(
-      padding: EdgeInsets.all(10.0),
+      padding: EdgeInsets.all(5.0),
       child: Row(
         children: <Widget>[
           _buildLogListItem(name),
