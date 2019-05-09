@@ -11,6 +11,7 @@ class RangingTab extends ListTab {
 
   String _busNum;
   String _className;
+  int _distance;
   int check = 0;
   List<Children> userResults = [];
 
@@ -19,8 +20,10 @@ class RangingTab extends ListTab {
   RangingTab.origin() {
     this._busNum = '';
     this._className = '';
+    this._distance = 5;
   }
-  RangingTab(String busNum, String className) {
+  RangingTab(String busNum, String className, int distance) {
+    this._distance = distance;
     if(busNum == '') {
       this._busNum = null;
     } else {
@@ -43,6 +46,7 @@ class RangingTab extends ListTab {
         .where('classRoom', isEqualTo: _className)
         .snapshots()
         .forEach((data) {
+      userResults.clear();
       data.documents.forEach((data) {
         var userdata = Children.fromSnapshot(data);
         userResults.add(userdata);
@@ -58,7 +62,7 @@ class RangingTab extends ListTab {
             if (beacon.ids[1].toString() == data.beaconMajor &&
                 beacon.ids[2].toString() == data.beaconMinor &&
                 beacon.ids[0] == "fda50693-a4e2-4fb1-afcf-c6eb07647825" &&
-                beacon.distance < 5) {
+                beacon.distance < _distance) {
               data.link = true;
               break;
             } else {

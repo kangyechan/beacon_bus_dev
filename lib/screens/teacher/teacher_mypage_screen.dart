@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:beacon_bus/constants.dart';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +20,7 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
   String className = '';
   String phoneNumber = '';
   File _profileImage;
-//  final FirebaseStorage storage = FirebaseStorage.instance;
+  final FirebaseStorage storage = FirebaseStorage.instance;
 
   TextEditingController _classNameController = TextEditingController();
   TextEditingController _phoneNumberController = TextEditingController();
@@ -29,12 +32,12 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
     _phoneNumberController.text = USER_ID;
   }
 
-//  Future getImage() async {
-//    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-//    setState(() {
-//      _profileImage = image;
-//    });
-//  }
+  Future getImage() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _profileImage = image;
+    });
+  }
 
 //  void _editHandle(String name, String price, String description) {
 //    if(name != '' && price != '' && description != '') {
@@ -168,7 +171,8 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
               ),
               color: Color(0xFFC9EBF7),
               onPressed: () {
-
+                Navigator.of(context).pop();
+                dispose();
               },
             ),
           ),

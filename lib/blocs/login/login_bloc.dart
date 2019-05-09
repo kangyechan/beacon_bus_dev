@@ -47,10 +47,12 @@ class LoginBloc extends Object with LoginValidators {
         String userName = snapshot.data['name'];
         String userClass = snapshot.data['class'];
         String childId = snapshot.data['childId'];
+        String profileImageUrl = snapshot.data['profileImageUrl'];
         prefs.setString(USER_NAME, userName);
         prefs.setString(USER_CLASS, userClass);
         prefs.setString(USER_ID, user.uid);
         prefs.setString(CHILD_ID, childId);
+        prefs.setString(USER_IMAGEURL, profileImageUrl);
           if (userType == "parent") {
             prefs.setString(USER_TYPE, 'parent');
             Navigator.pushNamedAndRemoveUntil(_context, '/login', (Route r) => false);

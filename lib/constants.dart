@@ -4,3 +4,4 @@ const USER_NAME = 'guest';
 const USER_CLASS = 'class';
 const USER_ID = 'USER_ID';
 const CHILD_ID = 'CHILD_ID';
+const USER_IMAGEURL = '';
