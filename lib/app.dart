@@ -2,13 +2,13 @@ import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:beacon_bus/blocs/teacher/teacher_provider.dart';
 import 'package:beacon_bus/blocs/parent/parent_provider.dart';
 import 'package:beacon_bus/screens/login_screen.dart';
+import 'package:beacon_bus/screens/parent/board_record_screen.dart';
 import 'package:beacon_bus/screens/parent/parent_mypage_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_home_screen.dart';
 import 'package:beacon_bus/screens/parent/parent_home_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_log_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_mypage_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:beacon_bus/screens/beacon/beacon_screen.dart';
 
 class BeaconBusApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -26,11 +26,11 @@ class BeaconBusApp extends StatelessWidget {
             routes: {
               '/login': (context) => LoginScreen(),
               '/parent': (context) => ParentHomeScreen(),
+              '/parentlog':(context) => ParentRecordScreen(),
+              '/parentmypage': (context) => ParentMyPageScreen(),
               '/teacher': (context) => TeacherHomeScreen(),
               '/teacherlog': (context) => TeacherLogScreen(),
               '/teachermypage': (context) => TeacherMyPageScreen(),
-              '/beacon':(context) => BeaconScreen(),
-              '/parentmypage':(context) => ParentMyPageScreen(),
             },
           ),
         ),

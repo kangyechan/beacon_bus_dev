@@ -1,34 +1,114 @@
-import 'package:beacon_bus/constants.dart';
+import 'dart:async';
+import 'dart:io';
+
+import 'package:beacon_bus/blocs/login/login_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 
 class TeacherMyPageScreen extends StatefulWidget {
-  final int carNum;
-
-  const TeacherMyPageScreen({Key key, this.carNum}): super(key: key);
 
   @override
-  _TeacherMyPageScreenState createState() => _TeacherMyPageScreenState(carNum: carNum);
+  _TeacherMyPageScreenState createState() => _TeacherMyPageScreenState();
 }
 
 class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
-  final int carNum;
 
-  _TeacherMyPageScreenState({this.carNum});
+  File _profileImage;
+  String name;
+  String className;
+  String phoneNumber;
+  String profileImageUrl;
+  String uid;
+
+  final FirebaseStorage storage = FirebaseStorage.instance;
+
+  TextEditingController _classNameController = TextEditingController();
+  TextEditingController _phoneNumberController = TextEditingController();
+
+  Future getImage() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _profileImage = image;
+    });
+  }
+
+  void _editHandle(String className, String phoneNumber, String profileImageUrl) {
+    if(className != '' && phoneNumber != '' && profileImageUrl != null) {
+      Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(uid).updateData({
+        'class': className,
+        'phoneNumber': phoneNumber,
+        'profileImageUrl': profileImageUrl,
+      }).then((contents) {
+        Navigator.popAndPushNamed(context, '/teacher');
+        dispose();
+      });
+    }
+  }
+
+  Future uploadImage() async{
+    if (_profileImage != null) {
+      final StorageReference fireBaseStorageRef =
+      FirebaseStorage.instance.ref().child('teacherImage/$uid');
+      final StorageUploadTask task =
+      fireBaseStorageRef.putFile(_profileImage);
+      profileImageUrl = await (await task.onComplete).ref.getDownloadURL();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    MediaQueryData queryData;
+    queryData = MediaQuery.of(context);
+    final bloc = LoginProvider.of(context);
+    bloc.setContext(context);
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: _buildAppbar(),
-      body: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Row(
-            children: <Widget>[
-              _inCheck(),
-              SizedBox(width: 20.0,),
-              _outCheck(),
-            ],
-          )
+      body: SafeArea(
+        child: FutureBuilder<FirebaseUser>(
+          future: bloc.currentUser,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
+            FirebaseUser user = snapshot.data;
+            return Container(
+              child: Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: StreamBuilder<DocumentSnapshot>(
+                    stream: Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(user.uid).snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return Text(" ");
+                      name = snapshot.data.data['name'];
+                      className = snapshot.data.data['class'];
+                      phoneNumber = snapshot.data.data['phoneNumber'];
+                      profileImageUrl = snapshot.data.data['profileImageUrl'];
+                      uid = snapshot.data.data['profileImageUrl'];
+                      return ListView(
+                        children: <Widget>[
+                          SizedBox(height: 30.0,),
+                          _buildImageSection(queryData, profileImageUrl),
+                          _buildCameraSection(),
+                          SizedBox(height: 20.0,),
+                          _buildNameSection(name),
+                          SizedBox(height: 30.0,),
+                          _buildClassSection(className),
+                          SizedBox(height: 30.0,),
+                          _buildPhoneSection(phoneNumber),
+                          SizedBox(height: 50.0,),
+                          _buildButton(),
+                        ],
+                      );
+                    }
+                  )
+              ),
+            );
+          }
+        ),
       ),
     );
   }
@@ -42,160 +122,157 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
         },
       ),
       title: Text(
-        SCHOOL_NAME,
+        '마이페이지',
         style: TextStyle(
           fontWeight: FontWeight.bold,
         ),
       ),
       centerTitle: true,
-      backgroundColor: Colors.yellow,
+      backgroundColor: Color(0xFFC9EBF7),
     );
   }
 
-  Widget _inCheck() {
-    return Flexible(
-        flex: 1,
-        child: Flex(
-          direction: Axis.vertical,
-          children: <Widget>[
-            _checkTitleSection("승차"),
-            _checkSubSection(),
-            Flexible(
-              child: ListView(
-                children: <Widget>[
-                  _buildLogSection(),
-                ],
-              ),
-            ),
-          ],
-        )
+  Widget _buildImageSection(MediaQueryData queryData, String url) {
+    if(url == '') url = null;
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(50.0),
+      ),
+      width: queryData.size.width * (0.2),
+      height: queryData.size.height * (0.2),
+      margin: EdgeInsets.symmetric(horizontal: 100.0),
+      child: url == null
+          ? Image(
+          image: AssetImage(
+            'images/profiledefault.png',
+          ),
+          fit: BoxFit.fitHeight,)
+          : Image.network(
+          url,
+          fit: BoxFit.fitHeight,),
     );
   }
-  Widget _outCheck() {
-    return Flexible(
-        flex: 1,
-        child: Flex(
-          direction: Axis.vertical,
-          children: <Widget>[
-            _checkTitleSection("하차"),
-            _checkSubSection(),
-            Flexible(
-              child: ListView(
-                children: <Widget>[
-                  _buildLogSection2(),
-                ],
-              ),
-            ),
-          ],
-        )
+
+  Widget _buildCameraSection() {
+    return Container(
+      child: FlatButton(
+        color: Colors.white,
+        child: Icon(
+          Icons.camera_alt,
+          color: Color(0xFF1EA8E0),
+        ),
+        onPressed: () => getImage()),
     );
   }
-  Widget _checkTitleSection(String title) {
-    return Center(
-      child: Container(
-        width: 70.0,
-        margin: EdgeInsets.only(bottom: 5.0),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: Colors.yellow,
-              width: 2.0,
-            ),
-          ),
+
+  Widget _buildNameSection(String name) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 50.0),
+      child: Text(
+        name +" 선생님",
+        style: TextStyle(
+          fontSize: 20.0,
         ),
-        child: Padding(
-          padding: EdgeInsets.only(bottom: 5.0),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20.0,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
+        textAlign: TextAlign.center,
       ),
     );
   }
-  Widget _checkSubSection() {
+
+  Widget _buildClassSection(String className) {
+    _classNameController.text = className+"반";
     return Container(
-      margin: EdgeInsets.only(top: 5.0, bottom: 10.0),
+      padding: EdgeInsets.symmetric(horizontal: 100.0),
       child: Flex(
         direction: Axis.horizontal,
         children: <Widget>[
-          Flexible(
-            flex: 1,
-            child: _buildSubSection("날짜"),
+          Expanded(
+            child: TextField(
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+              controller: _classNameController,
+            ),
           ),
-          Flexible(
-            flex: 1,
-            child: _buildSubSection("이름"),
-          ),
-          Flexible(
-            flex: 1,
-            child: _buildSubSection("시간"),
+          Container(
+            padding: EdgeInsets.only(top:15.0),
+            child: Icon(
+              Icons.create,
+              size: 20.0,
+              color: Color(0xFF1EA8E0),
+            ),
           ),
         ],
       ),
     );
   }
-  Widget _buildSubSection(String subtitle) {
-    return Center(
-      child: Text(
-        subtitle,
-        style: TextStyle(
-          fontSize: 15.0,
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
-        ),
+
+  Widget _buildPhoneSection(String phoneNumber) {
+    _phoneNumberController.text = phoneNumber;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 100.0),
+      child: Flex(
+        direction: Axis.horizontal,
+        children: <Widget>[
+          Expanded(
+            child: TextField(
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+                hintText: '- 없이 숫자만',
+              ),
+              textAlign: TextAlign.center,
+              controller: _phoneNumberController,
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.only(top:15.0),
+            child: Icon(
+              Icons.create,
+              size: 20.0,
+              color: Color(0xFF1EA8E0),
+            ),
+          ),
+        ],
       ),
     );
   }
-  Widget _buildLogSection() {
-    return Flex(
-      direction: Axis.horizontal,
+
+  Widget _buildButton() {
+    return Row(
       children: <Widget>[
-        Flexible(
-          flex: 1,
+        Expanded(
           child: Center(
-            child: Text("4월 11일"),
+            child: FlatButton(
+              child: Text(
+                "수정",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              color: Color(0xFFC9EBF7),
+              onPressed: () {
+                uploadImage().then((push){
+                  _editHandle(_classNameController.text.substring(0, _classNameController.text.length - 1),
+                      _phoneNumberController.text, profileImageUrl);
+                });
+              },
+            ),
           ),
         ),
-        Flexible(
-          flex: 1,
+        Expanded(
           child: Center(
-            child: Text("김영희"),
-          ),
-        ),
-        Flexible(
-          flex: 1,
-          child: Center(
-            child: Text("3시 20분"),
-          ),
-        ),
-      ],
-    );
-  }
-  Widget _buildLogSection2() {
-    return Flex(
-      direction: Axis.horizontal,
-      children: <Widget>[
-        Flexible(
-          flex: 1,
-          child: Center(
-            child: Text("4월 11일"),
-          ),
-        ),
-        Flexible(
-          flex: 1,
-          child: Center(
-            child: Text("김영희"),
-          ),
-        ),
-        Flexible(
-          flex: 1,
-          child: Center(
-            child: Text("3시 50분"),
+            child: FlatButton(
+              child: Text(
+                "취소",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              color: Color(0xFFC9EBF7),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
           ),
         ),
       ],

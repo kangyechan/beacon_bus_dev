@@ -1,4 +1,3 @@
-import 'package:beacon_bus/models/children.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +11,7 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
   TextEditingController keyword = TextEditingController();
   String dropdownValue;
   String searchText;
-  String busNum;
+  String classRoom;
 
   void _searchChanged(String value) {
     setState(() {
@@ -25,35 +24,38 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
   }
 
   Widget _buildSearchNum() {
-    return FutureBuilder(
-      future: Firestore.instance.collection('Kindergarden').document('hamang').collection('Bus').getDocuments(),
-      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (!snapshot.hasData) return LinearProgressIndicator();
+    return Container(
+      width: 70.0,
+      child: FutureBuilder(
+        future: Firestore.instance.collection('Kindergarden').document('hamang').collection('Class').getDocuments(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) return LinearProgressIndicator();
 
-        List<String> busList = ['전체'];
-        snapshot.data.documents.map((DocumentSnapshot document) {
-          busList.add(document.documentID.toString());
-        }).toList();
+          List<String> classList = ['전체'];
+          snapshot.data.documents.map((DocumentSnapshot document) {
+            classList.add(document.documentID.toString());
+          }).toList();
 
-        return Container(
-          margin: EdgeInsets.only(top: 10.0),
-          child: DropdownButton(
-            value: dropdownValue,
-            onChanged: (String value) {
-              setState(() {
-                dropdownValue = value;
-                if(value == '전체') { busNum = null; }
-                else { busNum = busList.indexWhere((num) => num.startsWith(value)).toString(); }
-              });
-            },
-            items: busList.map((value) => DropdownMenuItem(
-              value: value,
-              child: Text(value),
-            )).toList(),
-            hint: Text("전체"),
-          ),
-        );
-      },
+          return Container(
+            margin: EdgeInsets.only(top: 10.0),
+            child: DropdownButton(
+              value: dropdownValue,
+              onChanged: (String value) {
+                setState(() {
+                  dropdownValue = value;
+                  if(value == '전체') { classRoom = null; }
+                  else { classRoom = value; }
+                });
+              },
+              items: classList.map((value) => DropdownMenuItem(
+                value: value,
+                child: Text(value),
+              )).toList(),
+              hint: Text("전체"),
+            ),
+          );
+        },
+      ),
     );
   }
   Widget _buildSearchButton() {
@@ -72,7 +74,7 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
           semanticLabel: 'search',
         ),
         onPressed: () {
-          print(busNum);
+          print(classRoom);
           print(keyword.text);
           _searchChanged(keyword.text);
         },
@@ -105,13 +107,13 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
   }
   Widget _buildListTitle() {
     return Container(
-      padding: EdgeInsets.only(bottom: 10.0),
+      padding: EdgeInsets.only(bottom: 10.0, left: 20.0, right: 20.0),
       child: Row(
         children: <Widget>[
           _buildListTitleName('이름'),
           _buildListTitleName('날짜'),
-          _buildListTitleName('승차시간'),
-          _buildListTitleName('하차시간'),
+          _buildListTitleName('이탈시간'),
+          _buildListTitleName('합류시간'),
         ],
       ),
     );
@@ -132,14 +134,14 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance.collection('Kindergarden')
           .document('hamang')
-          .collection('Children')
+          .collection('Log')
           .where('name', isEqualTo: searchText)
-          .where('busNum', isEqualTo: busNum)
+          .where('classRoom', isEqualTo: classRoom)
           .snapshots(),
       builder: (context, snapshot) {
         if(!snapshot.hasData) return LinearProgressIndicator();
         print(searchText);
-        print(busNum);
+        print(classRoom);
         return _logListContents(context, snapshot.data.documents);
       },
     );
@@ -147,24 +149,38 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
 
   Widget _logListContents(BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView(
-      padding: EdgeInsets.only(top:10.0, left: 20.0, right: 20.0),
+      padding: EdgeInsets.only(top:5.0, left: 10.0, right: 10.0),
       children: snapshot.map((data) => _logListItem(context, data)).toList(),
     );
   }
 
   Widget _logListItem(BuildContext context, DocumentSnapshot data) {
-    final children = Children.fromSnapshot(data);
+    String name = data.data['name'];
+    Map map = Map.from(data.data['activityRecord']);
     return Container(
+      padding: EdgeInsets.all(5.0),
       child: Row(
         children: <Widget>[
-          Text(children.name),
-          Text(children.busNum),
-          Text(children.classRoom),
+          _buildLogListItem(name),
+          _buildLogListItem(map['date']),
+          _buildLogListItem(map['out']),
+          _buildLogListItem(map['in']),
         ],
       ),
     );
   }
 
+  Widget _buildLogListItem(String text) {
+    return Expanded(
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 12.0,
+        ),
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

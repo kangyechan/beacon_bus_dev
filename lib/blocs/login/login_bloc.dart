@@ -20,7 +20,6 @@ class LoginBloc extends Object with LoginValidators {
   }
 
   Future<FirebaseUser> get currentUser => FirebaseAuth.instance.currentUser();
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final _email = BehaviorSubject<String>();
@@ -41,18 +40,15 @@ class LoginBloc extends Object with LoginValidators {
   Observable<String> get childId => _childId.stream;
   Observable<String> get protector => _protector.stream;
 
-
   Observable<bool> get loading => _loading.stream;
+
 
 
   Function(String) get changeEmail => _email.sink.add;
 
   Function(String) get changePassword => _password.sink.add;
-
   Function(String) get setChildId => _childId.sink.add;
-
   Function(bool) get setLoadingState => _loading.sink.add;
-
   Function(String) get onChangeProtector => _protector.sink.add;
 
 
@@ -87,6 +83,7 @@ class LoginBloc extends Object with LoginValidators {
           prefs.setString(USER_TYPE, 'teacher');
           Navigator.pushNamedAndRemoveUntil(
               _context, '/login', (Route r) => false);
+          Navigator.pushNamedAndRemoveUntil(_context, '/login', (Route r) => false);
         }
       });
     });
@@ -110,7 +107,7 @@ class LoginBloc extends Object with LoginValidators {
     });
   }
 
-  getCurrentUserAndSetChildId() {
+  getCurrentUserAndSetChildId() async {
     FirebaseAuth.instance.currentUser().then((FirebaseUser user) {
       Firestore.instance
           .collection('Kindergarden')

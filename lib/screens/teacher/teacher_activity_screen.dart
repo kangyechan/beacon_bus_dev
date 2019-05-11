@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
+import 'package:beacon_bus/screens/beacon/tab_ranging.dart';
+import 'package:beacon_bus/screens/teacher/widgets/alarm.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 
 class TeacherActivityScreen extends StatefulWidget {
@@ -22,51 +22,15 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
   final String className;
   _TeacherActivityScreenState({this.className});
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  Alarm alarm = new Alarm();
 
-  String dropdownDistanceValue = '20 M';
-  int limitDistance = 20;
-  List<String> distanceList = ['5 M', '10 M', '15 M', '20 M', '25 M', '30 M'];
+  String dropdownDistanceValue = '5 M';
+  int limitDistance = 5;
+  List<String> distanceList = ['3 M', '5 M', '10 M', '15 M', '20 M', '25 M', '30 M'];
   String activityState = "in";
   String activityStateTitle = "현재 범위 내";
   int rangeIn;
   int rangeOut;
-
-  @override
-  void initState() {
-    super.initState();
-    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
-
-    var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
-    var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
-
-    flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: onSelectNotification);
-  }
-
-  Future onSelectNotification(String payload) {
-    debugPrint("payload : $payload");
-    showDialog(
-      context: context,
-      builder: (_) => CupertinoAlertDialog(
-        title: Text('승하차 알림'),
-        content: Text('$payload'),
-      ),
-    );
-  }
-  showNotification(int major, String stateAlarm) async {
-    var android = new AndroidNotificationDetails(
-        'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
-        priority: Priority.High,importance: Importance.Max
-    );
-    var iOS = new IOSNotificationDetails();
-    var platform = new NotificationDetails(android, iOS);
-    await flutterLocalNotificationsPlugin.show(
-        major, '승하차 알림', stateAlarm, platform,
-        payload: stateAlarm);
-  }
 
   void _setStateChanged(String boardStateName) {
     setState(() {
@@ -82,21 +46,23 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = LoginProvider.of(context);
-    bloc.setContext(context);
-
     return WillPopScope(
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: _buildAppbar(),
-        body: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Flex(
-            direction: Axis.vertical,
-            children: <Widget>[
-              _buildStateSection(),
-              _buildBoardSection(),
-              _buildEndBoard(),
-            ],
+        body: SafeArea(
+          child: Container(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Flex(
+                direction: Axis.vertical,
+                children: <Widget>[
+                  _buildStateSection(),
+                  _buildBoardSection(),
+                  _buildButtonSection(),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -121,13 +87,13 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
   }
 
   Widget _buildStateSection() {
-    return Padding(
-      padding: EdgeInsets.only(top: 5.0, right: 5.0, left: 5.0),
-      child: Row(
+    return Container(
+      child: Flex(
+        direction: Axis.horizontal,
         children: <Widget>[
-          _buildState(Icon(Icons.check_circle), Colors.green, "범위 내"),
-          _buildState(Icon(Icons.cancel), Colors.red, "범위 밖"),
-          _buildDistanceButton(),
+          Flexible(flex: 1, child: _buildState(Icon(Icons.check_circle), Colors.green, "범위 내")),
+          Flexible(flex: 1, child: _buildState(Icon(Icons.cancel), Colors.red, "범위 밖")),
+          Flexible(flex: 1, child: _buildDistanceButton()),
         ],
       ),
     );
@@ -171,56 +137,50 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
 
   Widget _countSectionContents(Icon stateIcon, Color stateColor,
       String name, int count){
-    return Flexible(
-      flex: 1,
-      child: FlatButton(
-        padding: EdgeInsets.all(5.0),
-        onPressed: () {
-          _setStateChanged(name);
-        },
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: IconTheme(
-                data: IconThemeData(
-                  color: stateColor,
-                ),
-                child: stateIcon,
+    return FlatButton(
+      padding: EdgeInsets.all(5.0),
+      onPressed: () {
+        _setStateChanged(name);
+      },
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: IconTheme(
+              data: IconThemeData(
+                color: stateColor,
               ),
+              child: stateIcon,
             ),
-            Text(
-              name+ " "+count.toString()+"명",
-            ),
-          ],
-        ),
+          ),
+          Text(
+            name+ " "+count.toString()+"명",
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildDistanceButton() {
-    return Flexible(
-      flex: 1,
-      child: Center(
-        child: DropdownButton(
-          value: dropdownDistanceValue,
-          onChanged: (String value) {
-            setState(() {
-              dropdownDistanceValue = value;
-              if(value.length == 3) {
-                limitDistance = int.parse(value.substring(0,1));
-                print(limitDistance);
-              } else {
-                limitDistance = int.parse(value.substring(0,2));
-                print(limitDistance);
-              }
-            });
-          },
-          items: distanceList.map((value) => DropdownMenuItem(
-            value: value,
-            child: Text(value),
-          )).toList(),
-          hint: Text("범위 지정"),
-        ),
+    return Center(
+      child: DropdownButton(
+        value: dropdownDistanceValue,
+        onChanged: (String value) {
+          setState(() {
+            dropdownDistanceValue = value;
+            if(value.length == 3) {
+              limitDistance = int.parse(value.substring(0,1));
+              print(limitDistance);
+            } else {
+              limitDistance = int.parse(value.substring(0,2));
+              print(limitDistance);
+            }
+          });
+        },
+        items: distanceList.map((value) => DropdownMenuItem(
+          value: value,
+          child: Text(value),
+        )).toList(),
+        hint: Text("범위 지정"),
       ),
     );
   }
@@ -359,21 +319,33 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
     }
   }
 
-  Widget _buildEndBoard() {
-    return Padding(
-      padding: EdgeInsets.all(10.0),
-      child: FlatButton(
-        padding: EdgeInsets.all(10.0),
-        color: Color(0xFFC9EBF7),
-        child: Text(
-          "활동 종료",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
+  Widget _buildButtonSection() {
+    return Center(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Center(
+              child: RangingTab('', className, limitDistance),
+            ),
           ),
-        ),
-        onPressed: () {
-          _showCheckDialog();
-        },
+          Expanded(
+            child: Center(
+              child: FlatButton(
+                color: Color(0xFFC9EBF7),
+                padding: EdgeInsets.all(10.0),
+                child: Text(
+                  "활동 종료",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                onPressed: () {
+                  _showCheckDialog();
+                },
+              ),
+            ),
+          )
+        ],
       ),
     );
   }
@@ -391,9 +363,9 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
             .toString(),
       });
       if (state == 'in') {
-        showNotification(major, name + '이 범위 안에 들어왔습니다.');
+        alarm.showNotification(major, name + '이 범위로 들어왔습니다.');
       } else {
-        showNotification(major, name + '이 범위를 이탈했습니다.');
+        alarm.showNotification(major, name + '이 범위를 이탈했습니다.');
       }
     }
     Navigator.of(context).pop();
@@ -483,17 +455,17 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("모든 학생의 상태를 확인하셨나요?"),
+          content: Text("모든 학생을 확인하셨나요?"),
           actions: <Widget>[
             CupertinoButton(
               child: Text(
-                "확인완료",
+                "확인",
                 style: TextStyle(
                   color: Color(0xFF1EA8E0),
                 ),
               ),
               onPressed: () {
-                if(rangeOut > 0){
+                if(rangeOut > 0) {
                   Navigator.of(context).pop();
                   _showStateCheckDialog(rangeOut);
                 } else {
@@ -504,7 +476,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
             ),
             CupertinoButton(
               child: Text(
-                "아니오",
+                "취소",
                 style: TextStyle(
                   color: Color(0xFF1EA8E0),
                 ),
@@ -518,21 +490,45 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
       },
     );
   }
-
   void _showStateCheckDialog(int count) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return CupertinoAlertDialog(
-            title: Text(
-              "종료 실패",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
+
+            title: Container(
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.warning,
+                    color: Colors.red,
+                  ),
+                  Icon(
+                    Icons.warning,
+                    color: Colors.red,
+                  ),
+                  Expanded(
+                    child: Text(
+                      "Dangerous!!",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.warning,
+                    color: Colors.red,
+                  ),
+                  Icon(
+                    Icons.warning,
+                    color: Colors.red,
+                  ),
+                ],
               ),
             ),
             content: Text(
                 count.toString() + "명이 범위 밖에 있습니다.\n"
-                    "인원을 확인해주세요."
+                    "다시 한 번 확인해주세요."
             ),
             actions: <Widget>[
               CupertinoButton(
@@ -540,7 +536,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
                   Navigator.pop(context);
                 },
                 child: Text(
-                  "인원 확인",
+                  "확인",
                   style: TextStyle(
                     color: Color(0xFF1EA8E0),
                   ),
@@ -551,23 +547,22 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
         }
     );
   }
-
   void _showCloseDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
           title: Text(
-            "활동 종료",
+            "측정 종료",
             style: TextStyle(
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("활동을 정말 종료하시겠습니까?"),
+          content: Text("이상이 없습니다.\n활동을 정말 종료하시겠습니까?"),
           actions: <Widget>[
             CupertinoButton(
               child: Text(
-                "활동 종료",
+                "확인",
                 style: TextStyle(
                   color: Color(0xFF1EA8E0),
                 ),

@@ -9,7 +9,7 @@ class Children {
   final String classRoom;
   final String busNum;
   String boardState;
-  final String activityState;
+  String activityState;
   final String changeStateTime;
 
   final String beaconUid;

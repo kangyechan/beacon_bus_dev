@@ -15,6 +15,7 @@ class BoardYesOrNoScreen extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, ParentBloc bloc) {
     return Container(
+      padding: EdgeInsets.only(left: 20.0, right: 20.0),
       width: 1000.0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -30,7 +31,6 @@ class BoardYesOrNoScreen extends StatelessWidget {
           _buildSampleSwitchButton('탑승'),
           _buildSampleSwitchButton('미탑승'),
           SizedBox(height: 10.0,),
-
         ],
       ),
     );

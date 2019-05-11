@@ -2,7 +2,6 @@ import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/screens/teacher/teacher_activitylog_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_buslog_screen.dart';
 import 'package:flutter/material.dart';
-import '../../blocs/login/login_provider.dart';
 
 class TeacherLogScreen extends StatefulWidget {
   @override
@@ -28,9 +27,8 @@ class _TeacherLogScreenState extends State<TeacherLogScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = LoginProvider.of(context);
-    bloc.setContext(context);
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: _buildAppbar(),
       body: currentPage,
       bottomNavigationBar: BottomNavigationBar(

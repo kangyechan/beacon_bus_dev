@@ -1,4 +1,6 @@
+import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class BoardStateWidget extends StatelessWidget {
@@ -11,6 +13,8 @@ class BoardStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    LoginBloc loginBloc = LoginProvider.of(context);
     if (state == "notboard") {
       return Container(
         width: 300.0,
@@ -92,9 +96,93 @@ class BoardStateWidget extends StatelessWidget {
           FlatButton(
             child: Text('처음으로', style: TextStyle(color: Colors.white, fontSize: 20.0),),
             onPressed: null
-          )
+          ),
+          _buildProtectorText(context, loginBloc),
         ],
       );
     }
+  }
+
+  Widget _buildProtectorText(BuildContext context, LoginBloc bloc) {
+    return GestureDetector(
+      onTap: () => showChangeProtectorDialog(context, bloc),
+      child: StreamBuilder<String>(
+          stream: bloc.childId,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
+            String childId = snapshot.data;
+            return StreamBuilder<DocumentSnapshot>(
+              stream: Firestore.instance
+                  .collection('Kindergarden')
+                  .document('hamang')
+                  .collection('Children')
+                  .document(childId)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return LinearProgressIndicator();
+                String protector = snapshot.data.data['protector'];
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      "오늘은 ${protector}가 기다립니다",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                );
+              },
+            );
+          }),
+    );
+  }
+
+  showChangeProtectorDialog(BuildContext context, LoginBloc bloc) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          margin: EdgeInsets.only(bottom: 200.0),
+          child: CupertinoAlertDialog(
+            title: Text(
+              "알림",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Text("마중나올 보호자를 변경하세요."),
+            actions: <Widget>[
+              StreamBuilder(
+                stream: bloc.protector,
+                builder: (context, snapshot) {
+                  return CupertinoTextField(
+                    onChanged: bloc.onChangeProtector,
+                    placeholder: "보호자 관계 ex:엄마, 아빠, 오빠",
+                    textAlign: TextAlign.center,
+                    autofocus: true,
+                  );
+                },
+              ),
+              CupertinoButton(
+                  child: Text(
+                    '변경',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: () {
+                    bloc.changeProtector();
+                  }),
+              CupertinoButton(
+                  child: Text(
+                    '취소',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

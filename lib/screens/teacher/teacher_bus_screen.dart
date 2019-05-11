@@ -2,12 +2,11 @@ import 'dart:async';
 
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
+import 'package:beacon_bus/screens/teacher/widgets/alarm.dart';
 import 'package:beacon_bus/screens/beacon/tab_ranging.dart';
-import 'package:beacons/beacons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 
 class TeacherBusScreen extends StatefulWidget {
@@ -23,11 +22,11 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   final int carNum;
   _TeacherBusScreenState({this.carNum});
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  Alarm alarm = new Alarm();
 
-  int limitDistance;
   String boardingState = "board";
-  String boardingStateTitle = "현재 탑승 명단";
+  String boardingStateTitle = "현재 탑승중";
+  int busSize;
   int boarding;
   int notBoarding;
   int unKnown;
@@ -35,67 +34,71 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   @override
   void initState() {
     super.initState();
-    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    _setDistance();
+    _setNotBoard();
 
-    var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
-    var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
-
-    flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: onSelectNotification);
   }
 
-  Future onSelectNotification(String payload) {
-    debugPrint("payload : $payload");
-    showDialog(
-      context: context,
-      builder: (_) => CupertinoAlertDialog(
-        title: Text('승하차 알림'),
-        content: Text('$payload'),
-      ),
-    );
+  void _setDistance() {
+    Firestore.instance
+        .collection('Kindergarden')
+        .document('hamang')
+        .collection('Bus')
+        .where('number', isEqualTo: carNum)
+        .snapshots()
+        .listen((data) =>
+    busSize = int.parse(data.documents[0]['distance']
+    ));
   }
-  showNotification(int major, String stateAlarm) async {
-    var android = new AndroidNotificationDetails(
-        'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
-        priority: Priority.High,importance: Importance.Max
-    );
-    var iOS = new IOSNotificationDetails();
-    var platform = new NotificationDetails(android, iOS);
-    await flutterLocalNotificationsPlugin.show(
-        major, '승하차 알림', stateAlarm, platform,
-        payload: stateAlarm);
+
+  void _setNotBoard() {
+    Firestore.instance
+        .collection('Kindergarden')
+        .document('hamang')
+        .collection('Children')
+        .where('number', isEqualTo: carNum)
+        .snapshots()
+        .listen((data) =>
+
+    busSize = int.parse(data.documents[0]['distance']
+    ));
   }
 
   void _setStateChanged(String boardStateName) {
     setState(() {
       if(boardStateName == '탑승중') {
         boardingState = "board";
-        boardingStateTitle = "현재 탑승 명단";
+        boardingStateTitle = "현재 탑승중";
       } else if(boardStateName == '미탑승') {
         boardingState = "unknown";
-        boardingStateTitle = "현재 미탑승 명단";
+        boardingStateTitle = "현재 미탑승중";
       } else {
         boardingState = "notboard";
-        boardingStateTitle = "금일 개인이동 명단";
+        boardingStateTitle = "오늘 개인이동";
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppbar(),
-      body: Padding(
-        padding: EdgeInsets.all(20.0),
-        child: Flex(
-          direction: Axis.vertical,
-          children: <Widget>[
-            _buildStateSection(),
-            _buildBoardSection(),
-            _buildEndBoard(),
-          ],
+    return WillPopScope(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: _buildAppbar(),
+        body: SafeArea(
+          child: Container(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Flex(
+                direction: Axis.vertical,
+                children: <Widget>[
+                  _buildStateSection(),
+                  _buildBoardSection(),
+                  _buildButtonSection(),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -116,15 +119,15 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   }
 
   Widget _buildStateSection() {
-    return Padding(
-        padding: EdgeInsets.only(top: 5.0, right: 5.0, left: 5.0),
-        child: Row(
-          children: <Widget>[
-            _buildState(Icon(Icons.check_circle), Colors.green, "탑승중"),
-            _buildState(Icon(Icons.cancel), Colors.red, "미탑승"),
-            _buildState(Icon(Icons.error), Colors.orange, "개인이동"),
-          ],
-        )
+    return Container(
+      child: Flex(
+        direction: Axis.horizontal,
+        children: <Widget>[
+          Flexible(flex: 1, child: _buildState(Icon(Icons.check_circle), Colors.green, "탑승중")),
+          Flexible(flex: 1, child: _buildState(Icon(Icons.cancel), Colors.red, "미탑승")),
+          Flexible(flex: 1, child: _buildState(Icon(Icons.error), Colors.orange, "개인이동")),
+        ],
+      ),
     );
   }
 
@@ -182,28 +185,25 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
 
   Widget _countSectionContents(Icon stateIcon, Color stateColor,
       String name, int count){
-    return Flexible(
-      flex: 1,
-      child: FlatButton(
-        padding: EdgeInsets.all(5.0),
-        onPressed: () {
-          _setStateChanged(name);
-        },
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: IconTheme(
-                data: IconThemeData(
-                  color: stateColor,
-                ),
-                child: stateIcon,
+    return FlatButton(
+      padding: EdgeInsets.all(5.0),
+      onPressed: () {
+        _setStateChanged(name);
+      },
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: IconTheme(
+              data: IconThemeData(
+                color: stateColor,
               ),
+              child: stateIcon,
             ),
-            Text(
-              name+ " "+count.toString()+"명",
-            ),
-          ],
-        ),
+          ),
+          Text(
+            name+ " "+count.toString()+"명",
+          ),
+        ],
       ),
     );
   }
@@ -361,21 +361,34 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
     }
   }
 
-  Widget _buildEndBoard() {
-    return Padding(
-      padding: EdgeInsets.all(10.0),
-      child: FlatButton(
-        padding: EdgeInsets.all(10.0),
-        color: Color(0xFFC9EBF7),
-        child: Text(
-          "운행 종료",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
+  Widget _buildButtonSection() {
+    return Center(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Center(
+              child: RangingTab(carNum.toString(), '', busSize),
+            ),
           ),
-        ),
-        onPressed: () {
-          _showCheckDialog();
-        },
+          Expanded(
+            child: Center(
+              child: FlatButton(
+                color: Color(0xFFC9EBF7),
+                padding: EdgeInsets.all(10.0),
+                child: Text(
+                  "운행 종료",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                onPressed: () {
+                  print(busSize);
+                  _showCheckDialog();
+                },
+              ),
+            ),
+          )
+        ],
       ),
     );
   }
@@ -393,11 +406,12 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
             .toString(),
       });
       if (state == 'board') {
-        showNotification(major, name + '이 승차했습니다.');
+        alarm.showNotification(major, name + '이 승차했습니다.');
       } else if (state == 'notboard') {
-        showNotification(major, name + '이 개인이동 합니다.');
+        alarm.showNotification(major, name + '이 개인이동 합니다.');
       } else {
-        showNotification(major, name + '이 하차했습니다.');
+
+        alarm.showNotification(major, name + '이 하차했습니다.');
       }
     }
     Navigator.of(context).pop();
@@ -440,9 +454,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                   ),
                 ],
               ),
-              onPressed: () {
-                _changeStateSave(id, major, name, currentState, 'board');
-              },
+              onPressed: () =>  _changeStateSave(id, major, name, currentState, 'board'),
             ),
             CupertinoButton(
               child: Row(
@@ -517,17 +529,17 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("모든 학생의 상태를 확인하셨나요?"),
+          content: Text("모든 학생을 확인하셨나요?"),
           actions: <Widget>[
             CupertinoButton(
               child: Text(
-                "확인완료",
+                "확인",
                 style: TextStyle(
                   color: Color(0xFF1EA8E0),
                 ),
               ),
               onPressed: () {
-                if(boarding > 0){
+                if(boarding > 0) {
                   Navigator.of(context).pop();
                   _showStateCheckDialog(boarding);
                 } else {
@@ -538,7 +550,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
             ),
             CupertinoButton(
               child: Text(
-                "아니오",
+                "취소",
                 style: TextStyle(
                   color: Color(0xFF1EA8E0),
                 ),
@@ -552,7 +564,6 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
       },
     );
   }
-
   void _showStateCheckDialog(int count) {
     showDialog(
         context: context,
@@ -566,7 +577,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
             ),
             content: Text(
                 count.toString() + "명이 탑승중 입니다.\n"
-                    "차량을 확인해주세요."
+                    "다시 한 번 확인해주세요."
             ),
             actions: <Widget>[
               CupertinoButton(
@@ -574,7 +585,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
                   Navigator.pop(context);
                 },
                 child: Text(
-                  "차량 확인",
+                  "확인",
                   style: TextStyle(
                     color: Color(0xFF1EA8E0),
                   ),
@@ -585,7 +596,6 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
         }
     );
   }
-
   void _showCloseDialog() {
     showDialog(
       context: context,
@@ -597,17 +607,17 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("운행을 정말 종료하시겠습니까?"),
+          content: Text("이상이 없습니다.\n운행을 정말 종료하시겠습니까?"),
           actions: <Widget>[
             CupertinoButton(
               child: Text(
-                "운행 종료",
+                "확인",
                 style: TextStyle(
                   color: Color(0xFF1EA8E0),
                 ),
               ),
               onPressed: () {
-                _setBusTeacherName("", carNum);
+                _setBusTeacherName('', carNum);
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
@@ -628,7 +638,6 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
       },
     );
   }
-
   _setBusTeacherName(String teacherName, int busNum) {
     Firestore.instance
         .collection('Kindergarden')

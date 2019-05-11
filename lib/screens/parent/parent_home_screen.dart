@@ -4,6 +4,8 @@ import 'package:beacon_bus/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'board_status_screen.dart';
 import 'board_yes_or_no.screen.dart';
@@ -40,8 +42,13 @@ class _ParentHomeScreenState extends State<ParentHomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(SCHOOL_NAME),
-//        leading: IconButton(icon: Icon(Icons.menu), onPressed: bloc.signOut),
+        title: Text(
+          SCHOOL_NAME,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.yellow,
       ),
       drawer: Drawer(
@@ -70,67 +77,44 @@ class _ParentHomeScreenState extends State<ParentHomeScreen> {
         _buildDrawerList(),
         _divider(),
         _logoutDrawer(bloc),
-
       ],
     );
   }
   Widget _divider() {
     return Divider(
       height: 0.5,
-      color: Color(0xFFC9EBF7),
+      color: Colors.amber,
     );
   }
   Widget _buildDrawerList() {
     return Expanded(
       child: Column(
         children: <Widget>[
-          ListTile(
-            title: Text(
-              "승하차 기록",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            trailing: Icon(Icons.navigate_next),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.pushNamed(context, '/parent-log');
-            },
-          ),
+          _buildListTile('승하차 기록', '/parentlog'),
           _divider(),
-          ListTile(
-            title: Text(
-              "알람 테스트",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            trailing: Icon(Icons.navigate_next),
-            onTap: () {
-              print('hi');
-
-//              Navigator.of(context).pop();
-//              Navigator.pushNamed(context, '/notification');
-            },
-          ),
-          ListTile(
-            title: Text(
-              "마이페이지",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            trailing: Icon(Icons.navigate_next),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.pushNamed(context, '/parentmypage');
-            },
-          ),
+          _buildListTile('마이페이지', '/parentmypage'),
           _divider(),
         ],
       ),
     );
   }
+
+  Widget _buildListTile(String listName, String route) {
+    return ListTile(
+      title: Text(
+        listName,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      trailing: Icon(Icons.navigate_next),
+      onTap: () {
+        Navigator.of(context).pop();
+        Navigator.pushNamed(context, route);
+      },
+    );
+  }
+
   Widget _buildUserAccounts(LoginBloc bloc) {
     return FutureBuilder<FirebaseUser>(
       future: bloc.currentUser,

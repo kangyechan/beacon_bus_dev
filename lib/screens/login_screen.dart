@@ -12,28 +12,97 @@ class LoginScreen extends StatelessWidget {
     bloc.setContext(context);
     init(context, bloc);
     return Scaffold(
+      backgroundColor: Colors.white,
       body: _buildBody(context, bloc),
     );
   }
 
   Widget _buildBody(BuildContext context, LoginBloc bloc) {
-    return Stack(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40.0),
-          child: ListView(
-            children: <Widget>[
-              SizedBox(height: 200.0,),
-              Image.asset('images/background.JPG'),
-              _emailField(bloc),
-              _passwordField(bloc),
-              _loginButton(bloc),
-
-            ],
+    return SafeArea(
+      child: Stack(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 50.0),
+            child: ListView(
+              children: <Widget>[
+                SizedBox(height: 100.0,),
+                _buildAppTitle(),
+                Image.asset(
+                  'images/parenthome.png',
+                ),
+                _emailField(bloc),
+                _passwordField(bloc),
+                _loginButton(bloc),
+              ],
+            ),
           ),
+          _buildProgressHud(bloc),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildAppTitle() {
+    return Container(
+      child: Center(
+        child: Image.asset(
+          'images/safezone.JPG',
+          fit: BoxFit.contain,
         ),
-        _buildProgressHud(bloc),
-      ],
+      ),
+    );
+  }
+
+  Widget _emailField(LoginBloc bloc) {
+    return StreamBuilder(
+      stream: bloc.email,
+      builder: (context, snapshot) {
+        return TextField(
+          onChanged: bloc.changeEmail,
+          keyboardType: TextInputType.emailAddress,
+          decoration: InputDecoration(
+              hintText: 'you@example.com',
+              labelText: '이메일',
+              errorText: snapshot.error
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _passwordField(LoginBloc bloc) {
+    return StreamBuilder(
+      stream: bloc.password,
+      builder: (context, snapshot) {
+        return TextField(
+          onChanged: bloc.changePassword,
+          decoration: InputDecoration(
+            hintText: 'Password',
+            labelText: '비밀번호',
+            errorText: snapshot.error,
+          ),
+          obscureText: true,
+        );
+      },
+    );
+  }
+
+  Widget _loginButton(LoginBloc bloc) {
+    return StreamBuilder(
+      stream: bloc.submitValid,
+      builder: (context, snapshot) {
+        return RaisedButton(
+            child: Text(
+              '로그인',
+              style:TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            color: Color(0xFFC9EBF7),
+            onPressed: snapshot.hasData ? () => bloc.submit() : null,
+        );
+      },
     );
   }
 
@@ -54,52 +123,6 @@ class LoginScreen extends StatelessWidget {
             text: '',
           ),);
         }
-    );
-  }
-
-  Widget _emailField(LoginBloc bloc) {
-    return StreamBuilder(
-      stream: bloc.email,
-      builder: (context, snapshot) {
-        return TextField(
-          onChanged: bloc.changeEmail,
-          keyboardType: TextInputType.emailAddress,
-          decoration: InputDecoration(
-              hintText: 'you@example.com',
-              labelText: 'Email Address',
-              errorText: snapshot.error
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _passwordField(LoginBloc bloc) {
-    return StreamBuilder(
-      stream: bloc.password,
-      builder: (context, snapshot) {
-        return TextField(
-          onChanged: bloc.changePassword,
-          decoration: InputDecoration(
-            hintText: 'Password',
-            labelText: 'Password',
-            errorText: snapshot.error,
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _loginButton(LoginBloc bloc) {
-    return StreamBuilder(
-      stream: bloc.submitValid,
-      builder: (context, snapshot) {
-        return RaisedButton(
-            child: Text('로그인'),
-            color: Theme.of(context).accentColor,
-            onPressed: snapshot.hasData ? () => bloc.submit() : null,
-        );
-      },
     );
   }
 
