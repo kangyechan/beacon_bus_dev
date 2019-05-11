@@ -52,16 +52,16 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   }
 
   void _setNotBoard() {
-    Firestore.instance
-        .collection('Kindergarden')
-        .document('hamang')
-        .collection('Children')
-        .where('number', isEqualTo: carNum)
-        .snapshots()
-        .listen((data) =>
-
-    busSize = int.parse(data.documents[0]['distance']
-    ));
+//    Firestore.instance
+//        .collection('Kindergarden')
+//        .document('hamang')
+//        .collection('Children')
+//        .where('number', isEqualTo: carNum)
+//        .snapshots()
+//        .listen((data) =>
+//
+//    busSize = int.parse(data.documents[0]['number']
+//    ));
   }
 
   void _setStateChanged(String boardStateName) {
@@ -428,7 +428,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("현재 상태를 변경합니다."),
+          content: Text("\n현재 상태를 변경합니다."),
           actions: <Widget>[
             CupertinoButton(
               child: Row(
@@ -529,7 +529,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("모든 학생을 확인하셨나요?"),
+          content: Text("\n모든 학생을 확인하셨나요?"),
           actions: <Widget>[
             CupertinoButton(
               child: Text(
@@ -576,7 +576,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
               ),
             ),
             content: Text(
-                count.toString() + "명이 탑승중 입니다.\n"
+                "\n"+ count.toString() + "명이 탑승중 입니다.\n"
                     "다시 한 번 확인해주세요."
             ),
             actions: <Widget>[
@@ -607,7 +607,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("이상이 없습니다.\n운행을 정말 종료하시겠습니까?"),
+          content: Text("\n이상이 없습니다.\n운행을 정말 종료하시겠습니까?"),
           actions: <Widget>[
             CupertinoButton(
               child: Text(
