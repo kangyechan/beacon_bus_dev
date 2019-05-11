@@ -113,6 +113,19 @@ class _ParentHomeScreenState extends State<ParentHomeScreen> {
 //              Navigator.pushNamed(context, '/notification');
             },
           ),
+          ListTile(
+            title: Text(
+              "마이페이지",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            trailing: Icon(Icons.navigate_next),
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.pushNamed(context, '/parentmypage');
+            },
+          ),
           _divider(),
         ],
       ),

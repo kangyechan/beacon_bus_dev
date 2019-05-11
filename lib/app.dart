@@ -2,6 +2,7 @@ import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:beacon_bus/blocs/teacher/teacher_provider.dart';
 import 'package:beacon_bus/blocs/parent/parent_provider.dart';
 import 'package:beacon_bus/screens/login_screen.dart';
+import 'package:beacon_bus/screens/parent/parent_mypage_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_home_screen.dart';
 import 'package:beacon_bus/screens/parent/parent_home_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_log_screen.dart';
@@ -29,6 +30,7 @@ class BeaconBusApp extends StatelessWidget {
               '/teacherlog': (context) => TeacherLogScreen(),
               '/teachermypage': (context) => TeacherMyPageScreen(),
               '/beacon':(context) => BeaconScreen(),
+              '/parentmypage':(context) => ParentMyPageScreen(),
             },
           ),
         ),

@@ -28,6 +28,7 @@ dependencies:
   beacons:
     git:
       url: https://github.com/chinapoopoo/beacons
+  progress_hud_v2: ^2.0.0
 
 
 dev_dependencies:

@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
 import 'package:beacon_bus/screens/parent/widgets/board_state_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:beacon_bus/blocs/parent/parent_provider.dart';
 import 'package:flutter/services.dart';
@@ -16,47 +18,48 @@ class BoardStatusScreen extends StatelessWidget {
 
   static const platform = const MethodChannel('sendSms');
 
-  Future<Null> sendSms() async {
-    print("SendSMS");
-    try {
-      final String result = await platform.invokeMethod('send',<String,dynamic>{"phone":"+8201049220759","msg":"Hello! I'm sent programatically."}); //Replace a 'X' with 10 digit phone number
-      print(result);
-    } on PlatformException catch (e) {
-      print(e.toString());
-    }
-  }
-
-  click() {
-    print('hi');
-  }
+//  Future<Null> sendSms() async {
+//    print("SendSMS");
+//    try {
+//      final String result = await platform.invokeMethod('send',<String,dynamic>{"phone":"+8201049220759","msg":"Hello! I'm sent programatically."}); //Replace a 'X' with 10 digit phone number
+//      print(result);
+//    } on PlatformException catch (e) {
+//      print(e.toString());
+//    }
+//  }
 
   @override
   Widget build(BuildContext context) {
-    final bloc = ParentProvider.of(context);
+    final parentBloc = ParentProvider.of(context);
+    final loginBloc = LoginProvider.of(context);
 
     return Scaffold(
-      body: _buildBody(context, bloc),
+      body: _buildBody(context, parentBloc, loginBloc),
     );
   }
 
-  Widget _buildBody(BuildContext context, ParentBloc bloc) {
+  Widget _buildBody(BuildContext context, ParentBloc parentBloc,
+      LoginBloc loginBloc) {
     return Container(
       width: 1000.0,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: ListView(
+
         children: <Widget>[
-          _buildDateText(bloc),
           SizedBox(
             height: 50.0,
           ),
-          _buildStateIndicator(bloc),
-          RaisedButton(
-            child: Text('hi'),
-            onPressed: () {
-              sendSms();
-            },
-          )
+          _buildDateText(parentBloc),
+          SizedBox(
+            height: 20.0,
+          ),
+          _buildStateIndicator(parentBloc, loginBloc),
+          _buildProtectorText(context, loginBloc),
+//          RaisedButton(
+//            child: Text('hi'),
+//            onPressed: () {
+//              sendSms();
+//            },
+//          )
         ],
       ),
     );
@@ -77,9 +80,9 @@ class BoardStatusScreen extends StatelessWidget {
           DateTime selectedDate = snapshot.data;
           DateTime currentTime = DateTime.now();
           String formattedSelectedDate =
-              bloc.calculateFormattedDateMDE(selectedDate);
+          bloc.calculateFormattedDateMDE(selectedDate);
           String formattedCurrentDate =
-              bloc.calculateFormattedDateMDE(currentTime);
+          bloc.calculateFormattedDateMDE(currentTime);
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -103,26 +106,26 @@ class BoardStatusScreen extends StatelessWidget {
               ),
               formattedSelectedDate == formattedCurrentDate
                   ? IconButton(
-                      icon: Icon(Icons.keyboard_arrow_right,
-                          color: Colors.white, size: 35.0),
-                      onPressed: null,
-                    )
+                icon: Icon(Icons.keyboard_arrow_right,
+                    color: Colors.white, size: 35.0),
+                onPressed: null,
+              )
                   : IconButton(
-                      icon: Icon(Icons.keyboard_arrow_right,
-                          color: Colors.grey.shade600, size: 35.0),
-                      onPressed: () {
-                        bloc.changeSelectedDate(
-                            selectedDate.add(Duration(days: 1)));
-                      },
-                    ),
+                icon: Icon(Icons.keyboard_arrow_right,
+                    color: Colors.grey.shade600, size: 35.0),
+                onPressed: () {
+                  bloc.changeSelectedDate(
+                      selectedDate.add(Duration(days: 1)));
+                },
+              ),
             ],
           );
         });
   }
 
-  Widget _buildStateIndicator(ParentBloc bloc) {
+  Widget _buildStateIndicator(ParentBloc bloc, LoginBloc loginBloc) {
     return StreamBuilder<String>(
-      stream: bloc.childId,
+      stream: loginBloc.childId,
       builder: (context, snapshot) {
         if (!snapshot.hasData) return LinearProgressIndicator();
         String childId = snapshot.data;
@@ -134,9 +137,9 @@ class BoardStatusScreen extends StatelessWidget {
             DateTime selectedDate = snapshot.data;
             DateTime currentTime = DateTime.now();
             String formattedSelectedDate =
-                bloc.calculateFormattedDateMDE(selectedDate);
+            bloc.calculateFormattedDateMDE(selectedDate);
             String formattedCurrentDate =
-                bloc.calculateFormattedDateMDE(currentTime);
+            bloc.calculateFormattedDateMDE(currentTime);
 
             if (formattedSelectedDate == formattedCurrentDate) {
               return StreamBuilder<DocumentSnapshot>(
@@ -149,12 +152,12 @@ class BoardStatusScreen extends StatelessWidget {
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) return LinearProgressIndicator();
                     String date =
-                        bloc.calculateFormattedDateYMD(DateTime.now());
+                    bloc.calculateFormattedDateYMD(DateTime.now());
                     Children child = Children.fromMap(snapshot.data.data);
                     List<String> notBoardingDateList =
-                        List<String>.from(child.notBoardingDateList);
+                    List<String>.from(child.notBoardingDateList);
                     bool containBoardingDate =
-                        notBoardingDateList.contains(date);
+                    notBoardingDateList.contains(date);
                     // 시간에서 연월시분을 시분만 남기기
                     String changeStateTime = bloc
                         .changeForamtToGetOnlyDateAndDay(child.changeStateTime);
@@ -194,7 +197,7 @@ class BoardStatusScreen extends StatelessWidget {
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) return CircularProgressIndicator();
                   List<String> recordList =
-                      List<String>.from(snapshot.data.data['record']);
+                  List<String>.from(snapshot.data.data['record']);
                   String date = '';
                   String getOnTime = '승차 정보 없음';
                   String getOffTime = '';
@@ -254,7 +257,7 @@ class BoardStatusScreen extends StatelessWidget {
                         ),
                       ),
                       SizedBox(
-                        height: 30.0,
+                        height: 10.0,
                       ),
                       FlatButton(
                         child: Text(
@@ -264,7 +267,10 @@ class BoardStatusScreen extends StatelessWidget {
                         onPressed: () {
                           bloc.changeSelectedDate(DateTime.now());
                         },
-                      )
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      ),
                     ],
                   );
                 },
@@ -273,6 +279,76 @@ class BoardStatusScreen extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Widget _buildProtectorText(BuildContext context, LoginBloc bloc) {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return Container(
+              margin: EdgeInsets.only(bottom: 200.0),
+              child: CupertinoAlertDialog(
+                title: Text(
+                  "알림",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                content: Text("마중나올 보호자를 변경하세요."),
+                actions: <Widget>[
+                  StreamBuilder(
+                    stream: bloc.protector,
+                    builder: (context, snapshot) {
+                      return CupertinoTextField(
+                        onChanged: bloc.onChangeProtector,
+                        placeholder: "보호자 관계 ex:엄마, 아빠, 오빠",
+                        textAlign: TextAlign.center ,
+                        autofocus: true,
+                      );
+                    },
+                  ),
+                  CupertinoButton(child: Text('변경', style: TextStyle(color: Colors.black),), onPressed: () {
+                    bloc.changeProtector();
+                  }),
+                  CupertinoButton(child: Text('취소', style: TextStyle(color: Colors.black),) , onPressed: () {
+                    Navigator.pop(context);
+                  }),
+                ],
+              ),
+            );
+          },
+        );
+      },
+      child: StreamBuilder<String>(
+          stream: bloc.childId,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
+            String childId = snapshot.data;
+            print(childId);
+
+            return StreamBuilder<DocumentSnapshot>(
+              stream: Firestore.instance
+                  .collection('Kindergarden')
+                  .document('hamang')
+                  .collection('Children')
+                  .document(childId)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return LinearProgressIndicator();
+                String protector = snapshot.data.data['protector'];
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text("오늘은 ${protector}가 기다립니다", style: TextStyle(fontWeight: FontWeight.bold),),
+                  ],
+                );
+              },
+            );
+          }),
     );
   }
 }
