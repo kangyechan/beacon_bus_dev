@@ -208,8 +208,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       ),
       trailing: Icon(Icons.navigate_next),
       onTap: () {
-        Navigator.of(context).pop();
-        Navigator.pushNamed(context, route);
+        Navigator.popAndPushNamed(context, route);
       },
     );
   }

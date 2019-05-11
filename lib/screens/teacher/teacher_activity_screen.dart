@@ -382,7 +382,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("현재 상태를 변경합니다."),
+          content: Text("\n현재 상태를 변경합니다."),
           actions: <Widget>[
             CupertinoButton(
               child: Row(
@@ -455,7 +455,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("모든 학생을 확인하셨나요?"),
+          content: Text("\n모든 학생을 확인하셨나요?"),
           actions: <Widget>[
             CupertinoButton(
               child: Text(
@@ -527,7 +527,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
               ),
             ),
             content: Text(
-                count.toString() + "명이 범위 밖에 있습니다.\n"
+                "\n" + count.toString() + "명이 범위 밖에 있습니다.\n"
                     "다시 한 번 확인해주세요."
             ),
             actions: <Widget>[
@@ -558,7 +558,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("이상이 없습니다.\n활동을 정말 종료하시겠습니까?"),
+          content: Text("\n이상이 없습니다.\n활동을 정말 종료하시겠습니까?"),
           actions: <Widget>[
             CupertinoButton(
               child: Text(

@@ -24,11 +24,11 @@ class _ListTabState extends State<ListTab> {
   int _subscriptionStartedTimestamp;
   bool _running = false;
 
-  @override
-  void dispose() {
-    super.dispose();
-    _subscription.cancel();
-  }
+//  @override
+//  void dispose() {
+//    super.dispose();
+//    _subscription.cancel();
+//  }
 
   void _onStart(BeaconRegion region) {
     setState(() {

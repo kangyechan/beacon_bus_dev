@@ -74,8 +74,6 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
           semanticLabel: 'search',
         ),
         onPressed: () {
-          print(classRoom);
-          print(keyword.text);
           _searchChanged(keyword.text);
         },
       ),
@@ -140,8 +138,6 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
           .snapshots(),
       builder: (context, snapshot) {
         if(!snapshot.hasData) return LinearProgressIndicator();
-        print(searchText);
-        print(classRoom);
         return _logListContents(context, snapshot.data.documents);
       },
     );
