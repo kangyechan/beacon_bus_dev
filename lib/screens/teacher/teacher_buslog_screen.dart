@@ -74,8 +74,6 @@ class _TeacherBusLogScreenState extends State<TeacherBusLogScreen> {
           semanticLabel: 'search',
         ),
         onPressed: () {
-          print(busNum);
-          print(keyword.text);
           _searchChanged(keyword.text);
         },
       ),
@@ -140,8 +138,6 @@ class _TeacherBusLogScreenState extends State<TeacherBusLogScreen> {
           .snapshots(),
       builder: (context, snapshot) {
         if(!snapshot.hasData) return LinearProgressIndicator();
-        print(searchText);
-        print(busNum);
         return _logListContents(context, snapshot.data.documents);
       },
     );

@@ -76,7 +76,7 @@ class _HeaderState extends State<Header> {
           _Button(
             running: widget.running,
             onTap: () {
-              widget.running ? _onTapSubmit() : _startCheck();
+              widget.running ? _stopCheck() : _startCheck();
             },
           ),
         ],
@@ -94,7 +94,7 @@ class _HeaderState extends State<Header> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("측정을 시작하시겠습니까?"),
+          content: Text("\n측정을 시작하시겠습니까?"),
           actions: <Widget>[
             CupertinoButton(
               child: Text(
@@ -107,6 +107,47 @@ class _HeaderState extends State<Header> {
                 Navigator.of(context).pop();
                 _onTapSubmit();
               }
+            ),
+            CupertinoButton(
+              child: Text(
+                "취소",
+                style: TextStyle(
+                  color: Color(0xFF1EA8E0),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _stopCheck() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text(
+            "측정 종료",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text("\n측정을 종료하시겠습니까?\n재 측정 하시려면 시작 버튼을 눌러주세요."),
+          actions: <Widget>[
+            CupertinoButton(
+                child: Text(
+                  "측정 종료",
+                  style: TextStyle(
+                    color: Color(0xFF1EA8E0),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _onTapSubmit();
+                }
             ),
             CupertinoButton(
               child: Text(

@@ -5,6 +5,7 @@ import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -48,7 +49,32 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
         'phoneNumber': phoneNumber,
         'profileImageUrl': profileImageUrl,
       }).then((contents) {
-        Navigator.popAndPushNamed(context, '/teacher');
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return CupertinoAlertDialog(
+              title: Text(
+                "상태 변경",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: Text("\n수정되었습니다."),
+              actions: <Widget> [
+                CupertinoButton(
+                  child: Text(
+                    "확인",
+                    style: TextStyle(
+                      color: Color(0xFF1EA8E0),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.popAndPushNamed(context, '/teacher');
+                  },
+                ),
+              ],
+            );
+          });
       });
     }
   }
