@@ -141,9 +141,9 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 String profileImageUrl = snapshot.data.data['profileImageUrl'];
                 return CircleAvatar(
                   backgroundColor: Colors.white,
-                  child: profileImageUrl == ''
-                    ? Image(image: AssetImage('images/profiledefault.png'))
-                    : Image.network(profileImageUrl),
+                  backgroundImage: profileImageUrl == ''
+                    ? Image(image: AssetImage('images/profiledefault.png'), fit: BoxFit.fill)
+                    : NetworkImage(profileImageUrl,),
                 );
               }
             ),
