@@ -8,6 +8,28 @@ class ParentDateHelpers {
     return getFormattedDate(unFormattedTime);
   }
 
+  String calculateFormattedDateMDE(DateTime time) {
+    DateFormat formatter = DateFormat.M().add_d().add_EEEE();
+    String unFormattedTime = formatter.format(time).toString();
+    return getFormattedDate(unFormattedTime);
+  }
+
+  String calculateFormattedDateYMD(DateTime time) {
+    DateFormat formatter = DateFormat.y().add_M().add_d().add_EEEE();
+    String unFormattedTime = formatter.format(time);
+    return getFormattedDate(unFormattedTime);
+  }
+
+  String changeForamtToGetOnlyDateAndDay(String unformattedDate) {
+    return unformattedDate.split('')
+        .reversed
+        .join('')
+        .substring(0, 5)
+        .split('')
+        .reversed
+        .join('');
+  }
+
   List<String> getOneWeekDate() {
     List<String> oneWeekDate = [];
     DateTime now = DateTime.now();

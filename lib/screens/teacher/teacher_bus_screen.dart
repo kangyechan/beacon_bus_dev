@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
+import 'package:beacon_bus/screens/beacon/tab_ranging.dart';
+import 'package:beacons/beacons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -83,24 +85,19 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      child: Scaffold(
-        appBar: _buildAppbar(),
-        body: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Flex(
-            direction: Axis.vertical,
-            children: <Widget>[
-              _buildStateSection(),
-              _buildBoardSection(),
-              _buildEndBoard(),
-            ],
-          ),
+    return Scaffold(
+      appBar: _buildAppbar(),
+      body: Padding(
+        padding: EdgeInsets.all(20.0),
+        child: Flex(
+          direction: Axis.vertical,
+          children: <Widget>[
+            _buildStateSection(),
+            _buildBoardSection(),
+            _buildEndBoard(),
+          ],
         ),
       ),
-      onWillPop: () {
-        return Future(() => false);
-      },
     );
   }
 

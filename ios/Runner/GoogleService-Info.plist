@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>337200690244-84ib0h2l736h7ti87ekbh75ri4t4jjpk.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.337200690244-84ib0h2l736h7ti87ekbh75ri4t4jjpk</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>337200690244-vpt392qlc0s4t3dc7310o6k4icjjo628.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyB4kwDG-0Ge5Fae4F9oruBld5atyOCilvg</string>
+	<key>GCM_SENDER_ID</key>
+	<string>337200690244</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>walab.beaconBus</string>
+	<key>PROJECT_ID</key>
+	<string>capstone-d26ae</string>
+	<key>STORAGE_BUCKET</key>
+	<string>capstone-d26ae.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:337200690244:ios:a2406ef75561432d</string>
+	<key>DATABASE_URL</key>
+	<string>https://capstone-d26ae.firebaseio.com</string>
+</dict>
+</plist>

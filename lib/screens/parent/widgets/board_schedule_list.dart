@@ -14,7 +14,7 @@ class BoardScheduleList extends StatelessWidget {
 
     return Flexible(
       child: FutureBuilder(
-        future: bloc.user,
+        future: bloc.currentUser,
         builder: (context, snapshot) {
           if (!snapshot.hasData) return LinearProgressIndicator();
           final FirebaseUser user = snapshot.data;

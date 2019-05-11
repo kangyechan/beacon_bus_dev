@@ -2,6 +2,7 @@ import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:beacon_bus/blocs/teacher/teacher_bloc.dart';
 import 'package:beacon_bus/blocs/teacher/teacher_provider.dart';
 import 'package:beacon_bus/constants.dart';
+import 'package:beacon_bus/screens/beacon/tab_ranging.dart';
 import 'package:beacon_bus/screens/teacher/teacher_activity_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_bus_screen.dart';
 import 'package:beacon_bus/screens/teacher/teacher_log_screen.dart';
@@ -47,6 +48,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 SizedBox(height: 10.0,),
                 _buildDropdownButton(tbloc),
                 _buildButton(context, carNum),
+                RangingTab()  ,
               ],
             ),
           ),
@@ -63,7 +65,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       title: Text(
         SCHOOL_NAME,
         style: TextStyle(
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight. bold,
         ),
       ),
       centerTitle: true,

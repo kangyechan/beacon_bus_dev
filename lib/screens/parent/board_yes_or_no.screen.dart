@@ -23,6 +23,38 @@ class BoardYesOrNoScreen extends StatelessWidget {
           _buildTitleText(),
           SizedBox(height: 50.0,),
          BoardScheduleList(),
+          Divider(),
+          SizedBox(height: 50.0,),
+          Text('상태 메뉴얼', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25.0),),
+          SizedBox(height: 20.0,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text('탑승할 경우       '),
+              Switch(
+                onChanged: (value) {
+                },
+                value: true,
+                activeColor: Colors.blue,
+              ),
+              Text('탑승'),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text('탑승하지 않을 경우  '),
+              Switch(
+                onChanged: (value) {
+                },
+                value: false,
+                activeColor: Colors.blue,
+              ),
+              Text('미탑승'),
+            ],
+          ),
+
+          SizedBox(height: 80.0,),
         ],
       ),
     );

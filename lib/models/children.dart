@@ -8,14 +8,16 @@ class Children {
   final String name;
   final String classRoom;
   final String busNum;
-  final String boardState;
+  String boardState;
   final String activityState;
   final String changeStateTime;
 
   final String beaconUid;
   final String beaconMajor;
   final String beaconMinor;
-  final int distance;
+  int connectTime = 0;
+  int noConnectTime = 0;
+  bool link = false;
 
   final DocumentReference reference;
 
@@ -34,7 +36,6 @@ class Children {
         assert(map['beaconUid'] != null),
         assert(map['beaconMajor'] != null),
         assert(map['beaconMinor'] != null),
-        assert(map['distance'] != null),
 
         id = map['id'],
         phoneNumber = map['phoneNumber'],
@@ -49,8 +50,7 @@ class Children {
 
         beaconUid = map['beaconUid'],
         beaconMajor = map['beaconMajor'],
-        beaconMinor = map['beaconMinor'],
-        distance = map['distance'];
+        beaconMinor = map['beaconMinor'];
 
   Children.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);
