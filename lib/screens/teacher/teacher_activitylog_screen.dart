@@ -112,8 +112,8 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
         children: <Widget>[
           _buildListTitleName('이름'),
           _buildListTitleName('날짜'),
-          _buildListTitleName('승차시간'),
-          _buildListTitleName('하차시간'),
+          _buildListTitleName('이탈시간'),
+          _buildListTitleName('합류시간'),
         ],
       ),
     );
@@ -163,17 +163,17 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
         children: <Widget>[
           _buildLogListItem(name),
           _buildLogListItem(map['date']),
-          _buildLogListItem(map['in']),
           _buildLogListItem(map['out']),
+          _buildLogListItem(map['in']),
         ],
       ),
     );
   }
 
-  Widget _buildLogListItem(String name) {
+  Widget _buildLogListItem(String text) {
     return Expanded(
       child: Text(
-        name,
+        text,
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 12.0,

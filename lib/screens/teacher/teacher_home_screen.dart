@@ -134,11 +134,18 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   );
                 }
             ),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Text(
-                "T",
-              ),
+            currentAccountPicture: StreamBuilder<DocumentSnapshot>(
+              stream: Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(user.uid).snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return Text(" ");
+                String profileImageUrl = snapshot.data.data['profileImageUrl'];
+                return CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: profileImageUrl == ''
+                    ? Image(image: AssetImage('images/profiledefault.png'))
+                    : Image.network(profileImageUrl),
+                );
+              }
             ),
           );
         }

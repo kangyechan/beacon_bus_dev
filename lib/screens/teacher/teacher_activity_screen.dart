@@ -495,10 +495,35 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
         context: context,
         builder: (BuildContext context) {
           return CupertinoAlertDialog(
-            title: Text(
-              "종료 실패",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
+
+            title: Container(
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.warning,
+                    color: Colors.red,
+                  ),
+                  Icon(
+                    Icons.warning,
+                    color: Colors.red,
+                  ),
+                  Expanded(
+                    child: Text(
+                      "Dangerous!!",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.warning,
+                    color: Colors.red,
+                  ),
+                  Icon(
+                    Icons.warning,
+                    color: Colors.red,
+                  ),
+                ],
               ),
             ),
             content: Text(
@@ -545,7 +570,6 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
-                dispose();
               },
             ),
             CupertinoButton(

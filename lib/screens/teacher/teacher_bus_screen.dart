@@ -34,14 +34,33 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
   @override
   void initState() {
     super.initState();
+    _setDistance();
+    _setNotBoard();
+
+  }
+
+  void _setDistance() {
     Firestore.instance
-    .collection('Kindergarden')
-    .document('hamang')
-    .collection('Bus')
-    .where('number', isEqualTo: carNum)
-    .snapshots()
-    .listen((data) =>
-      busSize = int.parse(data.documents[0]['distance']
+        .collection('Kindergarden')
+        .document('hamang')
+        .collection('Bus')
+        .where('number', isEqualTo: carNum)
+        .snapshots()
+        .listen((data) =>
+    busSize = int.parse(data.documents[0]['distance']
+    ));
+  }
+
+  void _setNotBoard() {
+    Firestore.instance
+        .collection('Kindergarden')
+        .document('hamang')
+        .collection('Children')
+        .where('number', isEqualTo: carNum)
+        .snapshots()
+        .listen((data) =>
+
+    busSize = int.parse(data.documents[0]['distance']
     ));
   }
 
@@ -394,6 +413,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
       } else if (state == 'notboard') {
         alarm.showNotification(major, name + '이 개인이동 합니다.');
       } else {
+
         alarm.showNotification(major, name + '이 하차했습니다.');
       }
     }

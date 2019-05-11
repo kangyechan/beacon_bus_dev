@@ -134,7 +134,7 @@ class _TeacherBusLogScreenState extends State<TeacherBusLogScreen> {
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance.collection('Kindergarden')
           .document('hamang')
-          .collection('Log')
+          .collection('BusLog')
           .where('name', isEqualTo: searchText)
           .where('busNum', isEqualTo: busNum)
           .snapshots(),
