@@ -39,14 +39,16 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
   }
 
   void _editHandle(String className, String phoneNumber, String profileImageUrl) {
-    if(className != '' && phoneNumber != '' && profileImageUrl != null) {
+    print(className);
+    print(phoneNumber);
+    print(profileImageUrl);
+    if(className != '' && phoneNumber != '' && profileImageUrl != '') {
       Firestore.instance.collection('Kindergarden').document('hamang').collection('Users').document(uid).updateData({
         'class': className,
         'phoneNumber': phoneNumber,
         'profileImageUrl': profileImageUrl,
       }).then((contents) {
         Navigator.popAndPushNamed(context, '/teacher');
-        dispose();
       });
     }
   }
@@ -58,6 +60,8 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
       final StorageUploadTask task =
       fireBaseStorageRef.putFile(_profileImage);
       profileImageUrl = await (await task.onComplete).ref.getDownloadURL();
+    } else {
+      profileImageUrl = profileImageUrl;
     }
   }
 
@@ -87,11 +91,11 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
                       className = snapshot.data.data['class'];
                       phoneNumber = snapshot.data.data['phoneNumber'];
                       profileImageUrl = snapshot.data.data['profileImageUrl'];
-                      uid = snapshot.data.data['profileImageUrl'];
+                      uid = snapshot.data.documentID;
                       return ListView(
                         children: <Widget>[
-                          SizedBox(height: 30.0,),
-                          _buildImageSection(queryData, profileImageUrl),
+                          SizedBox(height: 20.0,),
+                          _buildImageSection(queryData),
                           _buildCameraSection(),
                           SizedBox(height: 20.0,),
                           _buildNameSection(name),
@@ -132,25 +136,45 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
     );
   }
 
-  Widget _buildImageSection(MediaQueryData queryData, String url) {
-    if(url == '') url = null;
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(50.0),
-      ),
-      width: queryData.size.width * (0.2),
-      height: queryData.size.height * (0.2),
-      margin: EdgeInsets.symmetric(horizontal: 100.0),
-      child: url == null
-          ? Image(
-          image: AssetImage(
-            'images/profiledefault.png',
+  Widget _buildImageSection(MediaQueryData queryData) {
+    Widget section;
+    if(profileImageUrl == '') {
+      section = Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            image: _profileImage == null
+                ? AssetImage(
+                'images/profiledefault.png',
+              )
+                : Image.file(
+              _profileImage,
+            ),
+            fit: BoxFit.fitHeight,
           ),
-          fit: BoxFit.fitHeight,)
-          : Image.network(
-          url,
-          fit: BoxFit.fitHeight,),
-    );
+        ),
+        height: 180.0,
+      );
+    } else {
+      section = Container(
+        margin: EdgeInsets.symmetric(horizontal: 80.0),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            image: _profileImage == null
+                ? NetworkImage(
+              profileImageUrl,
+            )
+                : Image.file(
+              _profileImage,
+            ),
+            fit: BoxFit.fitHeight,
+          )
+        ),
+        height: 180.0,
+      );
+    }
+    return section;
   }
 
   Widget _buildCameraSection() {
@@ -161,7 +185,11 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
           Icons.camera_alt,
           color: Color(0xFF1EA8E0),
         ),
-        onPressed: () => getImage()),
+        onPressed: () {
+          print('camera button');
+          getImage();
+        },
+      ),
     );
   }
 
@@ -179,7 +207,6 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
   }
 
   Widget _buildClassSection(String className) {
-    _classNameController.text = className+"반";
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 100.0),
       child: Flex(
@@ -189,6 +216,10 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
             child: TextField(
               decoration: InputDecoration(
                 fillColor: Colors.white,
+                hintText: className + '반',
+                hintStyle: TextStyle(
+                  color: Colors.black,
+                ),
               ),
               textAlign: TextAlign.center,
               controller: _classNameController,
@@ -208,7 +239,6 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
   }
 
   Widget _buildPhoneSection(String phoneNumber) {
-    _phoneNumberController.text = phoneNumber;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 100.0),
       child: Flex(
@@ -218,7 +248,10 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
             child: TextField(
               decoration: InputDecoration(
                 fillColor: Colors.white,
-                hintText: '- 없이 숫자만',
+                hintText: phoneNumber,
+                hintStyle: TextStyle(
+                  color: Colors.black,
+                ),
               ),
               textAlign: TextAlign.center,
               controller: _phoneNumberController,
@@ -251,8 +284,10 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
               ),
               color: Color(0xFFC9EBF7),
               onPressed: () {
+                if(_classNameController.text == '') _classNameController.text = className+'반';
+                if(_phoneNumberController.text == '') _phoneNumberController.text = phoneNumber;
                 uploadImage().then((push){
-                  _editHandle(_classNameController.text.substring(0, _classNameController.text.length - 1),
+                  _editHandle(_classNameController.text.substring(0, _classNameController.text.length-1),
                       _phoneNumberController.text, profileImageUrl);
                 });
               },
