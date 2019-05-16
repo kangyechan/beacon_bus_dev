@@ -6,6 +6,7 @@ class Children {
   final String protector;
 
   final String name;
+  final String profileImageUrl;
   final String classRoom;
   final String busNum;
   String boardState;
@@ -28,6 +29,7 @@ class Children {
         assert(map['protector'] != null),
 
         assert(map['name'] != null),
+        assert(map['profileImageUrl'] != null),
         assert(map['classRoom'] != null),
         assert(map['busNum'] != null),
         assert(map['boardState'] != null),
@@ -43,6 +45,7 @@ class Children {
         protector = map['protector'],
 
         name = map['name'],
+        profileImageUrl = map['profileImageUrl'],
         classRoom = map['classRoom'],
         busNum = map['busNum'],
         boardState = map['boardState'],

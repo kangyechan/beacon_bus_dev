@@ -288,9 +288,9 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
           children: <Widget>[
             AspectRatio(
               aspectRatio: 16 / 9,
-              child: Image(
-                image: AssetImage('images/adddefault.JPG'),
-              ),
+              child: children.profileImageUrl == '' ?
+                Image(image: AssetImage('images/profiledefault.png'), fit: BoxFit.fitHeight,)
+                : Image.network(children.profileImageUrl, fit: BoxFit.fitHeight,),
             ),
             Container(
               height: 30.0,

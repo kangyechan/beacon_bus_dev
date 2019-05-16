@@ -346,7 +346,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("탑승하는 차량을 확인해 주세요."),
+          content: Text("\n탑승하는 차량을 확인해 주세요."),
           actions: <Widget>[
             CupertinoButton(
               child: Text(
@@ -376,7 +376,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text("로그아웃 하시겠습니까?"),
+          content: Text("\n로그아웃 하시겠습니까?"),
           actions: <Widget>[
             CupertinoButton(
               child: Text(
@@ -386,7 +386,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 ),
               ),
               onPressed: () {
-                Navigator.of(context).pop();
                 bloc.signOut();
               },
             ),
