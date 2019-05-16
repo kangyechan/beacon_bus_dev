@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:beacon_bus/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +40,7 @@ class _ParentHomeScreenState extends State<ParentHomeScreen> {
   Widget build(BuildContext context) {
     final bloc = LoginProvider.of(context);
     bloc.setContext(context);
+    bloc.getCurrentUserAndSetChildId();
 
     return Scaffold(
       appBar: AppBar(
@@ -175,8 +177,44 @@ class _ParentHomeScreenState extends State<ParentHomeScreen> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      onTap: () {
-        bloc.signOut();
+      onTap: () => showLogOutDialog(context, bloc),
+    );
+  }
+
+  showLogOutDialog(BuildContext context, LoginBloc bloc) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          margin: EdgeInsets.only(bottom: 200.0),
+          child: CupertinoAlertDialog(
+            title: Text(
+              "알림",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Text("로그아웃하시겠습니까?"),
+            actions: <Widget>[
+              CupertinoButton(
+                  child: Text(
+                    '확인',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: bloc.signOut
+              ),
+              CupertinoButton(
+                  child: Text(
+                    '취소',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+              ),
+            ],
+          ),
+        );
       },
     );
   }

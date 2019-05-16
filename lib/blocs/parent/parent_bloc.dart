@@ -128,6 +128,7 @@ class ParentBloc extends Object with ParentDateHelpers {
             .collection('Children')
             .document(_childId.value).updateData({"profileImageUrl": imageUrl}).then((done) {
               setLoadingState(false);
+              setProfileImageForAdd(null);
         });
       });
     }

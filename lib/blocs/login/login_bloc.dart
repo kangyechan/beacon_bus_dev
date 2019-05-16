@@ -101,9 +101,9 @@ class LoginBloc extends Object with LoginValidators {
     FirebaseAuth _auth = FirebaseAuth.instance;
     _auth.signOut().then((done) {
       Navigator.pushNamedAndRemoveUntil(_context, '/login', (Route r) => false);
+      changeEmail(null);
+      changePassword(null);
       prefs.setString(USER_TYPE, "");
-      prefs.setString(USER_NAME, "");
-      prefs.setString(USER_CLASS, "");
     });
   }
 

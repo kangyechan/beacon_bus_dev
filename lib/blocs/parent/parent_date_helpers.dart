@@ -14,13 +14,19 @@ class ParentDateHelpers {
     return getFormattedDate(unFormattedTime);
   }
 
-  String calculateFormattedDateYMD(DateTime time) {
+  String calculateFormattedDateYMDE(DateTime time) {
     DateFormat formatter = DateFormat.y().add_M().add_d().add_EEEE();
     String unFormattedTime = formatter.format(time);
     return getFormattedDate(unFormattedTime);
   }
 
-  String changeForamtToGetOnlyDateAndDay(String unformattedDate) {
+  String calculateFormattedDateHourAndMinute(DateTime time) {
+    DateFormat formatter = DateFormat.H().add_m();
+    String unFormattedTime = formatter.format(time);
+    return "${unFormattedTime.split(' ')[0]}시 ${unFormattedTime.split(' ')[1]}분";
+  }
+
+  String changeFormatToGetOnlyDateAndDay(String unformattedDate) {
     return unformattedDate.split('')
         .reversed
         .join('')
@@ -43,6 +49,7 @@ class ParentDateHelpers {
 
     return oneWeekDate;
   }
+
 
 
   String getFormattedDate(String unFormattedTime) {

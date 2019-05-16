@@ -118,7 +118,7 @@ class LoginScreen extends StatelessWidget {
           return Opacity(opacity: opacity, child: ProgressHUD(
             backgroundColor: Colors.black12,
             color: Colors.white,
-            containerColor: Theme.of(context).accentColor,
+            containerColor: Color(0xFFC9EBF7),
             borderRadius: 5.0,
             text: '',
           ),);

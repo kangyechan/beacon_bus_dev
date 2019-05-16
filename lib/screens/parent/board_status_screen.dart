@@ -134,7 +134,7 @@ class BoardStatusScreen extends StatelessWidget {
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) return LinearProgressIndicator();
                     String date =
-                        bloc.calculateFormattedDateYMD(DateTime.now());
+                        bloc.calculateFormattedDateYMDE(DateTime.now());
                     Children child = Children.fromMap(snapshot.data.data);
                     List<String> notBoardingDateList =
                         List<String>.from(child.notBoardingDateList);
@@ -142,7 +142,7 @@ class BoardStatusScreen extends StatelessWidget {
                         notBoardingDateList.contains(date);
                     // 시간에서 연월시분을 시분만 남기기
                     String changeStateTime = bloc
-                        .changeForamtToGetOnlyDateAndDay(child.changeStateTime);
+                        .changeFormatToGetOnlyDateAndDay(child.changeStateTime);
                     Widget childBoardingStateWidget;
                     if (child.boardState == "board") {
                       childBoardingStateWidget = BoardStateWidget(
@@ -183,7 +183,7 @@ class BoardStatusScreen extends StatelessWidget {
                   String getOffTime = '';
                   for (final document in snapshot.data.documents) {
                     Map<dynamic, dynamic> recordMap = document.data['boardRecord'];
-                    if (recordMap['date'] == bloc.calculateFormattedDateYMD(selectedDate)) {
+                    if (recordMap['date'] == bloc.calculateFormattedDateYMDE(selectedDate)) {
                       getOnTime = "승차 : ${recordMap['board']}";
                       getOffTime = "하차 : ${recordMap['unknown']}";
                       break;

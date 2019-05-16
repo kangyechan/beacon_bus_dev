@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:beacon_bus/blocs/parent/parent_date_helpers.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
 import 'package:beacon_bus/screens/teacher/widgets/alarm.dart';
@@ -9,7 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class TeacherBusScreen extends StatefulWidget {
+class TeacherBusScreen extends StatefulWidget  {
   final int carNum;
 
   TeacherBusScreen({Key key, this.carNum}): super(key: key);
@@ -18,7 +19,7 @@ class TeacherBusScreen extends StatefulWidget {
   _TeacherBusScreenState createState() => _TeacherBusScreenState(carNum: carNum);
 }
 
-class _TeacherBusScreenState extends State<TeacherBusScreen> {
+class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelpers {
   final int carNum;
   _TeacherBusScreenState({this.carNum});
 
@@ -404,6 +405,30 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> {
         'changeStateTime': DateFormat('yyyy-MM-dd hh:mm')
             .format(DateTime.now())
             .toString(),
+      }).then((done) {
+        if (state == "unknown") {
+          Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('BusLog')
+              .document()
+              .updateData({
+            'boardRecord': {
+              'unknown': calculateFormattedDateHourAndMinute(DateTime.now())
+            },
+          });
+        } else if (state == "board") {
+          Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('BusLog')
+              .document()
+              .updateData({
+            'boardRecord': {
+              'board': calculateFormattedDateHourAndMinute(DateTime.now())
+            },
+          });
+        }
       });
       if (state == 'board') {
         alarm.showNotification(major, name + '이 승차했습니다.');

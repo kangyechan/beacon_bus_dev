@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:beacon_bus/blocs/parent/parent_date_helpers.dart';
 import 'package:beacon_bus/models/children.dart';
 import 'package:beacon_bus/screens/teacher/widgets/alarm.dart';
 import 'package:beacons/beacons.dart';
@@ -7,8 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'tab_base.dart';
 
-class RangingTab extends ListTab {
-
+class RangingTab extends ListTab with ParentDateHelpers {
   String _busNum;
   String _className;
   int _distance;
@@ -22,14 +22,15 @@ class RangingTab extends ListTab {
     this._className = '';
     this._distance = 5;
   }
+
   RangingTab(String busNum, String className, int distance) {
     this._distance = distance;
-    if(busNum == '') {
+    if (busNum == '') {
       this._busNum = null;
     } else {
       this._busNum = busNum;
     }
-    if(className == '') {
+    if (className == '') {
       this._className = null;
     } else {
       this._className = className;
@@ -70,7 +71,7 @@ class RangingTab extends ListTab {
             }
           }
         }
-        if(_className == null && _busNum != null) {
+        if (_className == null && _busNum != null) {
           for (var data in userResults) {
             print(userResults);
             if (data.link == true) {
@@ -82,8 +83,26 @@ class RangingTab extends ListTab {
                     .document('hamang')
                     .collection('Children')
                     .document(data.id)
-                    .updateData({'boardState': 'board'});
-                alarm.showNotification(int.parse(data.beaconMajor), data.name + '이 승차했습니다.');
+                    .updateData({'boardState': 'board'}).then((done) {
+                  Firestore.instance
+                      .collection('Kindergarden')
+                      .document('hamang')
+                      .collection('BusLog')
+                      .document()
+                      .setData({
+                    'id': data.id,
+                    'boardRecord': {
+                      'date': calculateFormattedDateYMDE(DateTime.now()),
+                      'board':
+                          calculateFormattedDateHourAndMinute(DateTime.now()),
+                      'unknown': ""
+                    },
+                    'name': data.name,
+                    'busNum': _busNum,
+                  });
+                });
+                alarm.showNotification(
+                    int.parse(data.beaconMajor), data.name + '이 승차했습니다.');
               }
             } else {
               data.noConnectTime++;
@@ -96,13 +115,30 @@ class RangingTab extends ListTab {
                       .document('hamang')
                       .collection('Children')
                       .document(data.id)
-                      .updateData({'boardState': 'unknown'});
-                  alarm.showNotification(int.parse(data.beaconMajor), data.name + '이 하차했습니다.');
+                      .updateData({'boardState': 'unknown'}).then((done) {
+                    Firestore.instance
+                        .collection('Kindergarden')
+                        .document('hamang')
+                        .collection('BusLog')
+                        .where('id', isEqualTo: data.id).snapshots().listen((data) {
+
+                      Map newBoardRecordMap = data.documents[0]['boardRecord'];
+                      newBoardRecordMap['unknown'] = calculateFormattedDateHourAndMinute(DateTime.now());
+                      Firestore.instance
+                          .collection('Kindergarden')
+                          .document('hamang')
+                          .collection('BusLog').document(data.documents[0].documentID).updateData({
+                        'boardRecord': newBoardRecordMap
+                      });
+                    });
+                  });
+                  alarm.showNotification(
+                      int.parse(data.beaconMajor), data.name + '이 하차했습니다.');
                 }
               }
             }
           }
-        } else if(_className != null && _busNum == null){
+        } else if (_className != null && _busNum == null) {
           for (var data in userResults) {
             print(userResults);
             if (data.link == true) {
@@ -115,7 +151,8 @@ class RangingTab extends ListTab {
                     .collection('Children')
                     .document(data.id)
                     .updateData({'activityState': 'in'});
-                alarm.showNotification(int.parse(data.beaconMajor), data.name + '이 범위로 들어왔습니다.');
+                alarm.showNotification(
+                    int.parse(data.beaconMajor), data.name + '이 범위로 들어왔습니다.');
               }
             } else {
               data.noConnectTime++;
@@ -129,7 +166,8 @@ class RangingTab extends ListTab {
                       .collection('Children')
                       .document(data.id)
                       .updateData({'activityState': 'out'});
-                  alarm.showNotification(int.parse(data.beaconMajor), data.name + '이 범위를 이탈했습니다.');
+                  alarm.showNotification(
+                      int.parse(data.beaconMajor), data.name + '이 범위를 이탈했습니다.');
                 }
               }
             }
