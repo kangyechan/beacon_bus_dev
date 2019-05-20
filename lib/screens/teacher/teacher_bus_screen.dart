@@ -25,19 +25,25 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
 
   Alarm alarm = new Alarm();
 
-  String boardingState = "board";
-  String boardingStateTitle = "현재 탑승중";
+  String boardingState = null;
+  String boardingStateTitle = "전체 인원";
   int busSize;
+  int total;
   int boarding;
   int notBoarding;
   int unKnown;
+
+  Color totalColor = Color(0xFF1EA8E0);
+  Color boardColor = Colors.white;
+  Color unknownColor = Colors.white;
+  Color notboardColor = Colors.white;
+  Color IconColor = Colors.green;
 
   @override
   void initState() {
     super.initState();
     _setDistance();
     _setNotBoard();
-
   }
 
   void _setDistance() {
@@ -67,15 +73,34 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
 
   void _setStateChanged(String boardStateName) {
     setState(() {
-      if(boardStateName == '탑승중') {
+      if(boardStateName == '전체') {
+        boardingState = null;
+        boardingStateTitle = "전체 인원";
+        totalColor = Color(0xFF1EA8E0);
+        boardColor = Colors.white;
+        unknownColor = Colors.white;
+        notboardColor = Colors.white;
+      } else if(boardStateName == '승차') {
         boardingState = "board";
-        boardingStateTitle = "현재 탑승중";
-      } else if(boardStateName == '미탑승') {
+        boardingStateTitle = "승차 인원";
+        totalColor = Colors.white;
+        boardColor = Color(0xFF1EA8E0);
+        unknownColor = Colors.white;
+        notboardColor = Colors.white;
+      } else if(boardStateName == '하차') {
         boardingState = "unknown";
-        boardingStateTitle = "현재 미탑승중";
+        boardingStateTitle = "하차 인원";
+        totalColor = Colors.white;
+        boardColor = Colors.white;
+        unknownColor = Color(0xFF1EA8E0);
+        notboardColor = Colors.white;
       } else {
         boardingState = "notboard";
-        boardingStateTitle = "오늘 개인이동";
+        boardingStateTitle = "개인이동 인원";
+        totalColor = Colors.white;
+        boardColor = Colors.white;
+        unknownColor = Colors.white;
+        notboardColor = Color(0xFF1EA8E0);
       }
     });
   }
@@ -124,17 +149,32 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
       child: Flex(
         direction: Axis.horizontal,
         children: <Widget>[
-          Flexible(flex: 1, child: _buildState(Icon(Icons.check_circle), Colors.green, "탑승중")),
-          Flexible(flex: 1, child: _buildState(Icon(Icons.cancel), Colors.red, "미탑승")),
-          Flexible(flex: 1, child: _buildState(Icon(Icons.error), Colors.orange, "개인이동")),
+          Flexible(flex: 1, child: _buildState("전체", totalColor)),
+          Flexible(flex: 1, child: _buildState("승차", boardColor)),
+          Flexible(flex: 1, child: _buildState("하차", unknownColor)),
+          Flexible(flex: 1, child: _buildState("개인이동", notboardColor)),
         ],
       ),
     );
   }
 
-  Widget _buildState(Icon stateIcon, Color stateColor, String name) {
+  Widget _buildState(String name, Color color) {
     Widget countSection;
-    if (name == "탑승중") {
+    if (name == "전체") {
+      countSection = StreamBuilder<QuerySnapshot>(
+          stream: Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('Children')
+              .where('busNum', isEqualTo: carNum.toString())
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
+            total = snapshot.data.documents.length;
+            return _countSectionContents(name, total, color);
+          }
+      );
+    } else if (name == "승차") {
       countSection = StreamBuilder<QuerySnapshot>(
           stream: Firestore.instance
               .collection('Kindergarden')
@@ -146,11 +186,10 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
           builder: (context, snapshot) {
             if (!snapshot.hasData) return LinearProgressIndicator();
             boarding = snapshot.data.documents.length;
-            return _countSectionContents(
-                stateIcon, stateColor, name, boarding);
+            return _countSectionContents(name, boarding, color);
           }
       );
-    } else if (name == '미탑승') {
+    } else if (name == '하차') {
       countSection = StreamBuilder<QuerySnapshot>(
           stream: Firestore.instance
               .collection('Kindergarden')
@@ -162,7 +201,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
           builder: (context, snapshot) {
             if (!snapshot.hasData) return LinearProgressIndicator();
             unKnown = snapshot.data.documents.length;
-            return _countSectionContents(stateIcon, stateColor, name, unKnown);
+            return _countSectionContents(name, unKnown, color);
           }
       );
     } else {
@@ -177,34 +216,26 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
           builder: (context, snapshot) {
             if (!snapshot.hasData) return LinearProgressIndicator();
             notBoarding = snapshot.data.documents.length;
-            return _countSectionContents(stateIcon, stateColor, name, notBoarding);
+            return _countSectionContents(name, notBoarding, color);
           }
       );
     }
     return countSection;
   }
 
-  Widget _countSectionContents(Icon stateIcon, Color stateColor,
-      String name, int count){
-    return FlatButton(
-      padding: EdgeInsets.all(5.0),
-      onPressed: () {
-        _setStateChanged(name);
-      },
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: IconTheme(
-              data: IconThemeData(
-                color: stateColor,
-              ),
-              child: stateIcon,
-            ),
-          ),
-          Text(
-            name+ " "+count.toString()+"명",
-          ),
-        ],
+  Widget _countSectionContents(String name, int count, Color color){
+    return Container(
+      margin: EdgeInsets.only(left: 5.0),
+      child: OutlineButton(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+        borderSide: BorderSide(color: color, width: 2.0),
+        padding: EdgeInsets.all(5.0),
+        onPressed: () {
+          _setStateChanged(name);
+        },
+        child: Text(
+          name+ " "+count.toString()+"명",
+        ),
       ),
     );
   }
@@ -215,7 +246,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: Color(0xFFC9EBF7),
+            color: Color(0xFF1EA8E0),
             width: 2.0,
           ),
         ),
@@ -240,7 +271,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
       child: Flex(
         direction: Axis.vertical,
         children: <Widget>[
-          _buildTitleSection(200.0, boardingStateTitle),
+          _buildTitleSection(150.0, boardingStateTitle),
           Flexible(
             child: _buildBoardMember(),
           ),
@@ -276,36 +307,49 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
 
   Widget _buildMemberListItem(BuildContext context, DocumentSnapshot data) {
     final children = Children.fromSnapshot(data);
+    if(children.boardState == 'board') {
+      IconColor = Colors.green;
+    } else {
+      IconColor = Colors.grey[300];
+    }
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey[300]),
+          border: Border.all(
+            color: IconColor,
+            width: 3.0,
+          ),
           borderRadius: BorderRadius.circular(5.0),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             AspectRatio(
               aspectRatio: 16 / 9,
-              child: children.profileImageUrl == '' ?
-                Image(image: AssetImage('images/profiledefault.png'), fit: BoxFit.fitHeight,)
-                : Image.network(children.profileImageUrl, fit: BoxFit.fitHeight,),
+              child: Container(
+                child: children.profileImageUrl == ''
+                  ? Image(image: AssetImage('images/profiledefault.png'), fit: BoxFit.fill,)
+                  : Image.network(children.profileImageUrl, fit: BoxFit.fill,),
+              ),
             ),
             Container(
               height: 30.0,
               child: FlatButton(
                 child: Row(
                   children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        children.name,
-                        style: TextStyle(
-                          fontSize: 14.0,
-                        ),
+                    Icon(
+                      Icons.check_circle,
+                      color: IconColor,
+                      size: 15.0,
+                    ),
+                    SizedBox(width: 5.0),
+                    Text(
+                      children.name,
+                      style: TextStyle(
+                        fontSize: 14.0,
                       ),
                     ),
-                    _buildStateIcon(children.boardState),
                   ],
                 ),
                 onPressed: () {
@@ -327,41 +371,6 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
     );
   }
 
-  Widget _buildStateIcon(String boardState) {
-    // notBoardingDate가 없을때 조건도 추가해야함.
-    if(boardState == 'board') {
-      return IconTheme(
-        data: IconThemeData(
-          color: Colors.green,
-        ),
-        child: Icon(
-          Icons.check_circle,
-          size: 20.0,
-        ),
-      );
-    } else if(boardState == 'unknown') {
-      return IconTheme(
-        data: IconThemeData(
-          color: Colors.red,
-        ),
-        child: Icon(
-          Icons.cancel,
-          size: 20.0,
-        ),
-      );
-    } else {
-      return IconTheme(
-        data: IconThemeData(
-          color: Colors.amber,
-        ),
-        child: Icon(
-          Icons.error,
-          size: 20.0,
-        ),
-      );
-    }
-  }
-
   Widget _buildButtonSection() {
     return Center(
       child: Row(
@@ -373,19 +382,26 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
           ),
           Expanded(
             child: Center(
-              child: FlatButton(
-                color: Color(0xFFC9EBF7),
-                padding: EdgeInsets.all(10.0),
-                child: Text(
-                  "운행 종료",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                child: Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: FlatButton(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+                    color: Color(0xFFC9EBF7),
+                    padding: EdgeInsets.all(10.0),
+                    child: Text(
+                      "운행 종료",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onPressed: () {
+                      _showCheckDialog();
+                    },
                   ),
                 ),
-                onPressed: () {
-                  print(busSize);
-                  _showCheckDialog();
-                },
               ),
             ),
           )
@@ -473,7 +489,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
                     child: Text(
                       "탑승중",
                       style: TextStyle(
-                        color: Color(0xFF1EA8E0),
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -487,10 +503,10 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
                   Expanded(
                     child: IconTheme(
                       data: IconThemeData(
-                        color: Colors.red,
+                        color: Colors.grey[400],
                       ),
                       child: Icon(
-                        Icons.cancel,
+                        Icons.check_circle,
                         size: 20.0,
                       ),
                     ),
@@ -499,7 +515,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
                     child: Text(
                       "미탑승",
                       style: TextStyle(
-                        color: Color(0xFF1EA8E0),
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -515,10 +531,10 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
                   Expanded(
                     child: IconTheme(
                       data: IconThemeData(
-                        color: Colors.amber,
+                        color: Colors.grey[400],
                       ),
                       child: Icon(
-                        Icons.error,
+                        Icons.check_circle,
                         size: 20.0,
                       ),
                     ),
@@ -527,7 +543,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
                     child: Text(
                       "개인이동",
                       style: TextStyle(
-                        color: Color(0xFF1EA8E0),
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -594,10 +610,30 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
         context: context,
         builder: (BuildContext context) {
           return CupertinoAlertDialog(
-            title: Text(
-              "종료 실패",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
+            title: Container(
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Icon(
+                      Icons.warning,
+                      color: Colors.red,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      "위험!",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Icon(
+                      Icons.warning,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
               ),
             ),
             content: Text(

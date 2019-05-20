@@ -27,19 +27,37 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
   String dropdownDistanceValue = '5 M';
   int limitDistance = 5;
   List<String> distanceList = ['3 M', '5 M', '10 M', '15 M', '20 M', '25 M', '30 M'];
-  String activityState = "in";
-  String activityStateTitle = "현재 범위 내";
+  String activityState = null;
+  String activityStateTitle = "전체 인원";
+  int total;
   int rangeIn;
   int rangeOut;
 
+  Color totalColor = Color(0xFF1EA8E0);
+  Color insideColor = Colors.white;
+  Color outsideColor = Colors.white;
+  Color IconColor = Colors.green;
+
   void _setStateChanged(String boardStateName) {
     setState(() {
-      if(boardStateName == '범위 내') {
+      if(boardStateName == '전체') {
+        activityState = null;
+        activityStateTitle = "전체 인원";
+        totalColor = Color(0xFF1EA8E0);
+        insideColor = Colors.white;
+        outsideColor = Colors.white;
+      } else if(boardStateName == '범위 내') {
         activityState = "in";
-        activityStateTitle = "현재 범위 내";
+        activityStateTitle = "지정범위 내";
+        totalColor = Colors.white;
+        insideColor = Color(0xFF1EA8E0);
+        outsideColor = Colors.white;
       } else {
         activityState = "out";
-        activityStateTitle = "현재 범위 밖";
+        activityStateTitle = "지정범위 밖";
+        totalColor = Colors.white;
+        insideColor = Colors.white;
+        outsideColor = Color(0xFF1EA8E0);
       }
     });
   }
@@ -91,17 +109,32 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
       child: Flex(
         direction: Axis.horizontal,
         children: <Widget>[
-          Flexible(flex: 1, child: _buildState(Icon(Icons.check_circle), Colors.green, "범위 내")),
-          Flexible(flex: 1, child: _buildState(Icon(Icons.cancel), Colors.red, "범위 밖")),
+          Flexible(flex: 1, child: _buildState("전체", totalColor)),
+          Flexible(flex: 1, child: _buildState("범위 내", insideColor)),
+          Flexible(flex: 1, child: _buildState("범위 밖", outsideColor)),
           Flexible(flex: 1, child: _buildDistanceButton()),
         ],
       ),
     );
   }
 
-  Widget _buildState(Icon stateIcon, Color stateColor, String name) {
+  Widget _buildState(String name, Color color) {
     Widget countSection;
-    if (name == "범위 내") {
+    if (name == "전체") {
+      countSection = StreamBuilder<QuerySnapshot>(
+          stream: Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('Children')
+              .where('classRoom', isEqualTo: className)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return LinearProgressIndicator();
+            total = snapshot.data.documents.length;
+            return _countSectionContents(name, total, color);
+          }
+      );
+    } else if (name == "범위 내") {
       countSection = StreamBuilder<QuerySnapshot>(
           stream: Firestore.instance
               .collection('Kindergarden')
@@ -113,7 +146,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
           builder: (context, snapshot) {
             if (!snapshot.hasData) return LinearProgressIndicator();
             rangeIn = snapshot.data.documents.length;
-            return _countSectionContents(stateIcon, stateColor, name, rangeIn);
+            return _countSectionContents(name, rangeIn, color);
           }
       );
     } else {
@@ -128,34 +161,26 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
           builder: (context, snapshot) {
             if (!snapshot.hasData) return LinearProgressIndicator();
             rangeOut = snapshot.data.documents.length;
-            return _countSectionContents(stateIcon, stateColor, name, rangeOut);
+            return _countSectionContents(name, rangeOut, color);
           }
       );
     }
     return countSection;
   }
 
-  Widget _countSectionContents(Icon stateIcon, Color stateColor,
-      String name, int count){
-    return FlatButton(
-      padding: EdgeInsets.all(5.0),
-      onPressed: () {
-        _setStateChanged(name);
-      },
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: IconTheme(
-              data: IconThemeData(
-                color: stateColor,
-              ),
-              child: stateIcon,
-            ),
-          ),
-          Text(
-            name+ " "+count.toString()+"명",
-          ),
-        ],
+  Widget _countSectionContents(String name, int count, Color color){
+    return Container(
+      margin: EdgeInsets.only(left: 5.0),
+      child: OutlineButton(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+        borderSide: BorderSide(color: color, width: 2.0),
+        padding: EdgeInsets.all(5.0),
+        onPressed: () {
+          _setStateChanged(name);
+        },
+        child: Text(
+          name+ " "+count.toString()+"명",
+        ),
       ),
     );
   }
@@ -178,7 +203,10 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
         },
         items: distanceList.map((value) => DropdownMenuItem(
           value: value,
-          child: Text(value),
+          child: Container(
+            margin: EdgeInsets.only(left: 15.0,),
+            child: Text(value),
+          ),
         )).toList(),
         hint: Text("범위 지정"),
       ),
@@ -191,7 +219,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: Color(0xFFC9EBF7),
+            color: Color(0xFF1EA8E0),
             width: 2.0,
           ),
         ),
@@ -216,7 +244,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
       child: Flex(
         direction: Axis.vertical,
         children: <Widget>[
-          _buildTitleSection(200.0, activityStateTitle),
+          _buildTitleSection(150.0, activityStateTitle),
           Flexible(
             child: _buildBoardMember(),
           ),
@@ -252,20 +280,30 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
 
   Widget _buildMemberListItem(BuildContext context, DocumentSnapshot data) {
     final children = Children.fromSnapshot(data);
+    if(children.activityState == 'in') {
+      IconColor = Colors.green;
+    } else {
+      IconColor = Colors.grey[300];
+    }
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey[300]),
+          border: Border.all(
+            color: IconColor,
+            width: 3.0,
+          ),
           borderRadius: BorderRadius.circular(5.0),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             AspectRatio(
               aspectRatio: 16 / 9,
-              child: Image(
-                image: AssetImage('images/adddefault.JPG'),
+              child: Container(
+                child: children.profileImageUrl == ''
+                    ? Image(image: AssetImage('images/profiledefault.png'), fit: BoxFit.fill,)
+                    : Image.network(children.profileImageUrl, fit: BoxFit.fill,),
               ),
             ),
             Container(
@@ -273,15 +311,18 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
               child: FlatButton(
                 child: Row(
                   children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        children.name,
-                        style: TextStyle(
-                          fontSize: 14.0,
-                        ),
+                    Icon(
+                      Icons.check_circle,
+                      color: IconColor,
+                      size: 15.0,
+                    ),
+                    SizedBox(width: 5.0),
+                    Text(
+                      children.name,
+                      style: TextStyle(
+                        fontSize: 14.0,
                       ),
                     ),
-                    _buildStateIcon(children.activityState),
                   ],
                 ),
                 onPressed: () {
@@ -295,30 +336,6 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
     );
   }
 
-  Widget _buildStateIcon(String boardState) {
-    if(boardState == 'in') {
-      return IconTheme(
-        data: IconThemeData(
-          color: Colors.green,
-        ),
-        child: Icon(
-          Icons.check_circle,
-          size: 20.0,
-        ),
-      );
-    } else {
-      return IconTheme(
-        data: IconThemeData(
-          color: Colors.red,
-        ),
-        child: Icon(
-          Icons.cancel,
-          size: 20.0,
-        ),
-      );
-    }
-  }
-
   Widget _buildButtonSection() {
     return Center(
       child: Row(
@@ -330,18 +347,26 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
           ),
           Expanded(
             child: Center(
-              child: FlatButton(
-                color: Color(0xFFC9EBF7),
-                padding: EdgeInsets.all(10.0),
-                child: Text(
-                  "활동 종료",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                child: Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: FlatButton(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+                    color: Color(0xFFC9EBF7),
+                    padding: EdgeInsets.all(10.0),
+                    child: Text(
+                      "활동 종료",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onPressed: () {
+                      _showCheckDialog();
+                    },
                   ),
                 ),
-                onPressed: () {
-                  _showCheckDialog();
-                },
               ),
             ),
           )
@@ -416,7 +441,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
                 children: <Widget>[
                   IconTheme(
                     data: IconThemeData(
-                      color: Colors.red,
+                      color: Colors.grey,
                     ),
                     child: Icon(
                       Icons.cancel,
@@ -499,29 +524,25 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
             title: Container(
               child: Row(
                 children: <Widget>[
-                  Icon(
-                    Icons.warning,
-                    color: Colors.red,
-                  ),
-                  Icon(
-                    Icons.warning,
-                    color: Colors.red,
+                  Expanded(
+                    child: Icon(
+                      Icons.warning,
+                      color: Colors.red,
+                    ),
                   ),
                   Expanded(
                     child: Text(
-                      "Dangerous!!",
+                      "위험!",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  Icon(
-                    Icons.warning,
-                    color: Colors.red,
-                  ),
-                  Icon(
-                    Icons.warning,
-                    color: Colors.red,
+                  Expanded(
+                    child: Icon(
+                      Icons.warning,
+                      color: Colors.red,
+                    ),
                   ),
                 ],
               ),
