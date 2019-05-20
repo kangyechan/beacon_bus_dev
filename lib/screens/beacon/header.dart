@@ -178,18 +178,23 @@ class _Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(10.0),
-      child: FlatButton(
-        color: Color(0xFFC9EBF7),
+    return Container(
+      width: 100.0,
+      height: 100.0,
+      child: Padding(
         padding: EdgeInsets.all(10.0),
-        child: Text(
-          running ? '측정 종료' : '측정 시작',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
+        child: FlatButton(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+          color: Color(0xFFC9EBF7),
+          padding: EdgeInsets.all(10.0),
+          child: Text(
+            running ? '측정 종료' : '측정 시작',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          onPressed: onTap,
         ),
-        onPressed: onTap,
       ),
     );
   }
