@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:beacon_bus/blocs/parent/parent_date_helpers.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
@@ -127,6 +125,9 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
           ),
         ),
       ),
+      onWillPop: () {
+        return Future(() => false);
+      },
     );
   }
 
@@ -243,6 +244,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
   Widget _buildTitleSection(double width, String title) {
     return Container(
       width: width,
+      margin: EdgeInsets.only(bottom: 5.0),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -252,7 +254,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.all(10.0),
+        padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 10.0, bottom: 5.0),
         child: Text(
           title,
           style: TextStyle(
@@ -309,8 +311,10 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
     final children = Children.fromSnapshot(data);
     if(children.boardState == 'board') {
       IconColor = Colors.green;
+    } else if(children.boardState == 'unknown'){
+      IconColor = Colors.grey[350];
     } else {
-      IconColor = Colors.grey[300];
+      IconColor = Colors.grey[200];
     }
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
@@ -383,18 +387,19 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
           Expanded(
             child: Center(
               child: Container(
-                width: 100.0,
-                height: 100.0,
+                width: 90.0,
+                height: 90.0,
                 child: Padding(
                   padding: EdgeInsets.all(10.0),
-                  child: FlatButton(
+                  child: RaisedButton(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
                     color: Color(0xFFC9EBF7),
                     padding: EdgeInsets.all(10.0),
                     child: Text(
-                      "운행 종료",
+                      "운행종료",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
+                        fontSize: 13.0,
                       ),
                     ),
                     onPressed: () {
@@ -451,7 +456,6 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
       } else if (state == 'notboard') {
         alarm.showNotification(major, name + '이 개인이동 합니다.');
       } else {
-
         alarm.showNotification(major, name + '이 하차했습니다.');
       }
     }

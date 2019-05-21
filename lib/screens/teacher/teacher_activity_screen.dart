@@ -216,6 +216,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
   Widget _buildTitleSection(double width, String title) {
     return Container(
       width: width,
+      margin: EdgeInsets.only(bottom: 5.0),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -225,7 +226,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.all(10.0),
+        padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 10.0, bottom: 5.0),
         child: Text(
           title,
           style: TextStyle(
@@ -283,7 +284,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
     if(children.activityState == 'in') {
       IconColor = Colors.green;
     } else {
-      IconColor = Colors.grey[300];
+      IconColor = Colors.grey[350];
     }
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
@@ -348,18 +349,19 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
           Expanded(
             child: Center(
               child: Container(
-                width: 100.0,
-                height: 100.0,
+                width: 90.0,
+                height: 90.0,
                 child: Padding(
                   padding: EdgeInsets.all(10.0),
-                  child: FlatButton(
+                  child: RaisedButton(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
                     color: Color(0xFFC9EBF7),
                     padding: EdgeInsets.all(10.0),
                     child: Text(
-                      "활동 종료",
+                      "활동종료",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
+                        fontSize: 13.0,
                       ),
                     ),
                     onPressed: () {
