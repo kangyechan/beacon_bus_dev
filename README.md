@@ -1,6 +1,8 @@
 # beacon_bus
 
 A new Flutter application.
+SAFE_ZONE
+Smart Attendance check system For Everyone
 
 ## Getting Started
 
