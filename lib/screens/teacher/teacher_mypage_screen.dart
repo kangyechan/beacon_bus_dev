@@ -301,7 +301,7 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
       children: <Widget>[
         Expanded(
           child: Center(
-            child: FlatButton(
+            child: RaisedButton(
               child: Text(
                 "수정",
                 style: TextStyle(
@@ -322,7 +322,7 @@ class _TeacherMyPageScreenState extends State<TeacherMyPageScreen> {
         ),
         Expanded(
           child: Center(
-            child: FlatButton(
+            child: RaisedButton(
               child: Text(
                 "취소",
                 style: TextStyle(

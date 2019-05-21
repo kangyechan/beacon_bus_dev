@@ -296,7 +296,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 },
                 items: busList.map((value) => DropdownMenuItem(
                   value: value,
-                  child: Text(value),
+                  child: Container(margin: EdgeInsets.only(left: 15.0,), child: Text(value)),
                 )).toList(),
                 hint: Text("운행 차량"),
               ),
@@ -310,7 +310,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   Widget _buildButton(BuildContext context, String teacherName, int carNum) {
     return Flexible(
       flex: 1,
-      child: FlatButton(
+      child: RaisedButton(
         padding: EdgeInsets.all(10.0),
         child: Text(
           "차량 선택",
