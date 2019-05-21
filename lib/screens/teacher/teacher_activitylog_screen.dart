@@ -11,15 +11,24 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
   TextEditingController keyword = TextEditingController();
   String dropdownValue;
   String searchText;
+  String searchDate;
   String classRoom;
 
   void _searchChanged(String value) {
     setState(() {
       if (value == '') {
         searchText = null;
+        searchDate = null;
       } else {
         searchText = value;
+        searchDate = null;
       }
+    });
+  }
+
+  void _dateChanged(String value) {
+    setState(() {
+      searchDate = value;
     });
   }
 
@@ -134,6 +143,7 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
           .document('hamang')
           .collection('Log')
           .where('name', isEqualTo: searchText)
+          .where('activityRecord.date', isEqualTo: searchDate)
           .where('classRoom', isEqualTo: classRoom)
           .snapshots(),
       builder: (context, snapshot) {
@@ -157,11 +167,41 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
       padding: EdgeInsets.all(5.0),
       child: Row(
         children: <Widget>[
-          _buildLogListItem(name),
-          _buildLogListItem(map['date']),
+          _buildLogListItemNameButton(name),
+          _buildLogListItemDateButton(map['date']),
           _buildLogListItem(map['out']),
           _buildLogListItem(map['in']),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLogListItemNameButton(String text) {
+    return Expanded(
+      child: InkWell(
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12.0,
+          ),
+        ),
+        onTap: () => _searchChanged(text),
+      ),
+    );
+  }
+
+  Widget _buildLogListItemDateButton(String text) {
+    return Expanded(
+      child: InkWell(
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12.0,
+          ),
+        ),
+        onTap: () => _dateChanged(text),
       ),
     );
   }
@@ -177,6 +217,7 @@ class _TeacherActivityLogScreenState extends State<TeacherActivityLogScreen> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

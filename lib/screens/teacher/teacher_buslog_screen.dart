@@ -11,15 +11,24 @@ class _TeacherBusLogScreenState extends State<TeacherBusLogScreen> {
   TextEditingController keyword = TextEditingController();
   String dropdownValue;
   String searchText;
+  String searchDate;
   String busNum;
 
   void _searchChanged(String value) {
     setState(() {
       if (value == '') {
         searchText = null;
+        searchDate = null;
       } else {
         searchText = value;
+        searchDate = null;
       }
+    });
+  }
+
+  void _dateChanged(String value) {
+    setState(() {
+      searchDate = value;
     });
   }
 
@@ -134,6 +143,7 @@ class _TeacherBusLogScreenState extends State<TeacherBusLogScreen> {
           .document('hamang')
           .collection('BusLog')
           .where('name', isEqualTo: searchText)
+          .where('boardRecord.date', isEqualTo: searchDate)
           .where('busNum', isEqualTo: busNum)
           .snapshots(),
       builder: (context, snapshot) {
@@ -157,14 +167,45 @@ class _TeacherBusLogScreenState extends State<TeacherBusLogScreen> {
       padding: EdgeInsets.all(5.0),
       child: Row(
         children: <Widget>[
-          _buildLogListItem(name),
-          _buildLogListItem(map['date']),
+          _buildLogListItemNameButton(name),
+          _buildLogListItemDateButton(map['date']),
           _buildLogListItem(map['board']),
           _buildLogListItem(map['unknown']),
         ],
       ),
     );
   }
+
+  Widget _buildLogListItemNameButton(String text) {
+    return Expanded(
+      child: InkWell(
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12.0,
+          ),
+        ),
+        onTap: () => _searchChanged(text),
+      ),
+    );
+  }
+
+  Widget _buildLogListItemDateButton(String text) {
+    return Expanded(
+      child: InkWell(
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12.0,
+          ),
+        ),
+        onTap: () => _dateChanged(text),
+      ),
+    );
+  }
+
   Widget _buildLogListItem(String name) {
     return Expanded(
       child: Text(
