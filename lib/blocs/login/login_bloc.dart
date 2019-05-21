@@ -53,9 +53,9 @@ class LoginBloc extends Object with LoginValidators {
 
 
 
-  Future<Null> changeProtector() {
+  changeProtector(String selectedProtector) {
     Firestore.instance.collection('Kindergarden').document('hamang').collection(
-        'Children').document(_childId.value).updateData({'protector': _protector.value}).then((done) => Navigator.pop(_context));
+        'Children').document(_childId.value).updateData({'protector': selectedProtector});
   }
 
 

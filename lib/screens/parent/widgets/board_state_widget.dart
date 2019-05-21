@@ -2,6 +2,7 @@ import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_picker/Picker.dart';
 
 class BoardStateWidget extends StatelessWidget {
   final Color color;
@@ -13,7 +14,6 @@ class BoardStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     LoginBloc loginBloc = LoginProvider.of(context);
     if (state == "notboard") {
       return Container(
@@ -37,7 +37,10 @@ class BoardStateWidget extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 40.0),
-              child: Text('개인 이동', style: TextStyle(color: Colors.black, fontSize: 18.0),),
+              child: Text(
+                '개인 이동',
+                style: TextStyle(color: Colors.black, fontSize: 18.0),
+              ),
             ),
           ],
         ),
@@ -58,45 +61,78 @@ class BoardStateWidget extends StatelessWidget {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 50.0),
-                    child: Image.asset(
-                      'images/background.JPG',
-                      width: 100.0,
-                    ),
+                    child: Container(
+                      width: 170.0,
+                      height: 100.0,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          fit: BoxFit.fill,
+                          image: AssetImage('images/profiledefault.png'),
+                        ),
+                      ),
+                    )
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 5.0),
-                  child: state == 'unknown' ? Opacity(opacity: 0,) : FutureBuilder<DocumentSnapshot>(
-                      future: Firestore.instance.collection('Kindergarden')
-                          .document('hamang').collection('Bus').document(
-                          "$busNum호차")
-                          .get(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return Text('...');
-                        String teacher = snapshot.data.data['teacher'];
-                        return Text('$teacher 선생님', style: TextStyle(
-                            fontWeight: FontWeight.bold, color: Colors.white),);
-                      }
-                  ),
+                  child: state == 'unknown'
+                      ? Opacity(
+                          opacity: 0,
+                        )
+                      : FutureBuilder<DocumentSnapshot>(
+                          future: Firestore.instance
+                              .collection('Kindergarden')
+                              .document('hamang')
+                              .collection('Bus')
+                              .document("$busNum호차")
+                              .get(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) return Text('...');
+                            String teacher = snapshot.data.data['teacher'];
+                            return Text(
+                              '$teacher 선생님',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            );
+                          }),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 5.0),
-                  child: state == 'unknown' ? Opacity(opacity: 0,) : Text('$changeStateItem', style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.white),),
+                  child: state == 'unknown'
+                      ? Opacity(
+                          opacity: 0,
+                        )
+                      : Text(
+                          '$changeStateItem',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 30.0),
-                  child: Text(state == 'unknown' ? "미탑승" : "탑승중", style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.black, fontSize: 18.0),),
+                  child: Text(
+                    state == 'unknown' ? "미탑승" : "탑승중",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontSize: 18.0),
+                  ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 30.0,),
-          FlatButton(
-            child: Text('처음으로', style: TextStyle(color: Colors.white, fontSize: 20.0),),
-            onPressed: null
+          SizedBox(
+            height: 30.0,
           ),
+          FlatButton(
+              child: Text(
+                '처음으로',
+                style: TextStyle(color: Colors.white, fontSize: 20.0),
+              ),
+              onPressed: null),
           _buildProtectorText(context, loginBloc),
         ],
       );
@@ -126,7 +162,7 @@ class BoardStateWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      "오늘은 ${protector}가 기다립니다",
+                      "오늘은 ${protector}가(이) 기다립니다",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ],
@@ -138,51 +174,17 @@ class BoardStateWidget extends StatelessWidget {
   }
 
   showChangeProtectorDialog(BuildContext context, LoginBloc bloc) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          margin: EdgeInsets.only(bottom: 200.0),
-          child: CupertinoAlertDialog(
-            title: Text(
-              "알림",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: Text("마중나올 보호자를 변경하세요."),
-            actions: <Widget>[
-              StreamBuilder(
-                stream: bloc.protector,
-                builder: (context, snapshot) {
-                  return CupertinoTextField(
-                    onChanged: bloc.onChangeProtector,
-                    placeholder: "보호자 관계 ex:엄마, 아빠, 오빠",
-                    textAlign: TextAlign.center,
-                    autofocus: true,
-                  );
-                },
-              ),
-              CupertinoButton(
-                  child: Text(
-                    '변경',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  onPressed: () {
-                    bloc.changeProtector();
-                  }),
-              CupertinoButton(
-                  child: Text(
-                    '취소',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }),
-            ],
-          ),
-        );
-      },
-    );
+    Picker(
+        adapter: PickerDataAdapter<String>(
+            pickerdata: ['엄마', '아빠', '형', '누나', '이모', '삼촌']),
+        hideHeader: true,
+        title: Text(
+          "보호자",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+        onConfirm: (Picker picker, List value) {
+          final String selectedCategoryForAdd = picker.getSelectedValues()[0];
+          bloc.changeProtector(selectedCategoryForAdd);
+        }).showDialog(context);
   }
 }

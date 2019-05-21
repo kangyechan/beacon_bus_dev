@@ -31,6 +31,8 @@ dependencies:
     git:
       url: https://github.com/chinapoopoo/beacons
   progress_hud_v2: ^2.0.0
+  flutter_picker:
+    git: git://github.com/yangyxd/flutter_picker.git
 
 
 dev_dependencies:

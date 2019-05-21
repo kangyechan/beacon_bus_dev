@@ -52,7 +52,9 @@ class ParentMyPageScreen extends StatelessWidget {
               _buildChildImageView(bloc),
               _buildParentName(bloc),
               _buildParentPhoneNumber(bloc),
-              SizedBox(height: 75.0,),
+              SizedBox(
+                height: 75.0,
+              ),
               _buildEditButton(context, bloc),
             ],
           ),
@@ -213,10 +215,7 @@ class ParentMyPageScreen extends StatelessWidget {
   Widget _buildEditButton(BuildContext context, ParentBloc bloc) {
     return Container(
       padding: EdgeInsets.all(17.0),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.yellow
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.yellow),
 //      color: Colors.yellow,
       child: FlatButton(
         child: Text('수정하기'),
@@ -229,24 +228,24 @@ class ParentMyPageScreen extends StatelessWidget {
 
   Widget _buildProgressHud(ParentBloc bloc) {
     return StreamBuilder<Object>(
-        stream: bloc.loading,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return Container();
-          bool loading = snapshot.data;
-          print(loading);
-          double opacity = 0;
-          opacity = loading ? 1.0 : 0.0;
-          return Opacity(
-            opacity: opacity,
-            child: ProgressHUD(
-              backgroundColor: Colors.black12,
-              color: Colors.white,
-              containerColor: Theme.of(context).accentColor,
-              borderRadius: 5.0,
-              text: '',
-            ),
+      stream: bloc.loading,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return Container();
+        bool loading = snapshot.data;
+        print(loading);
+        if (loading) {
+          return ProgressHUD(
+            backgroundColor: Colors.black12,
+            color: Colors.white,
+            containerColor: Theme.of(context).accentColor,
+            borderRadius: 5.0,
+            text: '',
           );
-        });
+        } else {
+          return SizedBox.shrink();
+        }
+      },
+    );
   }
 
   Future imagePicker(ParentBloc parentBloc) async {
@@ -268,27 +267,29 @@ class ParentMyPageScreen extends StatelessWidget {
           content: Text("수정하시겠습니까?"),
           actions: <Widget>[
             CupertinoButton(
-                child: Text(
-                  '확인',
-                  style: TextStyle(color: Colors.black),
-                ),
-                onPressed: () {
-                  parentBloc.changeProfileImage();
-                }),
+              child: Text(
+                '확인',
+                style: TextStyle(color: Colors.black),
+              ),
+              onPressed: () {
+                parentBloc.changeProfileImage();
+                Navigator.pop(context);
+              },
+            ),
             CupertinoButton(
-                child: Text(
-                  '취소',
-                  style: TextStyle(color: Colors.black),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                }),
+              child: Text(
+                '취소',
+                style: TextStyle(color: Colors.black),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
           ],
         );
       },
     );
   }
-
 
   showChangePhoneNumberDialog(BuildContext context, ParentBloc parentBloc) {
     showDialog(

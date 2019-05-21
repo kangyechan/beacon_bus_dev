@@ -25,7 +25,9 @@ class LoginScreen extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 50.0),
             child: ListView(
               children: <Widget>[
-                SizedBox(height: 100.0,),
+                SizedBox(
+                  height: 100.0,
+                ),
                 _buildAppTitle(),
                 Image.asset(
                   'images/parenthome.png',
@@ -41,7 +43,6 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _buildAppTitle() {
     return Container(
@@ -64,8 +65,7 @@ class LoginScreen extends StatelessWidget {
           decoration: InputDecoration(
               hintText: 'you@example.com',
               labelText: '이메일',
-              errorText: snapshot.error
-          ),
+              errorText: snapshot.error),
         );
       },
     );
@@ -93,14 +93,14 @@ class LoginScreen extends StatelessWidget {
       stream: bloc.submitValid,
       builder: (context, snapshot) {
         return RaisedButton(
-            child: Text(
-              '로그인',
-              style:TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
+          child: Text(
+            '로그인',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
             ),
-            color: Color(0xFFC9EBF7),
-            onPressed: snapshot.hasData ? () => bloc.submit() : null,
+          ),
+          color: Color(0xFFC9EBF7),
+          onPressed: snapshot.hasData ? () => bloc.submit() : null,
         );
       },
     );
@@ -113,17 +113,18 @@ class LoginScreen extends StatelessWidget {
           if (!snapshot.hasData) return Container();
           bool loading = snapshot.data;
           print(loading);
-          double opacity = 0;
-          opacity = loading ? 1.0 : 0.0;
-          return Opacity(opacity: opacity, child: ProgressHUD(
-            backgroundColor: Colors.black12,
-            color: Colors.white,
-            containerColor: Color(0xFFC9EBF7),
-            borderRadius: 5.0,
-            text: '',
-          ),);
-        }
-    );
+          if (loading) {
+            return ProgressHUD(
+              backgroundColor: Colors.black12,
+              color: Colors.white,
+              containerColor: Theme.of(context).accentColor,
+              borderRadius: 5.0,
+              text: '',
+            );
+          } else {
+            return SizedBox.shrink();
+          }
+        });
   }
 
   void init(BuildContext context, LoginBloc bloc) async {
@@ -134,9 +135,11 @@ class LoginScreen extends StatelessWidget {
       if (user != null) {
         String userType = bloc.prefs.getString(USER_TYPE);
         if (userType == "teacher") {
-          Navigator.pushNamedAndRemoveUntil(context, '/teacher', (Route r) => false);
+          Navigator.pushNamedAndRemoveUntil(
+              context, '/teacher', (Route r) => false);
         } else if (userType == "parent") {
-          Navigator.pushNamedAndRemoveUntil(context, '/parent', (Route r) => false);
+          Navigator.pushNamedAndRemoveUntil(
+              context, '/parent', (Route r) => false);
         }
       }
     });
