@@ -26,7 +26,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
 
   String dropdownDistanceValue = '5 M';
   int limitDistance = 5;
-  List<String> distanceList = ['3 M', '5 M', '10 M', '15 M', '20 M', '25 M', '30 M'];
+  List<String> distanceList = ['1 M', '3 M', '5 M', '10 M', '15 M', '20 M', '25 M', '30 M'];
   String activityState = null;
   String activityStateTitle = "전체 인원";
   int total;
