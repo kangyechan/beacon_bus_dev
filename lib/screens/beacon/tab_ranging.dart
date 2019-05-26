@@ -13,6 +13,8 @@ class RangingTab extends ListTab with ParentDateHelpers {
   String _className;
   int _distance;
   int check = 0;
+  int stackTime = 8;
+  int noStackTime = 8;
   List<Children> userResults = [];
 
   Alarm alarm = new Alarm();
@@ -77,7 +79,7 @@ class RangingTab extends ListTab with ParentDateHelpers {
             if (data.link == true) {
               data.connectTime++;
               data.noConnectTime = 0;
-              if (data.connectTime == 10) {
+              if (data.connectTime == stackTime) {
                 Firestore.instance
                     .collection('Kindergarden')
                     .document('hamang')
@@ -108,7 +110,7 @@ class RangingTab extends ListTab with ParentDateHelpers {
               data.noConnectTime++;
               data.connectTime = 0;
               if (data.boardState == 'board') {
-                if (data.noConnectTime == 10) {
+                if (data.noConnectTime == noStackTime) {
                   data.boardState = 'unknown';
                   Firestore.instance
                       .collection('Kindergarden')
@@ -144,7 +146,7 @@ class RangingTab extends ListTab with ParentDateHelpers {
             if (data.link == true) {
               data.connectTime++;
               data.noConnectTime = 0;
-              if (data.connectTime == 10) {
+              if (data.connectTime == stackTime) {
                 Firestore.instance
                     .collection('Kindergarden')
                     .document('hamang')
@@ -158,7 +160,7 @@ class RangingTab extends ListTab with ParentDateHelpers {
               data.noConnectTime++;
               data.connectTime = 0;
               if (data.activityState == 'in') {
-                if (data.noConnectTime == 10) {
+                if (data.noConnectTime == noStackTime) {
                   data.activityState = 'out';
                   Firestore.instance
                       .collection('Kindergarden')
