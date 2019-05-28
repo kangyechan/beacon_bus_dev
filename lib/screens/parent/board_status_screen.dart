@@ -22,6 +22,7 @@ class BoardStatusScreen extends StatelessWidget {
     final loginBloc = LoginProvider.of(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: _buildBody(context, parentBloc, loginBloc),
     );
   }

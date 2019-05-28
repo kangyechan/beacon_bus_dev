@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:beacon_bus/blocs/parent/parent_date_helpers.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
@@ -40,20 +42,22 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
   @override
   void initState() {
     super.initState();
-    _setDistance();
+//    _setDistance();
     _setNotBoard();
   }
 
   void _setDistance() {
-    Firestore.instance
-        .collection('Kindergarden')
-        .document('hamang')
-        .collection('Bus')
-        .where('number', isEqualTo: carNum)
-        .snapshots()
-        .listen((data) =>
-    busSize = int.parse(data.documents[0]['distance']
-    ));
+    setState(() {
+      Firestore.instance
+          .collection('Kindergarden')
+          .document('hamang')
+          .collection('Bus')
+          .where('number', isEqualTo: carNum.toString())
+          .snapshots()
+          .listen((data) {
+        busSize = int.parse(data.documents[0]['distance']);
+      });
+    });
   }
 
   void _setNotBoard() {
@@ -376,42 +380,49 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
   }
 
   Widget _buildButtonSection() {
-    return Center(
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Center(
-              child: RangingTab(carNum.toString(), '', busSize),
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: Container(
-                width: 90.0,
-                height: 90.0,
-                child: Padding(
-                  padding: EdgeInsets.all(10.0),
-                  child: RaisedButton(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-                    color: Color(0xFFC9EBF7),
-                    padding: EdgeInsets.all(10.0),
-                    child: Text(
-                      "운행종료",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13.0,
-                      ),
-                    ),
-                    onPressed: () {
-                      _showCheckDialog();
-                    },
-                  ),
+    return FutureBuilder<QuerySnapshot>(
+      future: Firestore.instance.collection('Kindergarden').document('hamang').collection('Bus').where('number', isEqualTo: carNum.toString()).getDocuments(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return LinearProgressIndicator();
+        busSize = int.parse(snapshot.data.documents[0].data['distance']);
+        return Center(
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Center(
+                  child: RangingTab(carNum.toString(), '', busSize),
                 ),
               ),
-            ),
-          )
-        ],
-      ),
+              Expanded(
+                child: Center(
+                  child: Container(
+                    width: 90.0,
+                    height: 90.0,
+                    child: Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: RaisedButton(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+                        color: Color(0xFFC9EBF7),
+                        padding: EdgeInsets.all(10.0),
+                        child: Text(
+                          "운행종료",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13.0,
+                          ),
+                        ),
+                        onPressed: () {
+                          _showCheckDialog();
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        );
+      }
     );
   }
 

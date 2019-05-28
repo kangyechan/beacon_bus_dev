@@ -9,6 +9,7 @@ class BoardYesOrNoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final bloc = ParentProvider.of(context);
     return Scaffold(
+      backgroundColor: Colors.white,
       body: _buildBody(context, bloc),
     );
   }
