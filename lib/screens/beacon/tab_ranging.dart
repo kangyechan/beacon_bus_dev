@@ -79,7 +79,7 @@ class RangingTab extends ListTab with ParentDateHelpers {
             if (data.link == true) {
               data.connectTime++;
               data.noConnectTime = 0;
-              if (data.connectTime == stackTime) {
+              if (data.connectTime == stackTime && data.boardState != 'board') {
                 Firestore.instance
                     .collection('Kindergarden')
                     .document('hamang')
@@ -96,7 +96,7 @@ class RangingTab extends ListTab with ParentDateHelpers {
                     'boardRecord': {
                       'date': calculateFormattedDateYMDE(DateTime.now()),
                       'board':
-                          calculateFormattedDateHourAndMinute(DateTime.now()),
+                      calculateFormattedDateHourAndMinute(DateTime.now()),
                       'unknown': ""
                     },
                     'name': data.name,
@@ -110,7 +110,8 @@ class RangingTab extends ListTab with ParentDateHelpers {
               data.noConnectTime++;
               data.connectTime = 0;
               if (data.boardState == 'board') {
-                if (data.noConnectTime == noStackTime) {
+                if (data.noConnectTime == noStackTime &&
+                    data.boardState != 'board') {
                   data.boardState = 'unknown';
                   Firestore.instance
                       .collection('Kindergarden')
@@ -122,16 +123,18 @@ class RangingTab extends ListTab with ParentDateHelpers {
                         .collection('Kindergarden')
                         .document('hamang')
                         .collection('BusLog')
-                        .where('id', isEqualTo: data.id).snapshots().listen((data) {
-
+                        .where('id', isEqualTo: data.id)
+                        .snapshots()
+                        .listen((data) {
                       Map newBoardRecordMap = data.documents[0]['boardRecord'];
-                      newBoardRecordMap['unknown'] = calculateFormattedDateHourAndMinute(DateTime.now());
+                      newBoardRecordMap['unknown'] =
+                          calculateFormattedDateHourAndMinute(DateTime.now());
                       Firestore.instance
                           .collection('Kindergarden')
                           .document('hamang')
-                          .collection('BusLog').document(data.documents[0].documentID).updateData({
-                        'boardRecord': newBoardRecordMap
-                      });
+                          .collection('BusLog')
+                          .document(data.documents[0].documentID)
+                          .updateData({'boardRecord': newBoardRecordMap});
                     });
                   });
                   alarm.showNotification(
@@ -146,7 +149,7 @@ class RangingTab extends ListTab with ParentDateHelpers {
             if (data.link == true) {
               data.connectTime++;
               data.noConnectTime = 0;
-              if (data.connectTime == stackTime) {
+              if (data.connectTime == stackTime && data.activityState != 'in') {
                 Firestore.instance
                     .collection('Kindergarden')
                     .document('hamang')
