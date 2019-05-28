@@ -98,7 +98,7 @@ class _ParentRecordScreenState extends State<ParentRecordScreen> {
       padding: EdgeInsets.all(5.0),
       child: Row(
         children: <Widget>[
-          _buildLogListItem(map['date'].toString().substring(6)),
+          _buildLogListItem(map['date'].toString().substring(6).split('').reversed.join().substring(3).split('').reversed.join()),
           _buildLogListItem(map['board']),
           _buildLogListItem(map['unknown']),
         ],

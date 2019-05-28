@@ -80,28 +80,29 @@ class RangingTab extends ListTab with ParentDateHelpers {
               data.connectTime++;
               data.noConnectTime = 0;
               if (data.connectTime == stackTime && data.boardState != 'board') {
-                Firestore.instance
+                final DocumentReference documentReference = Firestore.instance
                     .collection('Kindergarden')
                     .document('hamang')
-                    .collection('Children')
-                    .document(data.id)
-                    .updateData({'boardState': 'board'}).then((done) {
+                    .collection('BusLog')
+                    .document();
+
+                documentReference.setData({
+                  'id': data.id,
+                  'boardRecord': {
+                    'date': calculateFormattedDateYMDE(DateTime.now()),
+                    'board':
+                        calculateFormattedDateHourAndMinute(DateTime.now()),
+                    'unknown': ""
+                  },
+                  'name': data.name,
+                  'busNum': _busNum,
+                }).then((done) {
                   Firestore.instance
                       .collection('Kindergarden')
                       .document('hamang')
-                      .collection('BusLog')
-                      .document()
-                      .setData({
-                    'id': data.id,
-                    'boardRecord': {
-                      'date': calculateFormattedDateYMDE(DateTime.now()),
-                      'board':
-                      calculateFormattedDateHourAndMinute(DateTime.now()),
-                      'unknown': ""
-                    },
-                    'name': data.name,
-                    'busNum': _busNum,
-                  });
+                      .collection('Children')
+                      .document(data.id)
+                      .updateData({'boardState': 'board', 'currentBusLogDocumentId': documentReference.documentID});
                 });
                 alarm.showNotification(
                     int.parse(data.beaconMajor), data.name + '이 승차했습니다.');
@@ -122,20 +123,28 @@ class RangingTab extends ListTab with ParentDateHelpers {
                     Firestore.instance
                         .collection('Kindergarden')
                         .document('hamang')
-                        .collection('BusLog')
-                        .where('id', isEqualTo: data.id)
-                        .snapshots()
-                        .listen((data) {
-                      Map newBoardRecordMap = data.documents[0]['boardRecord'];
-                      newBoardRecordMap['unknown'] =
-                          calculateFormattedDateHourAndMinute(DateTime.now());
-                      Firestore.instance
-                          .collection('Kindergarden')
-                          .document('hamang')
-                          .collection('BusLog')
-                          .document(data.documents[0].documentID)
-                          .updateData({'boardRecord': newBoardRecordMap});
+                        .collection('Children')
+                        .document(data.id).get().then((documentSnapshot) {
+                          String documentId = documentSnapshot.data['currentBusLogDocumentId'];
+                          Firestore.instance
+                              .collection('Kindergarden')
+                              .document('hamang')
+                              .collection('BusLog')
+                              .document(documentId)
+                              .snapshots()
+                              .listen((data) {
+                            Map newBoardRecordMap = data['boardRecord'];
+                            newBoardRecordMap['unknown'] =
+                                calculateFormattedDateHourAndMinute(DateTime.now());
+                            Firestore.instance
+                                .collection('Kindergarden')
+                                .document('hamang')
+                                .collection('BusLog')
+                                .document(data.documentID)
+                                .updateData({'boardRecord': newBoardRecordMap});
+                          });
                     });
+
                   });
                   alarm.showNotification(
                       int.parse(data.beaconMajor), data.name + '이 하차했습니다.');

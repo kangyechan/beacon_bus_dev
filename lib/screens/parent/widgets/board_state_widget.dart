@@ -1,4 +1,5 @@
 import 'package:beacon_bus/blocs/login/login_provider.dart';
+import 'package:beacon_bus/screens/parent/widgets/board_state_profile_image_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,34 +17,37 @@ class BoardStateWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     LoginBloc loginBloc = LoginProvider.of(context);
     if (state == "notboard") {
-      return Container(
-        width: 300.0,
-        height: 300.0,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(150.0),
-          color: color,
-        ),
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 50.0),
-                child: Image.asset(
-                  'images/background.JPG',
-                  width: 100.0,
+      return Column(
+        children: <Widget>[
+          Container(
+            width: 300.0,
+            height: 300.0,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.0),
+              color: color,
+            ),
+            child: Column(
+              children: <Widget>[
+                SizedBox(height: 20.0,),
+                BoardStateProfileImageWidget(),
+                SizedBox(
+                  height: 50.0,
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 40.0),
+                  child: Text(
+                    '개인 이동',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontSize: 18.0),
+                  ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 40.0),
-              child: Text(
-                '개인 이동',
-                style: TextStyle(color: Colors.black, fontSize: 18.0),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       );
     } else {
       return Column(
@@ -53,34 +57,19 @@ class BoardStateWidget extends StatelessWidget {
             height: 300.0,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(150.0),
+              borderRadius: BorderRadius.circular(10.0),
               color: color,
             ),
             child: Column(
               children: <Widget>[
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 50.0),
-                    child: Container(
-                      width: 170.0,
-                      height: 100.0,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          fit: BoxFit.fill,
-                          image: AssetImage('images/profiledefault.png'),
-                        ),
-                      ),
-                    )
-                  ),
+                BoardStateProfileImageWidget(),
+                SizedBox(
+                  height: 30.0,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 5.0),
                   child: state == 'unknown'
-                      ? Opacity(
-                          opacity: 0,
-                        )
+                      ? SizedBox.shrink()
                       : FutureBuilder<DocumentSnapshot>(
                           future: Firestore.instance
                               .collection('Kindergarden')
@@ -95,6 +84,7 @@ class BoardStateWidget extends StatelessWidget {
                               '$teacher 선생님',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 18.0,
                                   color: Colors.white),
                             );
                           }),
@@ -102,24 +92,20 @@ class BoardStateWidget extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 5.0),
                   child: state == 'unknown'
-                      ? Opacity(
-                          opacity: 0,
-                        )
+                      ? SizedBox.shrink()
                       : Text(
                           '$changeStateItem',
                           style: TextStyle(
+                            fontSize: 18.0,
                               fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 30.0),
-                  child: Text(
-                    state == 'unknown' ? "미탑승" : "탑승중",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        fontSize: 18.0),
-                  ),
+                Text(
+                  state == 'unknown' ? "미탑승" : "탑승중",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      fontSize: 18.0),
                 ),
               ],
             ),
@@ -127,12 +113,6 @@ class BoardStateWidget extends StatelessWidget {
           SizedBox(
             height: 30.0,
           ),
-          FlatButton(
-              child: Text(
-                '처음으로',
-                style: TextStyle(color: Colors.white, fontSize: 20.0),
-              ),
-              onPressed: null),
           _buildProtectorText(context, loginBloc),
         ],
       );
@@ -163,7 +143,7 @@ class BoardStateWidget extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       "오늘은 ${protector}가(이) 기다립니다",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
                     ),
                   ],
                 );

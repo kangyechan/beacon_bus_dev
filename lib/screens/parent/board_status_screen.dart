@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:beacon_bus/blocs/login/login_provider.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
+import 'package:beacon_bus/screens/parent/widgets/board_state_profile_image_widget.dart';
 import 'package:beacon_bus/screens/parent/widgets/board_state_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -20,6 +21,19 @@ class BoardStatusScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final parentBloc = ParentProvider.of(context);
     final loginBloc = LoginProvider.of(context);
+    const platform = const MethodChannel('sendSms');
+
+    Future<Null> sendSms() async {
+      print("SendSMS");
+      try {
+        final String result = await platform.invokeMethod('send',<String,dynamic>{"phone":"+821049220759","msg":"Hello! I'm sent programatically."}); //Replace a 'X' with 10 digit phone number
+        print(result);
+      } on PlatformException catch (e) {
+        print(e.toString());
+      }
+    }
+
+    sendSms();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -38,7 +52,7 @@ class BoardStatusScreen extends StatelessWidget {
           ),
           _buildDateText(parentBloc),
           SizedBox(
-            height: 20.0,
+            height: 30.0,
           ),
           _buildStateIndicator(parentBloc, loginBloc),
 //          _buildProtectorText(context, loginBloc),
@@ -84,7 +98,7 @@ class BoardStatusScreen extends StatelessWidget {
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 35.0,
-                  color: Colors.grey.shade600),
+                  color: Colors.blueGrey.shade600),
             ),
             formattedSelectedDate == formattedCurrentDate
                 ? IconButton(
@@ -192,24 +206,22 @@ class BoardStatusScreen extends StatelessWidget {
                   }
                   return Column(
                     children: <Widget>[
+                      SizedBox(height: 15.0,),
                       Container(
                         width: 300.0,
                         height: 300.0,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(150.0),
-                          color: Colors.blue,
+                          color: Colors.green.shade300,
+                          borderRadius: BorderRadius.circular(10.0),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Expanded(
                               child: Padding(
-                                padding: const EdgeInsets.only(top: 50.0),
-                                child: Image.asset(
-                                  'images/background.JPG',
-                                  width: 100.0,
-                                ),
+                                padding: const EdgeInsets.only(top: 20.0),
+                                child: BoardStateProfileImageWidget(),
                               ),
                             ),
                             SizedBox(
@@ -236,12 +248,12 @@ class BoardStatusScreen extends StatelessWidget {
                         ),
                       ),
                       SizedBox(
-                        height: 10.0,
+                        height: 20.0,
                       ),
                       FlatButton(
                         child: Text(
                           '처음으로',
-                          style: TextStyle(color: Colors.black, fontSize: 20.0),
+                          style: TextStyle(color: Colors.green.shade200, fontSize: 20.0, fontWeight: FontWeight.bold),
                         ),
                         onPressed: () {
                           bloc.changeSelectedDate(DateTime.now());

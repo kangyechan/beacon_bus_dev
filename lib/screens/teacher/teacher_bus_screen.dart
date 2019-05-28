@@ -10,17 +10,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class TeacherBusScreen extends StatefulWidget  {
+class TeacherBusScreen extends StatefulWidget {
   final int carNum;
 
-  TeacherBusScreen({Key key, this.carNum}): super(key: key);
+  TeacherBusScreen({Key key, this.carNum}) : super(key: key);
 
   @override
-  _TeacherBusScreenState createState() => _TeacherBusScreenState(carNum: carNum);
+  _TeacherBusScreenState createState() =>
+      _TeacherBusScreenState(carNum: carNum);
 }
 
-class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelpers {
+class _TeacherBusScreenState extends State<TeacherBusScreen>
+    with ParentDateHelpers {
   final int carNum;
+
   _TeacherBusScreenState({this.carNum});
 
   Alarm alarm = new Alarm();
@@ -30,7 +33,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
   int busSize;
   int total;
   int boarding;
-  int notBoarding;
+  int notBoarding = 0;
   int unKnown;
 
   Color totalColor = Color(0xFF1EA8E0);
@@ -75,21 +78,21 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
 
   void _setStateChanged(String boardStateName) {
     setState(() {
-      if(boardStateName == '전체') {
+      if (boardStateName == '전체') {
         boardingState = null;
         boardingStateTitle = "전체 인원";
         totalColor = Color(0xFF1EA8E0);
         boardColor = Colors.white;
         unknownColor = Colors.white;
         notboardColor = Colors.white;
-      } else if(boardStateName == '승차') {
+      } else if (boardStateName == '승차') {
         boardingState = "board";
         boardingStateTitle = "승차 인원";
         totalColor = Colors.white;
         boardColor = Color(0xFF1EA8E0);
         unknownColor = Colors.white;
         notboardColor = Colors.white;
-      } else if(boardStateName == '하차') {
+      } else if (boardStateName == '하차') {
         boardingState = "unknown";
         boardingStateTitle = "하차 인원";
         totalColor = Colors.white;
@@ -138,7 +141,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
   Widget _buildAppbar() {
     return AppBar(
       title: Text(
-        SCHOOL_NAME +" "+carNum.toString()+"호 차량",
+        SCHOOL_NAME + " " + carNum.toString() + "호 차량",
         style: TextStyle(
           fontWeight: FontWeight.bold,
         ),
@@ -177,8 +180,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
             if (!snapshot.hasData) return LinearProgressIndicator();
             total = snapshot.data.documents.length;
             return _countSectionContents(name, total, color);
-          }
-      );
+          });
     } else if (name == "승차") {
       countSection = StreamBuilder<QuerySnapshot>(
           stream: Firestore.instance
@@ -192,8 +194,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
             if (!snapshot.hasData) return LinearProgressIndicator();
             boarding = snapshot.data.documents.length;
             return _countSectionContents(name, boarding, color);
-          }
-      );
+          });
     } else if (name == '하차') {
       countSection = StreamBuilder<QuerySnapshot>(
           stream: Firestore.instance
@@ -207,8 +208,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
             if (!snapshot.hasData) return LinearProgressIndicator();
             unKnown = snapshot.data.documents.length;
             return _countSectionContents(name, unKnown, color);
-          }
-      );
+          });
     } else {
       countSection = StreamBuilder<QuerySnapshot>(
           stream: Firestore.instance
@@ -216,30 +216,49 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
               .document('hamang')
               .collection('Children')
               .where('busNum', isEqualTo: carNum.toString())
-              .where('boardState', isEqualTo: 'notboard')
               .snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) return LinearProgressIndicator();
-            notBoarding = snapshot.data.documents.length;
+
+            notBoarding = 0;
+
+            String currentTime = calculateFormattedDateYMDE(DateTime.now());
+
+            List<DocumentSnapshot> children = snapshot.data.documents;
+
+            children.forEach((documentSnapshot) {
+              List notBoardingDateList =
+                  documentSnapshot.data['notBoardingDateList'];
+              if (notBoardingDateList.contains(currentTime)) {
+                notBoarding++;
+                Firestore.instance
+                    .collection('Kindergarden')
+                    .document('hamang')
+                    .collection('Children')
+                    .document(documentSnapshot.documentID)
+                    .updateData({"boardState": "notboard"});
+              }
+            });
+
             return _countSectionContents(name, notBoarding, color);
-          }
-      );
+          });
     }
     return countSection;
   }
 
-  Widget _countSectionContents(String name, int count, Color color){
+  Widget _countSectionContents(String name, int count, Color color) {
     return Container(
       margin: EdgeInsets.only(left: 5.0),
       child: OutlineButton(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
         borderSide: BorderSide(color: color, width: 2.0),
         padding: EdgeInsets.all(5.0),
         onPressed: () {
           _setStateChanged(name);
         },
         child: Text(
-          name+ " "+count.toString()+"명",
+          name + " " + count.toString() + "명",
         ),
       ),
     );
@@ -258,7 +277,8 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 10.0, bottom: 5.0),
+        padding:
+            EdgeInsets.only(left: 10.0, top: 10.0, right: 10.0, bottom: 5.0),
         child: Text(
           title,
           style: TextStyle(
@@ -288,7 +308,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
 
   Widget _buildBoardMember() {
     return StreamBuilder(
-        stream:  Firestore.instance
+        stream: Firestore.instance
             .collection('Kindergarden')
             .document('hamang')
             .collection('Children')
@@ -298,24 +318,25 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
         builder: (context, snapshot) {
           if (!snapshot.hasData) return LinearProgressIndicator();
           return _buildMemberList(context, snapshot.data.documents);
-        }
-    );
+        });
   }
 
-  Widget _buildMemberList(BuildContext context, List<DocumentSnapshot> snapshot) {
+  Widget _buildMemberList(
+      BuildContext context, List<DocumentSnapshot> snapshot) {
     return GridView.count(
       crossAxisCount: 3,
       padding: EdgeInsets.all(10.0),
       childAspectRatio: 8.0 / 8.0,
-      children: snapshot.map((data) => _buildMemberListItem(context, data)).toList(),
+      children:
+          snapshot.map((data) => _buildMemberListItem(context, data)).toList(),
     );
   }
 
   Widget _buildMemberListItem(BuildContext context, DocumentSnapshot data) {
     final children = Children.fromSnapshot(data);
-    if(children.boardState == 'board') {
+    if (children.boardState == 'board') {
       IconColor = Colors.green;
-    } else if(children.boardState == 'unknown'){
+    } else if (children.boardState == 'unknown') {
       IconColor = Colors.grey[350];
     } else {
       IconColor = Colors.grey[200];
@@ -337,8 +358,14 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
               aspectRatio: 16 / 9,
               child: Container(
                 child: children.profileImageUrl == ''
-                  ? Image(image: AssetImage('images/profiledefault.png'), fit: BoxFit.fill,)
-                  : Image.network(children.profileImageUrl, fit: BoxFit.fill,),
+                    ? Image(
+                        image: AssetImage('images/profiledefault.png'),
+                        fit: BoxFit.fill,
+                      )
+                    : Image.network(
+                        children.profileImageUrl,
+                        fit: BoxFit.fill,
+                      ),
               ),
             ),
             Container(
@@ -361,7 +388,8 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
                   ],
                 ),
                 onPressed: () {
-                  _changeState(children.id, int.parse(children.beaconMajor), children.name, children.boardState);
+                  _changeState(children.id, int.parse(children.beaconMajor),
+                      children.name, children.boardState);
                 },
               ),
             ),
@@ -381,84 +409,118 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
 
   Widget _buildButtonSection() {
     return FutureBuilder<QuerySnapshot>(
-      future: Firestore.instance.collection('Kindergarden').document('hamang').collection('Bus').where('number', isEqualTo: carNum.toString()).getDocuments(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return LinearProgressIndicator();
-        busSize = int.parse(snapshot.data.documents[0].data['distance']);
-        return Center(
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: Center(
-                  child: RangingTab(carNum.toString(), '', busSize),
+        future: Firestore.instance
+            .collection('Kindergarden')
+            .document('hamang')
+            .collection('Bus')
+            .where('number', isEqualTo: carNum.toString())
+            .getDocuments(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return LinearProgressIndicator();
+          busSize = int.parse(snapshot.data.documents[0].data['distance']);
+          return Center(
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Center(
+                    child: RangingTab(carNum.toString(), '', busSize),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Center(
-                  child: Container(
-                    width: 90.0,
-                    height: 90.0,
-                    child: Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: RaisedButton(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-                        color: Color(0xFFC9EBF7),
+                Expanded(
+                  child: Center(
+                    child: Container(
+                      width: 90.0,
+                      height: 90.0,
+                      child: Padding(
                         padding: EdgeInsets.all(10.0),
-                        child: Text(
-                          "운행종료",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13.0,
+                        child: RaisedButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50.0)),
+                          color: Color(0xFFC9EBF7),
+                          padding: EdgeInsets.all(10.0),
+                          child: Text(
+                            "운행종료",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13.0,
+                            ),
                           ),
+                          onPressed: () {
+                            _showCheckDialog();
+                          },
                         ),
-                        onPressed: () {
-                          _showCheckDialog();
-                        },
                       ),
                     ),
                   ),
-                ),
-              )
-            ],
-          ),
-        );
-      }
-    );
+                )
+              ],
+            ),
+          );
+        });
   }
 
-  void _changeStateSave(String id, int major, String name, String currentState, String state) {
+  void _changeStateSave(
+      String id, int major, String name, String currentState, String state) {
     if (currentState != state) {
       Firestore.instance
           .collection('Kindergarden')
           .document('hamang')
           .collection('Children')
-          .document(id).updateData({
+          .document(id)
+          .updateData({
         'boardState': state,
-        'changeStateTime': DateFormat('yyyy-MM-dd hh:mm')
-            .format(DateTime.now())
-            .toString(),
+        'changeStateTime':
+            DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()).toString(),
       }).then((done) {
         if (state == "unknown") {
-          Firestore.instance
-              .collection('Kindergarden')
-              .document('hamang')
-              .collection('BusLog')
-              .document()
-              .updateData({
-            'boardRecord': {
-              'unknown': calculateFormattedDateHourAndMinute(DateTime.now())
-            },
-          });
+            Firestore.instance
+                .collection('Kindergarden')
+                .document('hamang')
+                .collection('Children')
+                .document(id).get().then((documentSnapshot) {
+              String documentId = documentSnapshot.data['currentBusLogDocumentId'];
+              Firestore.instance
+                  .collection('Kindergarden')
+                  .document('hamang')
+                  .collection('BusLog')
+                  .document(documentId)
+                  .snapshots()
+                  .listen((data) {
+                Map newBoardRecordMap = data['boardRecord'];
+                newBoardRecordMap['unknown'] =
+                    calculateFormattedDateHourAndMinute(DateTime.now());
+                Firestore.instance
+                    .collection('Kindergarden')
+                    .document('hamang')
+                    .collection('BusLog')
+                    .document(data.documentID)
+                    .updateData({'boardRecord': newBoardRecordMap});
+              });
+            });
         } else if (state == "board") {
-          Firestore.instance
+          final DocumentReference documentReference = Firestore.instance
               .collection('Kindergarden')
               .document('hamang')
               .collection('BusLog')
-              .document()
-              .updateData({
+              .document();
+
+          documentReference.setData({
+            'id': id,
             'boardRecord': {
-              'board': calculateFormattedDateHourAndMinute(DateTime.now())
+              'date': calculateFormattedDateYMDE(DateTime.now()),
+              'board':
+              calculateFormattedDateHourAndMinute(DateTime.now()),
+              'unknown': ""
             },
+            'name': name,
+            'busNum': "2",
+          }).then((done) {
+            Firestore.instance
+                .collection('Kindergarden')
+                .document('hamang')
+                .collection('Children')
+                .document(id)
+                .updateData({'boardState': 'board', 'currentBusLogDocumentId': documentReference.documentID});
           });
         }
       });
@@ -510,7 +572,8 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
                   ),
                 ],
               ),
-              onPressed: () =>  _changeStateSave(id, major, name, currentState, 'board'),
+              onPressed: () =>
+                  _changeStateSave(id, major, name, currentState, 'board'),
             ),
             CupertinoButton(
               child: Row(
@@ -595,7 +658,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
                 ),
               ),
               onPressed: () {
-                if(boarding > 0) {
+                if (boarding > 0) {
                   Navigator.of(context).pop();
                   _showStateCheckDialog(boarding);
                 } else {
@@ -620,6 +683,7 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
       },
     );
   }
+
   void _showStateCheckDialog(int count) {
     showDialog(
         context: context,
@@ -651,10 +715,10 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
                 ],
               ),
             ),
-            content: Text(
-                "\n"+ count.toString() + "명이 탑승중 입니다.\n"
-                    "다시 한 번 확인해주세요."
-            ),
+            content: Text("\n" +
+                count.toString() +
+                "명이 탑승중 입니다.\n"
+                "다시 한 번 확인해주세요."),
             actions: <Widget>[
               CupertinoButton(
                 onPressed: () {
@@ -669,9 +733,9 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
               ),
             ],
           );
-        }
-    );
+        });
   }
+
   void _showCloseDialog() {
     showDialog(
       context: context,
@@ -714,12 +778,14 @@ class _TeacherBusScreenState extends State<TeacherBusScreen> with ParentDateHelp
       },
     );
   }
+
   _setBusTeacherName(String teacherName, int busNum) {
     Firestore.instance
         .collection('Kindergarden')
         .document('hamang')
         .collection('Bus')
-        .document(busNum.toString()+'호차').updateData({
+        .document(busNum.toString() + '호차')
+        .updateData({
       'teacher': teacherName,
     });
   }
