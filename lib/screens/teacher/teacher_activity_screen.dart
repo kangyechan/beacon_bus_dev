@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:beacon_bus/blocs/parent/parent_date_helpers.dart';
 import 'package:beacon_bus/constants.dart';
 import 'package:beacon_bus/models/children.dart';
 import 'package:beacon_bus/screens/beacon/tab_ranging.dart';
@@ -18,7 +19,7 @@ class TeacherActivityScreen extends StatefulWidget {
   _TeacherActivityScreenState createState() => _TeacherActivityScreenState(className: className);
 }
 
-class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
+class _TeacherActivityScreenState extends State<TeacherActivityScreen> with ParentDateHelpers {
   final String className;
   _TeacherActivityScreenState({this.className});
 
@@ -26,7 +27,7 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
 
   String dropdownDistanceValue = '5 M';
   int limitDistance = 5;
-  List<String> distanceList = ['1 M', '3 M', '5 M', '10 M', '15 M', '20 M', '25 M', '30 M'];
+  List<String> distanceList = ['1 M', '2 M', '3 M', '5 M', '10 M', '15 M', '20 M', '25 M', '30 M'];
   String activityState = null;
   String activityStateTitle = "전체 인원";
   int total;
@@ -390,8 +391,62 @@ class _TeacherActivityScreenState extends State<TeacherActivityScreen> {
             .toString(),
       });
       if (state == 'in') {
+        Firestore.instance
+            .collection('Kindergarden')
+            .document('hamang')
+            .collection('Children')
+            .document(id)
+            .updateData({'activityState': 'in'}).then((done) {
+          Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('Children')
+              .document(id).get().then((documentSnapshot) {
+            String documentId = documentSnapshot.data['currentLogDocumentId'];
+            Firestore.instance
+                .collection('Kindergarden')
+                .document('hamang')
+                .collection('Log')
+                .document(documentId)
+                .snapshots()
+                .listen((data) {
+              Map newActivityRecordMap = data['activityRecord'];
+              newActivityRecordMap['in'] =
+                  calculateFormattedDateHourAndMinute(DateTime.now());
+              Firestore.instance
+                  .collection('Kindergarden')
+                  .document('hamang')
+                  .collection('Log')
+                  .document(data.documentID)
+                  .updateData({'activityRecord': newActivityRecordMap});
+            });
+          });
+        });
         alarm.showNotification(major, name + '이 범위로 들어왔습니다.');
       } else {
+        final DocumentReference documentReference = Firestore.instance
+            .collection('Kindergarden')
+            .document('hamang')
+            .collection('Log')
+            .document();
+
+        documentReference.setData({
+          'id': id,
+          'activityRecord': {
+            'date': calculateFormattedDateYMDE(DateTime.now()),
+            'out':
+            calculateFormattedDateHourAndMinute(DateTime.now()),
+            'in': ""
+          },
+          'name': name,
+        }).then((done) {
+          Firestore.instance
+              .collection('Kindergarden')
+              .document('hamang')
+              .collection('Children')
+              .document(id)
+              .updateData({'activityState': 'out', 'currentLogDocumentId': documentReference.documentID});
+        });
         alarm.showNotification(major, name + '이 범위를 이탈했습니다.');
       }
     }

@@ -144,7 +144,6 @@ class RangingTab extends ListTab with ParentDateHelpers {
                                 .updateData({'boardRecord': newBoardRecordMap});
                           });
                     });
-
                   });
                   alarm.showNotification(
                       int.parse(data.beaconMajor), data.name + '이 하차했습니다.');
@@ -153,18 +152,45 @@ class RangingTab extends ListTab with ParentDateHelpers {
             }
           }
         } else if (_className != null && _busNum == null) {
+
           for (var data in userResults) {
             print(userResults);
             if (data.link == true) {
               data.connectTime++;
               data.noConnectTime = 0;
               if (data.connectTime == stackTime && data.activityState != 'in') {
+
                 Firestore.instance
                     .collection('Kindergarden')
                     .document('hamang')
                     .collection('Children')
                     .document(data.id)
-                    .updateData({'activityState': 'in'});
+                    .updateData({'activityState': 'in'}).then((done) {
+                  Firestore.instance
+                      .collection('Kindergarden')
+                      .document('hamang')
+                      .collection('Children')
+                      .document(data.id).get().then((documentSnapshot) {
+                    String documentId = documentSnapshot.data['currentLogDocumentId'];
+                    Firestore.instance
+                        .collection('Kindergarden')
+                        .document('hamang')
+                        .collection('Log')
+                        .document(documentId)
+                        .snapshots()
+                        .listen((data) {
+                      Map newActivityRecordMap = data['activityRecord'];
+                      newActivityRecordMap['in'] =
+                          calculateFormattedDateHourAndMinute(DateTime.now());
+                      Firestore.instance
+                          .collection('Kindergarden')
+                          .document('hamang')
+                          .collection('Log')
+                          .document(data.documentID)
+                          .updateData({'activityRecord': newActivityRecordMap});
+                    });
+                  });
+                });
                 alarm.showNotification(
                     int.parse(data.beaconMajor), data.name + '이 범위로 들어왔습니다.');
               }
@@ -174,12 +200,29 @@ class RangingTab extends ListTab with ParentDateHelpers {
               if (data.activityState == 'in') {
                 if (data.noConnectTime == noStackTime) {
                   data.activityState = 'out';
-                  Firestore.instance
+                  final DocumentReference documentReference = Firestore.instance
                       .collection('Kindergarden')
                       .document('hamang')
-                      .collection('Children')
-                      .document(data.id)
-                      .updateData({'activityState': 'out'});
+                      .collection('Log')
+                      .document();
+
+                  documentReference.setData({
+                    'id': data.id,
+                    'activityRecord': {
+                      'date': calculateFormattedDateYMDE(DateTime.now()),
+                      'out':
+                      calculateFormattedDateHourAndMinute(DateTime.now()),
+                      'in': ""
+                    },
+                    'name': data.name,
+                  }).then((done) {
+                    Firestore.instance
+                        .collection('Kindergarden')
+                        .document('hamang')
+                        .collection('Children')
+                        .document(data.id)
+                        .updateData({'activityState': 'out', 'currentLogDocumentId': documentReference.documentID});
+                  });
                   alarm.showNotification(
                       int.parse(data.beaconMajor), data.name + '이 범위를 이탈했습니다.');
                 }
