@@ -5,6 +5,7 @@ import 'package:beacon_bus/models/children.dart';
 import 'package:beacon_bus/screens/teacher/widgets/alarm.dart';
 import 'package:beacons/beacons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 import 'tab_base.dart';
 
@@ -16,8 +17,27 @@ class RangingTab extends ListTab with ParentDateHelpers {
   int stackTime = 8;
   int noStackTime = 8;
   List<Children> userResults = [];
+  static const platform = const MethodChannel('sendSms');
 
   Alarm alarm = new Alarm();
+
+  Future<Null> sendSms(String phoneNumber, String name, String state)async {
+    String phoneNum = phoneNumber.substring(1);
+    print("SendSMS");
+
+    try {
+      if (state == "승차") {
+        final String result = await platform.invokeMethod('send',<String,dynamic>{"phone":"+82$phoneNum","msg":"$name 어린이 승차했습니다."}); //Replace a 'X' with 10 digit phone number
+        print(result);
+      } else {
+        final String result = await platform.invokeMethod('send',<String,dynamic>{"phone":"+82$phoneNum","msg":"$name 어린이 하차했습니다."}); //Replace a 'X' with 10 digit phone number
+        print(result);
+      }
+
+    } on PlatformException catch (e) {
+      print(e.toString());
+    }
+  }
 
   RangingTab.origin() {
     this._busNum = '';
@@ -106,6 +126,7 @@ class RangingTab extends ListTab with ParentDateHelpers {
                 });
                 alarm.showNotification(
                     int.parse(data.beaconMajor), data.name + '이 승차했습니다.');
+                sendSms(data.phoneNumber, data.name, "승차");
               }
             } else {
               data.noConnectTime++;
@@ -146,7 +167,9 @@ class RangingTab extends ListTab with ParentDateHelpers {
                     });
                   });
                   alarm.showNotification(
-                      int.parse(data.beaconMajor), data.name + '이 하차했습니다.');
+                    int.parse(data.beaconMajor), data.name + '이 하차했습니다.');
+                  sendSms(data.phoneNumber, data.name, "하차");
+
                 }
               }
             }
